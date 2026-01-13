@@ -25,7 +25,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/app/_components/ui/select";
-import { Textarea } from "@/app/_components/ui/textarea";
+import { ArrowLeft } from "lucide-react";
 
 // muito importante pro banco entender qual valor ta sendo enviado, tanto pra faixa quanto pro sexo
 
@@ -114,20 +114,7 @@ async function onSubmit(values: FormValues) {
           className=" inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-primary mb-8 transition-colors"
           href="/"
         >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="24" height="24"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            className="h-4 w-4"
-          >
-            <path d="m12 19-7-7 7-7" />
-            <path d="M19 12H5" />
-          </svg>
+           <ArrowLeft />
           Voltar para o início
         </Link>
 
@@ -141,8 +128,8 @@ async function onSubmit(values: FormValues) {
         <div className="rounded-2xl border border-zinc-200 bg-white p-6 gap-5 shadow-sm">
           <div className="gap-5">
             <h2 className="text-lg font-semibold text-zinc-900 gap-3">Formulário de Inscrição</h2>
-            <p className="mt-2 text-sm text-zinc-600">
-              Preencha todos os campos obrigatórios para concluir.
+            <p className="mt-1 text-sm text-zinc-600 mb-2 ">
+              Preencha todos os campos para concluir.
             </p>
           </div>
 
@@ -229,7 +216,7 @@ async function onSubmit(values: FormValues) {
                       <FormLabel>Faixa</FormLabel>
                       <Select value={field.value} onValueChange={field.onChange}>
                         <FormControl>
-                          <SelectTrigger className="w-full rounded-xl border-zinc-200">
+                          <SelectTrigger className="w-full rounded-xl border-zinc-200 cursor-pointer">
                             <SelectValue placeholder="Selecione" />
                           </SelectTrigger>
                         </FormControl>
@@ -285,10 +272,11 @@ async function onSubmit(values: FormValues) {
                   {serverError}
                 </div>
               )}
-
-              <Button className="h-12 rounded-xl" disabled={submitting} type="submit">
-                {submitting ? "Enviando..." : "Concluir inscrição"}
-              </Button>
+              <Link href="/cash">
+                <Button className="h-12 rounded-xl cursor-pointer" disabled={submitting} type="submit" >
+                  {submitting ? "Enviando..." : "Concluir inscrição"}
+                </Button>
+              </Link>
             </form>
           </Form>
         </div>
