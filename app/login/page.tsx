@@ -8,6 +8,7 @@ import { Input } from "@/app/_components/ui/input";
 import { Button } from "@/app/_components/ui/button";
 import { Label } from "@/app/_components/ui/label";
 import Image from "next/image";
+import { ArrowLeft } from "lucide-react";
 
 export default function Login() {
   const router = useRouter();
@@ -39,29 +40,19 @@ export default function Login() {
 
   return (
       <div className="min-h-screen flex flex-col items-center justify-center px-4 py-10">
-      <div className=" max-w-sm">
+      <div className=" w-full max-w-md">
         <Link
           className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-8 transition-colors"
           href="/"
         >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="24" height="24"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            className="h-4 w-4"
-          >
-            <path d="m12 19-7-7 7-7" />
-            <path d="M19 12H5" />
-          </svg>
+           <ArrowLeft />
           Voltar para o início
         </Link>
 
-        <div className="bg-card border border-border rounded-2xl shadow-sm p-6">
+        <div className="bg-card border border-border rounded-2xl shadow-sm p-8">
           <div className="mb-4 text-center">
             <div className="mx-auto p-3 rounded-xl w-fit mb-4">
-            <Image alt="logo" src="/logo.jpeg" width={200} height={100} />
+            <Image alt="logo" src="/logo.jpeg" width={250} height={100} />
             </div>
 
             <h3 className="text-xl font-semibold text-foreground">Área Administrativa</h3>

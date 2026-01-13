@@ -24,7 +24,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/app/_components/ui/select";
-import { Textarea } from "@/app/_components/ui/textarea";
+import { ArrowLeft } from "lucide-react";
 
 const belts = ["Branca", "Azul", "Roxa", "Marrom", "Preta"];
 const genders = ["Masculino", "Feminino"];
@@ -37,7 +37,6 @@ const schema = z.object({
   weight_kg: z.coerce.number().min(10).max(300),
   belt_color: z.enum(belts),
   gender: z.enum(genders),
-  notes: z.string().optional(),
 });
 
 type FormValues = z.infer<typeof schema>;
@@ -57,7 +56,6 @@ export default function InscricaoPage() {
       weight_kg: 0,
       belt_color: "",
       gender: "",
-      notes: "",
     },
     mode: "onSubmit",
   });
@@ -77,7 +75,6 @@ export default function InscricaoPage() {
         weight_kg: values.weight_kg,
         belt_color: values.belt_color,
         gender: values.gender,
-        notes: values.notes?.trim() || null,
       }),
     });
 
@@ -99,20 +96,7 @@ export default function InscricaoPage() {
           className=" inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-primary mb-8 transition-colors"
           href="/"
         >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="24" height="24"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            className="h-4 w-4"
-          >
-            <path d="m12 19-7-7 7-7" />
-            <path d="M19 12H5" />
-          </svg>
+           <ArrowLeft />
           Voltar para o início
         </Link>
 
@@ -126,8 +110,8 @@ export default function InscricaoPage() {
         <div className="rounded-2xl border border-zinc-200 bg-white p-6 gap-5 shadow-sm">
           <div className="gap-5">
             <h2 className="text-lg font-semibold text-zinc-900 gap-3">Formulário de Inscrição</h2>
-            <p className="mt-2 text-sm text-zinc-600">
-              Preencha todos os campos obrigatórios para concluir.
+            <p className="mt-1 text-sm text-zinc-600 mb-2 ">
+              Preencha todos os campos para concluir.
             </p>
           </div>
 
@@ -214,7 +198,7 @@ export default function InscricaoPage() {
                       <FormLabel>Faixa</FormLabel>
                       <Select value={field.value} onValueChange={field.onChange}>
                         <FormControl>
-                          <SelectTrigger className="w-full rounded-xl border-zinc-200">
+                          <SelectTrigger className="w-full rounded-xl border-zinc-200 cursor-pointer">
                             <SelectValue placeholder="Selecione" />
                           </SelectTrigger>
                         </FormControl>
@@ -240,7 +224,7 @@ export default function InscricaoPage() {
                       <FormLabel>Gênero</FormLabel>
                       <Select value={field.value} onValueChange={field.onChange}>
                         <FormControl>
-                          <SelectTrigger className="w-full rounded-xl border-zinc-200">
+                          <SelectTrigger className=" cursor-pointer w-full rounded-xl border-zinc-200">
                             <SelectValue placeholder="Selecione" />
                           </SelectTrigger>
                         </FormControl>
@@ -259,29 +243,16 @@ export default function InscricaoPage() {
                 />
               </div>
 
-              <FormField
-                control={form.control}
-                name="notes"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Observações (Opcional)</FormLabel>
-                    <FormControl>
-                      <Textarea placeholder="Digite sua observação à diretoria..." rows={3} {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
               {serverError && (
                 <div className="rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
                   {serverError}
                 </div>
               )}
-
-              <Button className="h-12 rounded-xl" disabled={submitting} type="submit">
-                {submitting ? "Enviando..." : "Concluir inscrição"}
-              </Button>
+              <Link href="/cash">
+                <Button className="h-12 rounded-xl cursor-pointer" disabled={submitting} type="submit" >
+                  {submitting ? "Enviando..." : "Concluir inscrição"}
+                </Button>
+              </Link>
             </form>
           </Form>
         </div>
