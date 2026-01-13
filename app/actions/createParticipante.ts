@@ -1,0 +1,46 @@
+"use server";
+
+import { createClient } from "@supabase/supabase-js";
+
+const supabase = createClient(
+  process.env.SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!
+);
+
+type CreateParticipantInput = {
+  full_name: string;
+  whatsapp: string;
+  age: number;
+  academy?: string;
+  weight_kg: number;
+  belt_color: string;
+  gender: "M" | "F";
+};
+
+console.log("SUPABASE_URL:", process.env.SUPABASE_URL);
+console.log(
+  "SUPABASE_SERVICE_ROLE_KEY:",
+  process.env.SUPABASE_SERVICE_ROLE_KEY ? "OK" : "MISSING"
+);
+
+export async function createParticipant(input: CreateParticipantInput) {
+  const { data, error } = await supabase
+    .from("participantes")
+    .insert({
+      nome: input.full_name,
+      wpp: input.whatsapp,
+      idade: input.age,
+      academia: input.academy ?? "Não informado",
+      peso: input.weight_kg,
+      faixa: input.belt_color,
+      sexo: input.gender,
+    })
+    .select("id")
+    .single();
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  return data.id;
+}

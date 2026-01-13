@@ -6,6 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm, type Resolver } from "react-hook-form";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { createParticipant } from "@/app/actions/createParticipante";
 
 import { Button } from "@/app/_components/ui/button";
 import { Input } from "@/app/_components/ui/input";
@@ -26,8 +27,23 @@ import {
 } from "@/app/_components/ui/select";
 import { ArrowLeft } from "lucide-react";
 
-const belts = ["Branca", "Azul", "Roxa", "Marrom", "Preta"];
-const genders = ["Masculino", "Feminino"];
+// muito importante pro banco entender qual valor ta sendo enviado, tanto pra faixa quanto pro sexo
+
+const beltOptions = [
+  { label: "Branca", value: "BRANCA" },
+  { label: "Azul", value: "AZUL" },
+  { label: "Roxa", value: "ROXA" },
+  { label: "Marrom", value: "MARROM" },
+  { label: "Preta", value: "PRETA" },
+]; 
+
+const genderOptions = [
+  { label: "Masculino", value: "M" },
+  { label: "Feminino", value: "F" },
+];
+
+const genderEnum = ["M", "F"] as const;
+const beltEnum = ["BRANCA", "AZUL", "ROXA", "MARROM", "PRETA"] as const;
 
 const schema = z.object({
   full_name: z.string().min(3, "Informe o nome completo"),
@@ -35,8 +51,16 @@ const schema = z.object({
   age: z.coerce.number().int().min(4).max(90),
   academy: z.string().optional(),
   weight_kg: z.coerce.number().min(10).max(300),
-  belt_color: z.enum(belts),
-  gender: z.enum(genders),
+  belt_color: z.preprocess(
+      (v) => (v === "" ? undefined : v),
+      z.enum(beltEnum, { message: "Selecione uma faixa" })
+  ),
+  
+  gender: z.preprocess(
+    (v) => (v === "" ? undefined : v),
+    z.enum(genderEnum, { message: "Selecione o sexo" })
+  ),
+
 });
 
 type FormValues = z.infer<typeof schema>;
@@ -54,40 +78,34 @@ export default function InscricaoPage() {
       age: 0,
       academy: "",
       weight_kg: 0,
-      belt_color: "",
-      gender: "",
+      belt_color: undefined,
+      gender: undefined, // pro select iniciar sem nada selecionado
     },
     mode: "onSubmit",
   });
 
-  async function onSubmit(values: FormValues) {
-    setSubmitting(true);
-    setServerError(null);
+async function onSubmit(values: FormValues) {
+  setSubmitting(true);
+  setServerError(null);
 
-    const res = await fetch("/api/register", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        full_name: values.full_name.trim(),
-        whatsapp: values.whatsapp.trim(),
-        age: values.age,
-        academy: values.academy?.trim() || null,
-        weight_kg: values.weight_kg,
-        belt_color: values.belt_color,
-        gender: values.gender,
-      }),
+  try {
+    const id = await createParticipant({
+      full_name: values.full_name.trim(),
+      whatsapp: values.whatsapp.trim(),
+      age: values.age,
+      academy: values.academy?.trim(),
+      weight_kg: values.weight_kg,
+      belt_color: values.belt_color,
+      gender: values.gender,
     });
 
-    const data = await res.json().catch(() => ({}));
-
-    if (!res.ok) {
-      setServerError(data?.error ?? "Não foi possível concluir sua inscrição.");
-      setSubmitting(false);
-      return;
-    }
-
-    router.push(`/pagamento/${data.id}`);
+    router.push("/cash");
+  } catch (err) {
+    setServerError("Não foi possível concluir sua inscrição.");
+  } finally {
+    setSubmitting(false);
   }
+}
 
   return (
     <div className=" bg-zinc-50 px-4 py-10">
@@ -203,44 +221,50 @@ export default function InscricaoPage() {
                           </SelectTrigger>
                         </FormControl>
 
-                        <SelectContent>
-                          {belts.map((b) => (
-                            <SelectItem key={b} value={b} className="cursor-pointer">
-                              {b}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
+                          <SelectContent>
+                            {beltOptions.map((b) => (
+                              <SelectItem key={b.value} value={b.value}>
+                                {b.label}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
                       </Select>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
 
-                <FormField
-                  control={form.control}
-                  name="gender"
-                  render={({ field }) => (
-                    <FormItem className="w-full">
-                      <FormLabel>Gênero</FormLabel>
-                      <Select value={field.value} onValueChange={field.onChange}>
-                        <FormControl>
-                          <SelectTrigger className=" cursor-pointer w-full rounded-xl border-zinc-200">
-                            <SelectValue placeholder="Selecione" />
-                          </SelectTrigger>
-                        </FormControl>
+              <FormField
+                control={form.control}
+                name="gender"
+                render={({ field }) => (
+                  <FormItem className="w-full">
+                    <FormLabel>Gênero</FormLabel>
 
-                        <SelectContent>
-                          {genders.map((g) => (
-                            <SelectItem key={g} value={g} className="cursor-pointer">
-                              {g}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                    <Select value={field.value} onValueChange={field.onChange}>
+                      <FormControl>
+                        <SelectTrigger className="w-full rounded-xl border-zinc-200">
+                          <SelectValue placeholder="Selecione" />
+                        </SelectTrigger>
+                      </FormControl>
+
+                      <SelectContent>
+                        {genderOptions.map((g) => (
+                          <SelectItem
+                            key={g.value}
+                            value={g.value}
+                            className="cursor-pointer"
+                          >
+                            {g.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
               </div>
 
               {serverError && (
