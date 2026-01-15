@@ -1,14 +1,14 @@
 "use client";
 
-import * as React from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import * as React from "react";
 
-import { Input } from "@/app/_components/ui/input";
 import { Button } from "@/app/_components/ui/button";
+import { Input } from "@/app/_components/ui/input";
 import { Label } from "@/app/_components/ui/label";
-import Image from "next/image";
 import { ArrowLeft } from "lucide-react";
+import Image from "next/image";
 
 export default function Login() {
   const router = useRouter();
@@ -52,7 +52,7 @@ export default function Login() {
         <div className="bg-card border border-border rounded-2xl shadow-sm p-8">
           <div className="mb-4 text-center">
             <div className="mx-auto p-3 rounded-xl w-fit mb-4">
-            <Image alt="logo" src="/logo.jpeg" width={250} height={100} />
+            <Image alt="logo" src="/logo-black-belt-jj.png" width={250} height={100} quality={100} />
             </div>
 
             <h3 className="text-xl font-semibold text-foreground">Área Administrativa</h3>
