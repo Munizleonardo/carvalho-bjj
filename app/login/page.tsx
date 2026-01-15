@@ -35,7 +35,7 @@ export default function Login() {
       return;
     }
 
-    router.push("/admin/inscricoes");
+    router.push("/admin/painel");
   }
 
   return (
