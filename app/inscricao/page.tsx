@@ -261,7 +261,7 @@ export default function InscricaoPage() {
           </div>
 
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="grid gap-8 ">
+            <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col md:flex md:flex-col gap-8 ">
               <FormField
                 control={form.control}
                 name="full_name"
@@ -298,7 +298,7 @@ export default function InscricaoPage() {
                 )}
               />
 
-              <div className="flex gap-4">
+              <div className="flex flex-col md:flex-row gap-4">
                 <FormField
                   control={form.control}
                   name="age"
@@ -362,7 +362,7 @@ export default function InscricaoPage() {
                 />
               </div>
 
-              <div className="flex gap-4 w-full">
+              <div className="flex flex-col md:flex-row gap-8">
                 <FormField
                   control={form.control}
                   name="academy"
@@ -424,7 +424,7 @@ export default function InscricaoPage() {
                 />
               </div>
 
-              <div className="flex gap-4">
+              <div className="flex flex-col md:flex-row gap-8">
                 <FormField
                   control={form.control}
                   name="belt_color"

@@ -59,7 +59,7 @@ export default function Login() {
             <Image alt="logo" src="/logo-black-belt-jj.png" width={250} height={100} quality={100} />
             </div>
 
-            <h3 className="text-2xl font-semibold text-zinc-100">
+            <h3 className="text-2xl font-semibold text-black">
               Área Administrativa
             </h3>
             <p className="text-lg text-zinc-400 mt-1">
@@ -69,7 +69,7 @@ export default function Login() {
 
           <form onSubmit={onSubmit} className="space-y-4">
             <div className="space-y-2 mb-2">
-              <Label className="text-xl text-zinc-200" htmlFor="password">
+              <Label className="text-xl text-black" htmlFor="password">
                 Senha
               </Label>
               <Input
@@ -83,7 +83,7 @@ export default function Login() {
             </div>
 
             {error && (
-              <div className="rounded-xl border border-red-900/50 bg-red-950/40 px-3 py-2 text-sm text-red-200">
+              <div className="rounded-xl border border-red-900/50 bg-white px-3 py-2 text-sm text-red-200">
                 {error}
               </div>
             )}
