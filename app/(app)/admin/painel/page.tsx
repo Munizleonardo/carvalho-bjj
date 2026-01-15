@@ -1,9 +1,19 @@
-import Link from "next/link";
+"use client";
+
 import { Button } from "@/app/_components/ui/button";
 import { Input } from "@/app/_components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/app/_components/ui/table";
+import { logout } from "@/app/_lib/auth";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 export default function PainelAdministrativo() {
+  const router = useRouter();
+
+  function handleLogout() {
+    logout();
+    router.push("/");
+  }
   return (
     <div className="min-h-screen bg-background">
       <header className="sticky top-0 z-10 border-b border-border bg-card">
@@ -44,6 +54,7 @@ export default function PainelAdministrativo() {
                 variant="ghost"
                 className="h-9 rounded-xl px-3 text-muted-foreground"
                 type="button"
+                onClick={handleLogout}
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
