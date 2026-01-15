@@ -1,24 +1,38 @@
-import { Button } from "@/app/_components/ui/button";
 import Link from "next/link";
+import { Button } from "@/app/_components/ui/button";
 
 export default function Ready() {
-    return (
-        <section className="py-20">
-            <div className="container mx-auto px-4">
-                <div className="border border-border rounded-2xl shadow-sm p-6 max-w-3xl mx-auto bg-primary text-primary-foreground overflow-hidden relative">
-                    <div className="absolute inset-0 bg-linear-to-br from-white/10 to-transparent">
-                    </div>
-                    <div className="py-12 px-8 text-center relative">
-                        <h2 className="text-2xl md:text-3xl font-bold mb-4">Pronto para competir?</h2>
-                        <p className="text-primary-foreground/80 mb-8 max-w-md mx-auto">Não perca tempo! As vagas são limitadas. Faça sua inscrição agora e garanta sua participação.</p>
-                        <Link href="/inscricao">
-                            <Button className="cursor-pointer not-only:inline-flex items-center justify-center gap-2 whitespace-nowrap ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg]:size-4 [&amp;_svg]:shrink-0 bg-secondary text-secondary-foreground hover:bg-secondary/80 rounded-xl h-14 px-8 text-base font-medium">
-                            Inscrever-se agora
-                            </Button>
-                        </Link>
-                    </div>
-                </div>
+  return (
+    <section className="py-20 bg-black">
+      <div className="container mx-auto px-4">
+        <div className="relative mx-auto max-w-3xl overflow-hidden rounded-2xl border border-zinc-800 bg-zinc-950 p-6 shadow-sm">
+          {/* brilho vermelho */}
+          <div className="absolute -top-24 left-1/3 h-64 w-64 rounded-full bg-red-600/20 blur-3xl" />
+          <div className="absolute -bottom-24 right-1/4 h-64 w-64 rounded-full bg-red-500/15 blur-3xl" />
+
+          <div className="relative px-6 py-12 text-center">
+            <h2 className="mb-4 text-2xl font-bold text-zinc-100 md:text-3xl">
+              Pronto para competir?
+            </h2>
+
+            <p className="mx-auto mb-8 max-w-md text-zinc-400">
+              Não perca tempo. As vagas são limitadas. Faça sua inscrição agora e
+              garanta sua participação.
+            </p>
+
+            <Button
+              asChild
+              className="h-14 rounded-xl px-8 text-base font-medium bg-red-600 hover:bg-red-500"
+            >
+              <Link href="/inscricao">Inscrever-se agora</Link>
+            </Button>
+
+            <div className="mt-6 text-sm text-zinc-500">
+              Pagamento via PIX e confirmação por WhatsApp.
             </div>
-        </section>
-    )
+          </div>
+        </div>
+      </div>
+    </section>
+  );
 }

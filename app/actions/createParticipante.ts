@@ -12,7 +12,8 @@ type CreateParticipantInput = {
   whatsapp: string;
   age: number;
   academy?: string;
-  weight_kg: number;
+  category: string;
+  weight_kg: number | undefined,
   belt_color: string;
   gender: "M" | "F";
 };
@@ -31,6 +32,7 @@ export async function createParticipant(input: CreateParticipantInput) {
       wpp: input.whatsapp,
       idade: input.age,
       academia: input.academy ?? "Não informado",
+      categoria: input.category,
       peso: input.weight_kg,
       faixa: input.belt_color,
       sexo: input.gender,

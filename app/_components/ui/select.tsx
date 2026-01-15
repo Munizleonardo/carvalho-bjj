@@ -19,7 +19,7 @@ const SelectTrigger = React.forwardRef<
     className={cn(
       "flex h-10 w-full items-center justify-between rounded-xl border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-900",
       "ring-offset-background focus:outline-none focus:ring-2 focus:ring-zinc-900/10 focus:ring-offset-2",
-      "disabled:cursor-not-allowed disabled:opacity-50",
+      "disabled:cursor-not-allowed",
       className
     )}
     {...props}
@@ -39,7 +39,7 @@ const SelectScrollUpButton = React.forwardRef<
   <SelectPrimitive.ScrollUpButton
     ref={ref}
     className={cn(
-      "flex cursor-default items-center justify-center py-1 text-zinc-700",
+      "flex cursor-pointer items-center justify-center py-1 text-zinc-700",
       className
     )}
     {...props}

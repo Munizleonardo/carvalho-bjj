@@ -5,7 +5,7 @@ import Ready from "./_components/home/Ready";
 
 export default function Home() {
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen bg-black">
       <main>
         <HeroSection />
         <HowWorks />
