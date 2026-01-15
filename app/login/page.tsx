@@ -1,14 +1,14 @@
 "use client";
 
-import * as React from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import * as React from "react";
 
-import { Input } from "@/app/_components/ui/input";
 import { Button } from "@/app/_components/ui/button";
+import { Input } from "@/app/_components/ui/input";
 import { Label } from "@/app/_components/ui/label";
-import Image from "next/image";
 import { ArrowLeft } from "lucide-react";
+import Image from "next/image";
 
 export default function Login() {
   const router = useRouter();
@@ -35,7 +35,7 @@ export default function Login() {
       return;
     }
 
-    router.push("/admin/inscricoes");
+    router.push("/admin/painel");
   }
 
   return (
