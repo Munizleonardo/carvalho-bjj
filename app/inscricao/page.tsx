@@ -66,36 +66,6 @@ const categoryOptions: Array<{ label: string; value: Category }> = [
   { label: "Pesadíssimo", value: "PESADISSIMO" },
 ];
 
-const categoryWeightRange: Record<
-  Category,
-  { min: number; max: number; step?: number }
-> = {
-  GALO: { min: 52, max: 57, step: 1 },
-  PLUMA: { min: 58, max: 64, step: 1 },
-  PENA: { min: 65, max: 70, step: 1 },
-  LEVE: { min: 71, max: 76, step: 1 },
-  MEDIO: { min: 77, max: 82, step: 1 },
-  MEIO_PESADO: { min: 83, max: 88, step: 1 },
-  PESADO: { min: 89, max: 94, step: 1 },
-  SUPER_PESADO: { min: 95, max: 100, step: 1 },
-  PESADISSIMO: { min: 101, max: 120, step: 1 },
-};
-
-function rangeLabel(category: Category) {
-  const r = categoryWeightRange[category];
-  return `${r.min}–${r.max} kg`;
-}
-
-function buildWeightOptions(category?: Category) {
-  if (!category) return [];
-  const { min, max, step = 1 } = categoryWeightRange[category];
-  const out: Array<{ label: string; value: string; n: number }> = [];
-  for (let w = min; w <= max; w += step) {
-    out.push({ label: `${w} kg`, value: String(w), n: w });
-  }
-  return out;
-}
-
 const genderEnum = ["M", "F"] as const;
 const beltEnum = ["BRANCA", "AZUL", "ROXA", "MARROM", "PRETA"] as const;
 
@@ -108,6 +78,7 @@ const schema = z
 
     mod_gi: z.boolean().default(false),
     mod_nogi: z.boolean().default(false),
+    mod_gi_extra: z.boolean().default(false),
 
     category: z.preprocess(
       (v) => (v === "" ? undefined : v),
@@ -131,9 +102,6 @@ const schema = z
   })
   .superRefine((data, ctx) => {
     if (!data.category) return;
-
-    const range = categoryWeightRange[data.category];
-    if (!range) return;
   
     if (data.weight_kg === undefined) {
       ctx.addIssue({
@@ -142,14 +110,6 @@ const schema = z
         message: "Selecione o peso do atleta",
       });
       return;
-    }
-
-    if (data.weight_kg < range.min || data.weight_kg > range.max) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        path: ["weight_kg"],
-        message: `Para ${data.category}, o peso deve ficar entre ${range.min} e ${range.max} kg`,
-      });
     }
 
     if (!data.mod_gi && !data.mod_nogi){
@@ -186,17 +146,13 @@ export default function InscricaoPage() {
       gender: undefined,
       mod_gi: false,
       mod_nogi: false,
+      mod_gi_extra: false,
     },
     mode: "onSubmit",
   });
 
   const selectedCategory =
     (form.watch("category") as Category | undefined) ?? undefined;
-
-  const weightOptions = React.useMemo(
-    () => buildWeightOptions(selectedCategory),
-    [selectedCategory]
-  );
 
   React.useEffect(() => {
     if (!selectedCategory) {
@@ -231,6 +187,14 @@ export default function InscricaoPage() {
     }
   }
 
+  const giSelected = form.watch("mod_gi");
+
+  React.useEffect(() => {
+    if (!giSelected) {
+      form.setValue("mod_gi_extra", false, {shouldValidate: true});
+    }
+  }, [giSelected, form]);
+  
   return (
     <div className="min-h-screen bg-black text-zinc-100 px-4 py-10 relative overflow-hidden">
       <div className="absolute -top-24 left-1/2 h-[520px] w-[520px] -translate-x-1/2 rounded-full bg-red-600/15 blur-3xl" />
@@ -324,34 +288,17 @@ export default function InscricaoPage() {
                   render={({ field }) => (
                     <FormItem className="w-full">
                       <FormLabel className="text-lg text-zinc-200">Categoria</FormLabel>
-
-                      <Select
-                        value={field.value ?? ""}
-                        onValueChange={(v) => {
-                          field.onChange(v as Category);
-                          form.setValue("weight_kg", undefined, { shouldValidate: true });
-                          setWeightOpen(true);
-                        }}
-                      >
+                      <Select value={field.value ?? ""} onValueChange={field.onChange}>
                         <FormControl>
                           <SelectTrigger className="w-full rounded-2xl border-zinc-800 bg-black/40 text-zinc-100 cursor-pointer">
-                            <SelectValue placeholder="Selecione (ex: Leve 71–76 kg)" />
+                            <SelectValue placeholder="Selecione" />
                           </SelectTrigger>
                         </FormControl>
 
                         <SelectContent className="border-zinc-800 bg-zinc-950 text-zinc-100">
-                          {categoryOptions.map((c) => (
-                            <SelectItem
-                              key={c.value}
-                              value={c.value}
-                              className={itemInteractiveClass}
-                            >
-                              <div className="flex w-full items-center justify-between gap-4">
-                                <span className="text-zinc-100">{c.label}</span>
-                                <span className="text-xs text-zinc-400">
-                                  {rangeLabel(c.value)}
-                                </span>
-                              </div>
+                          {categoryOptions.map((b) => (
+                            <SelectItem key={b.value} value={b.value} className={itemInteractiveClass}>
+                              {b.label}
                             </SelectItem>
                           ))}
                         </SelectContent>
@@ -362,7 +309,7 @@ export default function InscricaoPage() {
                 />
               </div>
 
-              <div className="flex flex-col md:flex-row gap-8">
+              <div className="flex flex-col-reverse md:flex-row gap-8">
                 <FormField
                   control={form.control}
                   name="academy"
@@ -385,39 +332,13 @@ export default function InscricaoPage() {
                   name="weight_kg"
                   render={({ field }) => (
                     <FormItem className="w-full">
-                      <FormLabel className="text-lg text-zinc-200">Peso (kg)</FormLabel>
-
-                      <Select
-                        open={weightOpen}
-                        onOpenChange={setWeightOpen}
-                        value={field.value === undefined ? "" : String(field.value)}
-                        onValueChange={(v) => {
-                          field.onChange(v === "" ? undefined : Number(v));
-                          setWeightOpen(false);
-                        }}
-                        disabled={!selectedCategory}
-                      >
-                        <FormControl>
-                          <SelectTrigger className="w-full rounded-2xl border-zinc-800 bg-black/40 text-zinc-100 cursor-pointer disabled:opacity-50">
-                            <SelectValue
-                              placeholder={
-                                selectedCategory
-                                  ? "Selecione o peso"
-                                  : "Selecione a categoria primeiro"
-                              }
-                            />
-                          </SelectTrigger>
-                        </FormControl>
-
-                        <SelectContent className="border-zinc-800 bg-zinc-950 text-zinc-100">
-                          {weightOptions.map((w) => (
-                            <SelectItem key={w.value} value={w.value} className={itemInteractiveClass}>
-                              {w.label}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-
+                      <FormLabel className="text-lg text-zinc-200">Peso</FormLabel>
+                      <FormControl>
+                        <Input
+                          {...field}
+                          className="rounded-xl bg-black/40 border-zinc-800 text-zinc-100 placeholder:text-zinc-500 focus-visible:ring-red-500/30"
+                        />
+                      </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -489,26 +410,62 @@ export default function InscricaoPage() {
 
                 <div className="grid  gap-3">
 
-                  <FormField
-                    control={form.control}
-                    name="mod_gi"
-                    render={({ field }) => (
-                      <FormItem className="flex items-start gap-3 space-y-0">
-                        <FormControl>
-                          <Checkbox
-                            checked={field.value}
-                            onCheckedChange={(v) => field.onChange(Boolean(v))}
-                            className="mt-1"
-                          />
-                        </FormControl>
-                        <div className="grid gap-1 leading-none">
-                          <FormLabel className="text-zinc-100 cursor-pointer">Gi (com kimono)</FormLabel>
-                          <p className="text-sm text-zinc-400">Inclui a inscrição na modalidade tradicional.</p>
-                        </div>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                <FormField
+                  control={form.control}
+                  name="mod_gi"
+                  render={({ field }) => (
+                    <FormItem className="flex items-start gap-3 space-y-0">
+                      <FormControl>
+                        <Checkbox
+                          checked={field.value}
+                          onCheckedChange={(v) => field.onChange(Boolean(v))}
+                          className="mt-1"
+                        />
+                      </FormControl>
+
+                      <div className="grid gap-1 leading-none">
+                        <FormLabel className="text-zinc-100 cursor-pointer">
+                          Gi (com kimono)
+                        </FormLabel>
+                        <p className="text-sm text-zinc-400">
+                          Inclui a inscrição na modalidade tradicional.
+                        </p>
+
+                        {giSelected && (
+                          <div className="mt-3 pl-1">
+                            <FormField
+                              control={form.control}
+                              name="mod_gi_extra"
+                              render={({ field: extraField }) => (
+                                <FormItem className="flex items-start gap-3 space-y-0 rounded-xl border border-zinc-800 bg-black/30 p-3">
+                                  <FormControl>
+                                    <Checkbox
+                                      checked={extraField.value}
+                                      onCheckedChange={(v) => extraField.onChange(Boolean(v))}
+                                      className="mt-1"
+                                    />
+                                  </FormControl>
+
+                                  <div className="grid gap-1 leading-none">
+                                    <FormLabel className="text-zinc-100 cursor-pointer">
+                                      Absoluto
+                                    </FormLabel>
+                                    <p className="text-sm text-zinc-400">
+                                      Inclui a inscrição no Absoluto, campeão dos campeões.
+                                    </p>
+                                    <FormMessage />
+                                  </div>
+                                </FormItem>
+                              )}
+                            />
+                          </div>
+                        )}
+                      </div>
+
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
                   <FormField
                     control={form.control}

@@ -76,7 +76,7 @@ export default function Login() {
                 id="password"
                 type="password"
                 placeholder="Digite a senha"
-                className="rounded-xl bg-black/40 border-zinc-800 text-zinc-100 placeholder:text-zinc-500 focus-visible:ring-red-500/30"
+                className="rounded-xl bg-white border-zinc-800 text-black placeholder:text-zinc-500 focus-visible:ring-red-500/30"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
               />

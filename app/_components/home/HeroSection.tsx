@@ -51,7 +51,7 @@ export default function HeroSection() {
             <Button
               asChild
               variant="outline"
-              className="h-14 w-full rounded-xl px-8 text-base font-medium sm:w-auto border-zinc-700 bg-transparent text-zinc-200 hover:bg-zinc-900"
+              className="h-14 w-full rounded-xl px-8 text-base font-medium sm:w-auto border-zinc-700 bg-transparent text-zinc-200 hover:bg-white hover:text-black"
             >
               <Link href="/login">Área Administrativa</Link>
             </Button>
