@@ -111,7 +111,7 @@ export async function GET(req: Request) {
   doc.end();
   const pdf = await done;
 
-  return new NextResponse(pdf, {
+  return new NextResponse(new Uint8Array(pdf), {
     headers: {
       "Content-Type": "application/pdf",
       "Content-Disposition": `inline; filename="inscricoes.pdf"`,
