@@ -6,7 +6,7 @@ export default function HowWorks() {
       <div className="container mx-auto px-4">
         <div className="mb-12 text-center">
           <h2 className="mb-4 text-3xl font-bold text-zinc-100 md:text-4xl">
-            Como funciona
+            Como Funciona a Inscrição
           </h2>
           <p className="mx-auto max-w-xl text-lg text-zinc-400">
             Siga os passos abaixo para garantir sua vaga no campeonato
@@ -29,7 +29,7 @@ export default function HowWorks() {
                 Preencha seus dados
               </h3>
               <p className="text-sm text-zinc-400">
-                Insira suas informações pessoais e dados para competição
+                Insira suas informações pessoais e selecione as modalidadaes.
               </p>
             </div>
           </div>

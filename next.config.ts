@@ -7,6 +7,7 @@ const nextConfig: NextConfig = {
     imageSizes: [16, 24, 32, 48, 64, 96, 128, 256],
     qualities: [60, 75, 85, 90, 95],
   },
+  serverExternalPackages: ["pdfmake"],
 };
 
 export default nextConfig;

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { Button } from "../ui/button";
 import { Trophy } from "lucide-react";
 
@@ -8,14 +9,9 @@ export default function HeroSection() {
       id="home"
       className="relative flex min-h-screen items-center justify-center overflow-hidden bg-black"
     >
-      {/* fundo com textura sutil */}
-      <div className="absolute inset-0 bg-gradient-to-b from-zinc-950 via-black to-black" />
-
-      {/* brilho vermelho discreto */}
+      <div className="absolute inset-0 bg-linear-to-b from-zinc-950 via-black to-black" />
       <div className="absolute -top-24 left-1/2 h-[520px] w-[520px] -translate-x-1/2 rounded-full bg-red-600/15 blur-3xl" />
       <div className="absolute -bottom-40 right-[-120px] h-[520px] w-[520px] rounded-full bg-red-500/10 blur-3xl" />
-
-      {/* linhas sutis para dar vida */}
       <div className="absolute inset-0 opacity-[0.06] [background-image:radial-gradient(circle_at_1px_1px,white_1px,transparent_1px)] [background-size:24px_24px]" />
 
       <div className="relative container mx-auto px-4 py-20 md:py-32">
