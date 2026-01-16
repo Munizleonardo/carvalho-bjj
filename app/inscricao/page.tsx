@@ -3,13 +3,14 @@
 import * as React from "react";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm, type Resolver } from "react-hook-form";
+import type { Resolver } from "react-hook-form";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Checkbox } from "@/app/_components/ui/checkbox";
 import { createParticipant } from "@/app/_lib/actions/createParticipante";
 import { Button } from "@/app/_components/ui/button";
 import { Input } from "@/app/_components/ui/input";
+import { useForm } from "react-hook-form";
 import {
   Form,
   FormControl,
@@ -27,6 +28,64 @@ import {
 } from "@/app/_components/ui/select";
 import { ArrowLeft } from "lucide-react";
 
+import {
+  categoryEnum,
+  beltEnum,
+  genderEnum,
+  type Category,
+} from "@/app/_lib/types";
+
+// -------------------- SCHEMA ZOD --------------------
+const formSchema = z.object({
+  full_name: z.string().min(3, { message: "Informe o nome completo" }),
+  whatsapp: z.string().min(8, { message: "Informe um WhatsApp válido" }),
+
+  age: z.preprocess(
+    (val) => {
+      if (val === "" || val === undefined || val === null) return undefined;
+      return Number(val);
+    },
+    z
+      .number({ message: "Idade inválida" }) // aqui substituí invalid_type_error por message
+      .int({ message: "Idade deve ser um número inteiro" })
+      .min(4, { message: "Idade mínima é 4 anos" })
+      .max(90, { message: "Idade máxima é 90 anos" })
+  ),
+
+  academy: z.string().optional(),
+
+  mod_gi: z.boolean(),
+  mod_nogi: z.boolean(),
+  mod_gi_extra: z.boolean(),
+
+  category: z.enum(categoryEnum),
+
+  weight_kg: z.preprocess(
+    (val) => {
+      if (val === "" || val === undefined || val === null) return undefined;
+      return Number(val);
+    },
+    z
+      .number({ message: "Peso inválido" }) // aqui também
+      .min(10, { message: "Peso mínimo é 10kg" })
+      .max(300, { message: "Peso máximo é 300kg" })
+  ),
+
+  belt_color: z.enum(beltEnum),
+  gender: z.enum(genderEnum),
+}).superRefine((data, ctx) => {
+  if (!data.mod_gi && !data.mod_nogi) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ["mod_gi"],
+      message: "Selecione pelo menos uma modalidade",
+    });
+  }
+});
+
+export type FormValues = z.infer<typeof formSchema>;
+
+// -------------------- OPTIONS --------------------
 const beltOptions = [
   { label: "Branca", value: "BRANCA" },
   { label: "Azul", value: "AZUL" },
@@ -40,20 +99,6 @@ const genderOptions = [
   { label: "Feminino", value: "F" },
 ];
 
-const categoryEnum = [
-  "GALO",
-  "PLUMA",
-  "PENA",
-  "LEVE",
-  "MEDIO",
-  "MEIO_PESADO",
-  "PESADO",
-  "SUPER_PESADO",
-  "PESADISSIMO",
-] as const;
-
-type Category = (typeof categoryEnum)[number];
-
 const categoryOptions: Array<{ label: string; value: Category }> = [
   { label: "Galo", value: "GALO" },
   { label: "Pluma", value: "PLUMA" },
@@ -66,102 +111,27 @@ const categoryOptions: Array<{ label: string; value: Category }> = [
   { label: "Pesadíssimo", value: "PESADISSIMO" },
 ];
 
-const genderEnum = ["M", "F"] as const;
-const beltEnum = ["BRANCA", "AZUL", "ROXA", "MARROM", "PRETA"] as const;
-
-const schema = z
-  .object({
-    full_name: z.string().min(3, "Informe o nome completo"),
-    whatsapp: z.string().min(8, "Informe um WhatsApp válido"),
-    age: z.coerce.number().int().min(4).max(90),
-    academy: z.string().optional(),
-
-    mod_gi: z.boolean().default(false),
-    mod_nogi: z.boolean().default(false),
-    mod_gi_extra: z.boolean().default(false),
-
-    category: z.preprocess(
-      (v) => (v === "" ? undefined : v),
-      z.enum(categoryEnum, { message: "Selecione a categoria" })
-    ),
-
-    weight_kg: z.preprocess(
-      (v) => (v === "" || v === undefined || v === null ? undefined : Number(v)),
-      z.number().min(10).max(300).optional()
-    ),
-
-    belt_color: z.preprocess(
-      (v) => (v === "" ? undefined : v),
-      z.enum(beltEnum, { message: "Selecione uma faixa" })
-    ),
-
-    gender: z.preprocess(
-      (v) => (v === "" ? undefined : v),
-      z.enum(genderEnum, { message: "Selecione o sexo" })
-    ),
-  })
-  .superRefine((data, ctx) => {
-    if (!data.category) return;
-  
-    if (data.weight_kg === undefined) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        path: ["weight_kg"],
-        message: "Selecione o peso do atleta",
-      });
-      return;
-    }
-
-    if (!data.mod_gi && !data.mod_nogi){
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        path: ["mod_gi"],
-        message: "Selecione pelo menos uma opção",
-      });
-    }
-  });
-
-type FormValues = z.infer<typeof schema>;
-
 const itemInteractiveClass =
   "cursor-pointer focus:outline-none data-[highlighted]:bg-zinc-900 data-[highlighted]:text-zinc-100 hover:bg-zinc-900/60";
 
+// -------------------- COMPONENT --------------------
 export default function InscricaoPage() {
   const router = useRouter();
   const [submitting, setSubmitting] = React.useState(false);
   const [serverError, setServerError] = React.useState<string | null>(null);
 
-  const [weightOpen, setWeightOpen] = React.useState(false);
-
-  const form = useForm<FormValues>({
-    resolver: zodResolver(schema) as Resolver<FormValues>,
-    defaultValues: {
-      full_name: "",
-      whatsapp: "",
-      age: 0,
-      academy: "",
-      category: undefined,
-      weight_kg: undefined,
-      belt_color: undefined,
-      gender: undefined,
-      mod_gi: false,
-      mod_nogi: false,
-      mod_gi_extra: false,
-    },
-    mode: "onSubmit",
-  });
+const form = useForm<FormValues>({
+  resolver: zodResolver(formSchema) as unknown as Resolver<FormValues>,
+  shouldUnregister: true,
+  defaultValues: {
+    mod_gi: false,
+    mod_nogi: false,
+    mod_gi_extra: false,
+  },
+});
 
   const selectedCategory =
     (form.watch("category") as Category | undefined) ?? undefined;
-
-  React.useEffect(() => {
-    if (!selectedCategory) {
-      form.setValue("weight_kg", undefined, { shouldValidate: false });
-      setWeightOpen(false);
-      return;
-    }
-    form.setValue("weight_kg", undefined, { shouldValidate: true });
-  }, [selectedCategory, form]);
 
   async function onSubmit(values: FormValues) {
     setSubmitting(true);
@@ -177,6 +147,9 @@ export default function InscricaoPage() {
         weight_kg: values.weight_kg,
         belt_color: values.belt_color,
         gender: values.gender,
+        mod_gi: values.mod_gi,
+        mod_nogi: values.mod_nogi,
+        mod_gi_extra: values.mod_gi_extra,
       });
 
       router.push("/cash");
@@ -191,10 +164,14 @@ export default function InscricaoPage() {
 
   React.useEffect(() => {
     if (!giSelected) {
-      form.setValue("mod_gi_extra", false, {shouldValidate: true});
+      form.setValue("mod_gi_extra", false, {
+        shouldValidate: false,
+        shouldDirty: true,
+      });
     }
   }, [giSelected, form]);
-  
+
+  // -------------------- RENDER --------------------
   return (
     <div className="min-h-screen bg-black text-zinc-100 px-4 py-10 relative overflow-hidden">
       <div className="absolute -top-24 left-1/2 h-[520px] w-[520px] -translate-x-1/2 rounded-full bg-red-600/15 blur-3xl" />
@@ -212,26 +189,35 @@ export default function InscricaoPage() {
         <div className="mb-6">
           <h1 className="text-3xl font-semibold text-zinc-100">Inscrição</h1>
           <p className="mt-1 text-lg text-zinc-400">
-            Preencha os dados do atleta. Após enviar, você verá o PIX e as instruções de pagamento.
+            Preencha os dados do atleta. Após enviar, você verá o PIX e as
+            instruções de pagamento.
           </p>
         </div>
 
         <div className="rounded-2xl border border-zinc-800 bg-zinc-950/70 p-6 flex flex-col gap-5 shadow-sm backdrop-blur">
           <div>
-            <h2 className="text-xl font-semibold text-zinc-100">Formulário de Inscrição</h2>
+            <h2 className="text-xl font-semibold text-zinc-100">
+              Formulário de Inscrição
+            </h2>
             <p className="mt-1 text-lg text-zinc-400 mb-2">
               Preencha todos os campos para concluir.
             </p>
           </div>
 
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col md:flex md:flex-col gap-8 ">
+            <form
+              onSubmit={form.handleSubmit(onSubmit)}
+              className="flex flex-col md:flex md:flex-col gap-8 "
+            >
+              {/* Nome */}
               <FormField
                 control={form.control}
                 name="full_name"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-lg text-zinc-200">Nome Completo</FormLabel>
+                    <FormLabel className="text-lg text-zinc-200">
+                      Nome Completo
+                    </FormLabel>
                     <FormControl>
                       <Input
                         placeholder="Nome do Atleta"
@@ -244,12 +230,15 @@ export default function InscricaoPage() {
                 )}
               />
 
+              {/* WhatsApp */}
               <FormField
                 control={form.control}
                 name="whatsapp"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-lg text-zinc-200">Telefone (WhatsApp)</FormLabel>
+                    <FormLabel className="text-lg text-zinc-200">
+                      Telefone (WhatsApp)
+                    </FormLabel>
                     <FormControl>
                       <Input
                         placeholder="(DD) 9XXXX-XXXX"
@@ -263,18 +252,24 @@ export default function InscricaoPage() {
               />
 
               <div className="flex flex-col md:flex-row gap-4">
+                {/* Idade */}
                 <FormField
                   control={form.control}
                   name="age"
                   render={({ field }) => (
                     <FormItem className="w-full">
-                      <FormLabel className="text-lg text-zinc-200">Idade</FormLabel>
+                      <FormLabel className="text-lg text-zinc-200">
+                        Idade
+                      </FormLabel>
                       <FormControl>
                         <Input
-                          className="w-full rounded-xl bg-black/40 border-zinc-800 text-zinc-100 focus-visible:ring-red-500/30"
-                          inputMode="numeric"
                           type="number"
-                          {...field}
+                          inputMode="numeric"
+                          className="w-full rounded-xl bg-black/40 border-zinc-800 text-zinc-100 focus-visible:ring-red-500/30"
+                          value={field.value}
+                          onChange={(e) =>
+                            field.onChange(Number(e.target.value))
+                          }
                         />
                       </FormControl>
                       <FormMessage />
@@ -282,13 +277,19 @@ export default function InscricaoPage() {
                   )}
                 />
 
+                {/* Categoria */}
                 <FormField
                   control={form.control}
                   name="category"
                   render={({ field }) => (
                     <FormItem className="w-full">
-                      <FormLabel className="text-lg text-zinc-200">Categoria</FormLabel>
-                      <Select value={field.value ?? ""} onValueChange={field.onChange}>
+                      <FormLabel className="text-lg text-zinc-200">
+                        Categoria
+                      </FormLabel>
+                      <Select
+                        value={field.value ?? ""}
+                        onValueChange={field.onChange}
+                      >
                         <FormControl>
                           <SelectTrigger className="w-full rounded-2xl border-zinc-800 bg-black/40 text-zinc-100 cursor-pointer">
                             <SelectValue placeholder="Selecione" />
@@ -297,7 +298,11 @@ export default function InscricaoPage() {
 
                         <SelectContent className="border-zinc-800 bg-zinc-950 text-zinc-100">
                           {categoryOptions.map((b) => (
-                            <SelectItem key={b.value} value={b.value} className={itemInteractiveClass}>
+                            <SelectItem
+                              key={b.value}
+                              value={b.value}
+                              className={itemInteractiveClass}
+                            >
                               {b.label}
                             </SelectItem>
                           ))}
@@ -310,12 +315,15 @@ export default function InscricaoPage() {
               </div>
 
               <div className="flex flex-col-reverse md:flex-row gap-8">
+                {/* Academia */}
                 <FormField
                   control={form.control}
                   name="academy"
                   render={({ field }) => (
                     <FormItem className="w-full">
-                      <FormLabel className="text-lg text-zinc-200">Academia</FormLabel>
+                      <FormLabel className="text-lg text-zinc-200">
+                        Academia
+                      </FormLabel>
                       <FormControl>
                         <Input
                           {...field}
@@ -327,6 +335,7 @@ export default function InscricaoPage() {
                   )}
                 />
 
+                {/* Peso */}
                 <FormField
                   control={form.control}
                   name="weight_kg"
@@ -335,8 +344,14 @@ export default function InscricaoPage() {
                       <FormLabel className="text-lg text-zinc-200">Peso</FormLabel>
                       <FormControl>
                         <Input
-                          {...field}
+                          type="number"
+                          inputMode="decimal"
+                          step="0.1"
                           className="rounded-xl bg-black/40 border-zinc-800 text-zinc-100 placeholder:text-zinc-500 focus-visible:ring-red-500/30"
+                          value={field.value}
+                          onChange={(e) =>
+                            field.onChange(Number(e.target.value))
+                          }
                         />
                       </FormControl>
                       <FormMessage />
@@ -345,6 +360,7 @@ export default function InscricaoPage() {
                 />
               </div>
 
+              {/* Faixa e Gênero */}
               <div className="flex flex-col md:flex-row gap-8">
                 <FormField
                   control={form.control}
@@ -361,7 +377,11 @@ export default function InscricaoPage() {
 
                         <SelectContent className="border-zinc-800 bg-zinc-950 text-zinc-100">
                           {beltOptions.map((b) => (
-                            <SelectItem key={b.value} value={b.value} className={itemInteractiveClass}>
+                            <SelectItem
+                              key={b.value}
+                              value={b.value}
+                              className={itemInteractiveClass}
+                            >
                               {b.label}
                             </SelectItem>
                           ))}
@@ -387,7 +407,11 @@ export default function InscricaoPage() {
 
                         <SelectContent className="border-zinc-800 bg-zinc-950 text-zinc-100">
                           {genderOptions.map((g) => (
-                            <SelectItem key={g.value} value={g.value} className={itemInteractiveClass}>
+                            <SelectItem
+                              key={g.value}
+                              value={g.value}
+                              className={itemInteractiveClass}
+                            >
                               {g.label}
                             </SelectItem>
                           ))}
@@ -399,97 +423,109 @@ export default function InscricaoPage() {
                 />
               </div>
 
+              {/* Server Error */}
               {serverError && (
                 <div className="rounded-xl border border-red-900/50 bg-red-950/40 px-3 py-2 text-sm text-red-200">
                   {serverError}
                 </div>
               )}
+
+              {/* Modalidades */}
               <div className="flex flex-wrap gap-6 w-full">
-              <div className="rounded-2xl border border-zinc-800 bg-black/30 p-4 w-full flex flex-col ">
-                <p className="text-lg text-zinc-200 font-medium mb-3 justify-center flex">Seleção de Modalidades</p>
+                <div className="rounded-2xl border border-zinc-800 bg-black/30 p-4 w-full flex flex-col ">
+                  <p className="text-lg text-zinc-200 font-medium mb-3 justify-center flex">
+                    Seleção de Modalidades
+                  </p>
 
-                <div className="grid  gap-3">
-
-                <FormField
-                  control={form.control}
-                  name="mod_gi"
-                  render={({ field }) => (
-                    <FormItem className="flex items-start gap-3 space-y-0">
-                      <FormControl>
-                        <Checkbox
-                          checked={field.value}
-                          onCheckedChange={(v) => field.onChange(Boolean(v))}
-                          className="mt-1"
-                        />
-                      </FormControl>
-
-                      <div className="grid gap-1 leading-none">
-                        <FormLabel className="text-zinc-100 cursor-pointer">
-                          Gi (com kimono)
-                        </FormLabel>
-                        <p className="text-sm text-zinc-400">
-                          Inclui a inscrição na modalidade tradicional.
-                        </p>
-
-                        {giSelected && (
-                          <div className="mt-3 pl-1">
-                            <FormField
-                              control={form.control}
-                              name="mod_gi_extra"
-                              render={({ field: extraField }) => (
-                                <FormItem className="flex items-start gap-3 space-y-0 rounded-xl border border-zinc-800 bg-black/30 p-3">
-                                  <FormControl>
-                                    <Checkbox
-                                      checked={extraField.value}
-                                      onCheckedChange={(v) => extraField.onChange(Boolean(v))}
-                                      className="mt-1"
-                                    />
-                                  </FormControl>
-
-                                  <div className="grid gap-1 leading-none">
-                                    <FormLabel className="text-zinc-100 cursor-pointer">
-                                      Absoluto
-                                    </FormLabel>
-                                    <p className="text-sm text-zinc-400">
-                                      Inclui a inscrição no Absoluto, campeão dos campeões.
-                                    </p>
-                                    <FormMessage />
-                                  </div>
-                                </FormItem>
-                              )}
+                  <div className="grid  gap-3">
+                    {/* GI */}
+                    <FormField
+                      control={form.control}
+                      name="mod_gi"
+                      render={({ field }) => (
+                        <FormItem className="flex items-start gap-3 space-y-0">
+                          <FormControl>
+                            <Checkbox
+                              checked={field.value}
+                              onCheckedChange={field.onChange}
+                              className="mt-1"
                             />
+                          </FormControl>
+
+                          <div className="grid gap-1 leading-none">
+                            <FormLabel className="text-zinc-100 cursor-pointer">
+                              Gi (com kimono)
+                            </FormLabel>
+                            <p className="text-sm text-zinc-400">
+                              Inclui a inscrição na modalidade tradicional.
+                            </p>
+
+                            {giSelected && (
+                              <div className="mt-3 pl-1">
+                                <FormField
+                                  control={form.control}
+                                  name="mod_gi_extra"
+                                  render={({ field: extraField }) => (
+                                    <FormItem className="flex items-start gap-3 space-y-0 rounded-xl border border-zinc-800 bg-black/30 p-3">
+                                      <FormControl>
+                                        <Checkbox
+                                          checked={extraField.value}
+                                          onCheckedChange={extraField.onChange}
+                                          className="mt-1"
+                                        />
+                                      </FormControl>
+
+                                      <div className="grid gap-1 leading-none">
+                                        <FormLabel className="text-zinc-100 cursor-pointer">
+                                          Absoluto
+                                        </FormLabel>
+                                        <p className="text-sm text-zinc-400">
+                                          Inclui a inscrição no Absoluto, campeão dos campeões.
+                                        </p>
+                                        <FormMessage />
+                                      </div>
+                                    </FormItem>
+                                  )}
+                                />
+                              </div>
+                            )}
                           </div>
-                        )}
-                      </div>
 
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
 
-                  <FormField
-                    control={form.control}
-                    name="mod_nogi"
-                    render={({ field }) => (
-                      <FormItem className="flex items-start gap-3 space-y-0">
-                        <FormControl>
-                          <Checkbox
-                            checked={field.value}
-                            onCheckedChange={(v) => field.onChange(Boolean(v))}
-                            className="mt-1"
-                          />
-                        </FormControl>
-                        <div className="grid gap-1 leading-none">
-                          <FormLabel className="text-zinc-100 cursor-pointer">NoGi (sem kimono)</FormLabel>
-                          <p className="text-sm text-zinc-400">Inclui a inscrição na modalidade sem kimono.</p>
-                        </div>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                    {/* NOGI */}
+                    <FormField
+                      control={form.control}
+                      name="mod_nogi"
+                      render={({ field }) => (
+                        <FormItem className="flex items-start gap-3 space-y-0">
+                          <FormControl>
+                            <Checkbox
+                              checked={field.value}
+                              onCheckedChange={field.onChange}
+                            />
+                          </FormControl>
+
+                          <div className="grid gap-1 leading-none">
+                            <FormLabel className="cursor-pointer text-zinc-100">
+                              NoGi (sem kimono)
+                            </FormLabel>
+                            <p className="text-sm text-zinc-400">
+                              Inclui a inscrição na modalidade sem kimono.
+                            </p>
+                          </div>
+
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
                 </div>
               </div>
-              </div>
+
               <div className="flex justify-center gap-4">
                 <Button
                   className="h-12 rounded-xl cursor-pointer px-8 bg-red-600 hover:bg-red-500"

@@ -1,7 +1,7 @@
 "use server";
 
 import { supabaseAdmin } from "@/app/_lib/supabase/admin";
-import type { ParticipantAdmin, Belt } from "@/app/_lib/types";
+import type { ParticipantAdmin, BeltColor } from "@/app/_lib/types";
 
 type ParticipanteRow = {
   id: string;
