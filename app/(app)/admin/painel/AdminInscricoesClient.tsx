@@ -38,7 +38,7 @@ import {
 import { logout } from "@/app/_lib/auth";
 import { deleteParticipantAdmin } from "@/app/_lib/actions/adminInscricoes";
 
-import type { ParticipantAdmin, Belt, ModalityFilter } from "@/app/_lib/types";
+import type { ParticipantAdmin, BeltColor, ModalityFilter } from "@/app/_lib/types";
 import { beltDotClasses, beltLabel } from "@/app/_lib/types";
 
 import { MoreHorizontal, ArrowLeft, Users, FileDown, Trash2, Info, SlidersHorizontal } from "lucide-react";
@@ -47,7 +47,7 @@ type Props = {
   initialParticipants: ParticipantAdmin[];
 };
 
-const beltOptions: Array<{ label: string; value: "ALL" | Belt }> = [
+const beltOptions: Array<{ label: string; value: "ALL" | BeltColor }> = [
   { label: "Todas as faixas", value: "ALL" },
   { label: "Branca", value: "BRANCA" },
   { label: "Azul", value: "AZUL" },
@@ -85,7 +85,7 @@ function passesModality(p: ParticipantAdmin, mod: ModalityFilter) {
   return true;
 }
 
-function passesBelt(p: ParticipantAdmin, belt: "ALL" | Belt) {
+function passesBelt(p: ParticipantAdmin, belt: "ALL" | BeltColor) {
   if (belt === "ALL") return true;
   return p.belt_color === belt;
 }
@@ -118,7 +118,7 @@ export default function AdminInscricoesClient({ initialParticipants }: Props) {
   );
 
   const [search, setSearch] = React.useState("");
-  const [belt, setBelt] = React.useState<"ALL" | Belt>("ALL");
+  const [belt, setBelt] = React.useState<"ALL" | BeltColor>("ALL");
   const [modality, setModality] = React.useState<ModalityFilter>("ALL");
 
   const [minWeight, setMinWeight] = React.useState<string>("");
@@ -387,7 +387,7 @@ export default function AdminInscricoesClient({ initialParticipants }: Props) {
 
                     <TableCell>
                       <div className="flex items-center gap-2">
-                        <div className={`h-3.5 w-3.5 rounded-full border ${beltDotClasses(p.belt_color)}`} />
+                      <div className={`h-3.5 w-3.5 rounded-full border ${beltDotClasses[p.belt_color]}`} />
                         <span className="text-sm text-zinc-100">{beltLabel[p.belt_color]}</span>
                       </div>
                     </TableCell>
@@ -485,7 +485,7 @@ export default function AdminInscricoesClient({ initialParticipants }: Props) {
                   <div className="flex items-center justify-between gap-4">
                     <span className="text-zinc-400">Faixa</span>
                     <span className="inline-flex items-center gap-2">
-                      <span className={`h-3 w-3 rounded-full border ${beltDotClasses(detailsItem.belt_color)}`} />
+                      <span className={`h-3 w-3 rounded-full border ${beltDotClasses[detailsItem.belt_color]}`} />
                       <span className="text-zinc-100">{beltLabel[detailsItem.belt_color]}</span>
                     </span>
                   </div>
