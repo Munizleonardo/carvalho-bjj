@@ -1,7 +1,8 @@
 import { listParticipantsAdmin } from "@/app/_lib/actions/adminInscricoes";
 import type { Belt, ModalityFilter, ParticipantAdmin } from "@/app/_lib/types";
 import { beltLabel } from "@/app/_lib/types";
-import { NextResponse } from "next/server";
+
+export const runtime = "nodejs";
 
 function normalize(s: string) {
   return s.trim().toLowerCase();
@@ -60,13 +61,11 @@ export async function GET(req: Request) {
       maxW: searchParams.get("maxW") ?? undefined,
     });
 
-    // Importação usando require para compatibilidade com CommonJS
+    // Importação usando require no runtime Node.js
     // eslint-disable-next-line @typescript-eslint/no-require-imports
     const pdfmake = require("pdfmake");
-    
-    // O pdfmake pode exportar como default ou como propriedade
     const PdfPrinter = pdfmake.default || pdfmake;
-    
+
     const fonts = {
       Roboto: {
         normal: "Helvetica",
@@ -83,16 +82,8 @@ export async function GET(req: Request) {
       pageSize: "A4",
       pageMargins: [36, 36, 36, 36],
       content: [
-        {
-          text: "Relatório de Inscrições",
-          style: "header",
-          margin: [0, 0, 0, 10],
-        },
-        {
-          text: `Total filtrado: ${filtered.length}`,
-          style: "subheader",
-          margin: [0, 0, 0, 20],
-        },
+        { text: "Relatório de Inscrições", style: "header", margin: [0, 0, 0, 10] },
+        { text: `Total filtrado: ${filtered.length}`, style: "subheader", margin: [0, 0, 0, 20] },
         {
           table: {
             headerRows: 1,
@@ -157,17 +148,9 @@ export async function GET(req: Request) {
         },
       ],
       styles: {
-        header: {
-          fontSize: 16,
-          bold: true,
-        },
-        subheader: {
-          fontSize: 10,
-          color: "#666666",
-        },
-        tableHeader: {
-          fontSize: 11,
-        },
+        header: { fontSize: 16, bold: true },
+        subheader: { fontSize: 10, color: "#666666" },
+        tableHeader: { fontSize: 11 },
       },
     };
 
@@ -182,17 +165,18 @@ export async function GET(req: Request) {
       pdfDoc.end();
     });
 
-    return new NextResponse(new Uint8Array(pdfBuffer), {
+    return new Response(new Uint8Array(pdfBuffer), {
       headers: {
         "Content-Type": "application/pdf",
-        "Content-Disposition": `inline; filename="inscricoes.pdf"`,
+        "Content-Disposition": 'inline; filename="inscricoes.pdf"',
+        "Cache-Control": "no-store",
       },
     });
   } catch (error) {
     console.error("Erro ao gerar PDF:", error);
-    return NextResponse.json(
-      { error: "Erro ao gerar PDF. Tente novamente." },
-      { status: 500 }
-    );
+    return new Response(JSON.stringify({ error: "Erro ao gerar PDF. Tente novamente." }), {
+      status: 500,
+      headers: { "Content-Type": "application/json" },
+    });
   }
 }
