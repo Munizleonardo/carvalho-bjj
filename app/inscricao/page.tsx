@@ -7,7 +7,7 @@ import { useForm, type Resolver } from "react-hook-form";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Checkbox } from "@/app/_components/ui/checkbox";
-import { createParticipant } from "@/app/actions/createParticipante";
+import { createParticipant } from "@/app/_lib/actions/createParticipante";
 import { Button } from "@/app/_components/ui/button";
 import { Input } from "@/app/_components/ui/input";
 import {
