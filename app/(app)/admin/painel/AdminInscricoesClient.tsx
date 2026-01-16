@@ -1,19 +1,24 @@
 "use client";
 
-import * as React from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import * as React from "react";
 
 import { Button } from "@/app/_components/ui/button";
-import { Input } from "@/app/_components/ui/input";
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/app/_components/ui/table";
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/app/_components/ui/dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/app/_components/ui/dropdown-menu";
+import { Input } from "@/app/_components/ui/input";
 import {
   Select,
   SelectContent,
@@ -22,26 +27,21 @@ import {
   SelectValue,
 } from "@/app/_components/ui/select";
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-} from "@/app/_components/ui/dialog";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/app/_components/ui/dropdown-menu";
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/app/_components/ui/table";
 
-import { logout } from "@/app/_lib/auth";
 import { deleteParticipantAdmin } from "@/app/_lib/actions/adminInscricoes";
+import { logout } from "@/app/_lib/auth";
 
-import type { ParticipantAdmin, Belt, ModalityFilter } from "@/app/_lib/types";
+import type { Belt, ModalityFilter, ParticipantAdmin } from "@/app/_lib/types";
 import { beltDotClasses, beltLabel } from "@/app/_lib/types";
 
-import { MoreHorizontal, ArrowLeft, Users, FileDown, Trash2, Info, SlidersHorizontal } from "lucide-react";
+import { ArrowLeft, FileDown, Info, MoreHorizontal, SlidersHorizontal, Trash2, Users } from "lucide-react";
 
 type Props = {
   initialParticipants: ParticipantAdmin[];
@@ -172,7 +172,7 @@ export default function AdminInscricoesClient({ initialParticipants }: Props) {
     if (minW !== undefined && !Number.isNaN(minW)) params.set("minW", String(minW));
     if (maxW !== undefined && !Number.isNaN(maxW)) params.set("maxW", String(maxW));
 
-    window.open(`/api/admin/inscricoes/export-pdf?${params.toString()}`, "_blank");
+    window.open(`/admin/inscricoes/export-pdf?${params.toString()}`, "_blank");
   }
 
   return (
@@ -278,7 +278,13 @@ export default function AdminInscricoesClient({ initialParticipants }: Props) {
 
             <div className="w-full md:w-48">
               <label className="mb-2 block text-sm text-zinc-400">Faixa</label>
-              <Select value={belt} onValueChange={(v) => setBelt(v as any)}>
+              <Select
+                value={belt}
+                onValueChange={(v) => {
+                  const validValue = beltOptions.find((opt) => opt.value === v)?.value;
+                  if (validValue) setBelt(validValue);
+                }}
+              >
                 <SelectTrigger className="cursor-pointer h-10 rounded-xl border-zinc-800 bg-black/40 text-zinc-100">
                   <SelectValue placeholder="Todas as faixas" />
                 </SelectTrigger>

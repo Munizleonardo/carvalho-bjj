@@ -3,7 +3,7 @@
 import { createClient } from "@supabase/supabase-js";
 
 const supabase = createClient(
-  process.env.SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
 
@@ -18,7 +18,7 @@ type CreateParticipantInput = {
   gender: "M" | "F";
 };
 
-console.log("SUPABASE_URL:", process.env.SUPABASE_URL);
+console.log("NEXT_PUBLIC_SUPABASE_URL:", process.env.NEXT_PUBLIC_SUPABASE_URL);
 console.log(
   "SUPABASE_SERVICE_ROLE_KEY:",
   process.env.SUPABASE_SERVICE_ROLE_KEY ? "OK" : "MISSING"

@@ -1,8 +1,7 @@
-import { NextResponse } from "next/server";
-import PDFDocument from "pdfkit";
 import { listParticipantsAdmin } from "@/app/_lib/actions/adminInscricoes";
 import type { Belt, ModalityFilter, ParticipantAdmin } from "@/app/_lib/types";
 import { beltLabel } from "@/app/_lib/types";
+import { NextResponse } from "next/server";
 
 function normalize(s: string) {
   return s.trim().toLowerCase();
@@ -49,72 +48,151 @@ function filterList(
 }
 
 export async function GET(req: Request) {
-  const { searchParams } = new URL(req.url);
+  try {
+    const { searchParams } = new URL(req.url);
 
-  const all = await listParticipantsAdmin();
-  const filtered = filterList(all, {
-    q: searchParams.get("q") ?? undefined,
-    belt: searchParams.get("belt") ?? undefined,
-    mod: searchParams.get("mod") ?? undefined,
-    minW: searchParams.get("minW") ?? undefined,
-    maxW: searchParams.get("maxW") ?? undefined,
-  });
+    const all = await listParticipantsAdmin();
+    const filtered = filterList(all, {
+      q: searchParams.get("q") ?? undefined,
+      belt: searchParams.get("belt") ?? undefined,
+      mod: searchParams.get("mod") ?? undefined,
+      minW: searchParams.get("minW") ?? undefined,
+      maxW: searchParams.get("maxW") ?? undefined,
+    });
 
-  const doc = new PDFDocument({ size: "A4", margin: 36 });
+    // Importação usando require para compatibilidade com CommonJS
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const pdfmake = require("pdfmake");
+    
+    // O pdfmake pode exportar como default ou como propriedade
+    const PdfPrinter = pdfmake.default || pdfmake;
+    
+    const fonts = {
+      Roboto: {
+        normal: "Helvetica",
+        bold: "Helvetica-Bold",
+        italics: "Helvetica-Oblique",
+        bolditalics: "Helvetica-BoldOblique",
+      },
+    };
 
-  const chunks: Buffer[] = [];
-  doc.on("data", (c) => chunks.push(c));
-  const done = new Promise<Buffer>((resolve) => {
-    doc.on("end", () => resolve(Buffer.concat(chunks)));
-  });
+    const printer = new PdfPrinter(fonts);
 
-  doc.fontSize(16).text("Relatório de Inscrições", { align: "left" });
-  doc.moveDown(0.5);
-  doc.fontSize(10).fillColor("#666").text(`Total filtrado: ${filtered.length}`);
-  doc.fillColor("#000");
-  doc.moveDown(1);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const docDefinition: any = {
+      pageSize: "A4",
+      pageMargins: [36, 36, 36, 36],
+      content: [
+        {
+          text: "Relatório de Inscrições",
+          style: "header",
+          margin: [0, 0, 0, 10],
+        },
+        {
+          text: `Total filtrado: ${filtered.length}`,
+          style: "subheader",
+          margin: [0, 0, 0, 20],
+        },
+        {
+          table: {
+            headerRows: 1,
+            widths: ["*", 60, 60, 80, 100],
+            body: [
+              [
+                { text: "Atleta", style: "tableHeader", bold: true },
+                { text: "Idade", style: "tableHeader", bold: true },
+                { text: "Peso", style: "tableHeader", bold: true },
+                { text: "Faixa", style: "tableHeader", bold: true },
+                { text: "Categoria", style: "tableHeader", bold: true },
+              ],
+              ...filtered.map((p) => {
+                const mods = [
+                  p.mod_gi ? "Gi" : null,
+                  p.mod_nogi ? "NoGi" : null,
+                  p.mod_abs ? "Abs" : null,
+                ]
+                  .filter(Boolean)
+                  .join(", ");
 
-  doc.fontSize(11).text("Atleta", 36, doc.y, { continued: true });
-  doc.text("Idade", 250, doc.y, { continued: true });
-  doc.text("Peso", 300, doc.y, { continued: true });
-  doc.text("Faixa", 350, doc.y, { continued: true });
-  doc.text("Categoria", 410, doc.y);
-  doc.moveDown(0.25);
-  doc.moveTo(36, doc.y).lineTo(559, doc.y).stroke();
-  doc.moveDown(0.5);
+                return [
+                  {
+                    text: [
+                      { text: `${p.full_name} (${p.whatsapp})\n`, fontSize: 10 },
+                      {
+                        text: `${p.academy ?? "-"} | ${mods || "-"}`,
+                        fontSize: 9,
+                        color: "#666666",
+                      },
+                    ],
+                  },
+                  { text: String(p.age), fontSize: 10 },
+                  { text: `${p.weight_kg} kg`, fontSize: 10 },
+                  { text: beltLabel[p.belt_color], fontSize: 10 },
+                  { text: p.category || "-", fontSize: 10 },
+                ];
+              }),
+            ],
+          },
+          layout: {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            hLineWidth: function (i: number, node: any) {
+              return i === 0 || i === node.table.body.length ? 1 : 0;
+            },
+            vLineWidth: function () {
+              return 0;
+            },
+            paddingLeft: function () {
+              return 0;
+            },
+            paddingRight: function () {
+              return 0;
+            },
+            paddingTop: function () {
+              return 5;
+            },
+            paddingBottom: function () {
+              return 5;
+            },
+          },
+        },
+      ],
+      styles: {
+        header: {
+          fontSize: 16,
+          bold: true,
+        },
+        subheader: {
+          fontSize: 10,
+          color: "#666666",
+        },
+        tableHeader: {
+          fontSize: 11,
+        },
+      },
+    };
 
-  for (const p of filtered) {
-    const lineY = doc.y;
+    const pdfDoc = printer.createPdfKitDocument(docDefinition);
 
-    const mods = [
-      p.mod_gi ? "Gi" : null,
-      p.mod_nogi ? "NoGi" : null,
-      p.mod_abs ? "Abs" : null,
-    ]
-      .filter(Boolean)
-      .join(", ");
+    const chunks: Buffer[] = [];
+    pdfDoc.on("data", (chunk: Buffer) => chunks.push(chunk));
 
-    doc.fontSize(10).text(`${p.full_name} (${p.whatsapp})`, 36, lineY);
-    doc.text(String(p.age), 250, lineY);
-    doc.text(`${p.weight_kg} kg`, 300, lineY);
-    doc.text(beltLabel[p.belt_color], 350, lineY);
-    doc.text(p.category || "-", 410, lineY);
+    const pdfBuffer = await new Promise<Buffer>((resolve, reject) => {
+      pdfDoc.on("end", () => resolve(Buffer.concat(chunks)));
+      pdfDoc.on("error", reject);
+      pdfDoc.end();
+    });
 
-    doc.fontSize(9).fillColor("#666").text(`${p.academy ?? "-"} | ${mods || "-"}`, 36, lineY + 12);
-    doc.fillColor("#000");
-
-    doc.moveDown(1.2);
-
-    if (doc.y > 760) doc.addPage();
+    return new NextResponse(new Uint8Array(pdfBuffer), {
+      headers: {
+        "Content-Type": "application/pdf",
+        "Content-Disposition": `inline; filename="inscricoes.pdf"`,
+      },
+    });
+  } catch (error) {
+    console.error("Erro ao gerar PDF:", error);
+    return NextResponse.json(
+      { error: "Erro ao gerar PDF. Tente novamente." },
+      { status: 500 }
+    );
   }
-
-  doc.end();
-  const pdf = await done;
-
-  return new NextResponse(new Uint8Array(pdf), {
-    headers: {
-      "Content-Type": "application/pdf",
-      "Content-Disposition": `inline; filename="inscricoes.pdf"`,
-    },
-  });
 }
