@@ -160,18 +160,19 @@ export default function Cash() {
                   <span className="text-sm text-zinc-400 block mb-2">
                     Mensagem sugerida:
                   </span>
-                  <code className="flex-1 bg-black/50 px-3 py-2 rounded-lg text-sm border border-zinc-800 text-zinc-100">
+                  <code className="flex-1 flex bg-black/50 px-3 py-2 w-full rounded-lg text-sm border border-zinc-800 text-zinc-100">
                     Pagamento Inscrição - Nome do Atleta
                   </code>
                 </div>
               </div>
-
-              <Button
-                className="cursor-pointer w-full rounded-xl h-11 bg-zinc-100 text-black hover:bg-white"
-                type="button"
-              >
-                Abrir WhatsApp
-              </Button>
+              <Link href="https://wa.me/+5522999809455" target="_blank">
+                <Button
+                  className="cursor-pointer w-full rounded-xl h-11 bg-zinc-100 text-black hover:bg-emerald-200/90"
+                  type="button"
+                >
+                  Abrir WhatsApp
+                </Button>
+              </Link>  
             </div>
           </div>
 

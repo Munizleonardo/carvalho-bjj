@@ -4,7 +4,7 @@ import { createClient } from "@supabase/supabase-js";
 import type { Category, BeltColor, Gender } from "@/app/_lib/types";
 
 const supabase = createClient(
-  process.env.SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
 
@@ -19,10 +19,11 @@ type CreateParticipantInput = {
   belt_color: BeltColor;
   gender: Gender;
 
-  mod_gi: boolean;
-  mod_nogi: boolean;
-  mod_gi_extra: boolean;
-};
+console.log("NEXT_PUBLIC_SUPABASE_URL:", process.env.NEXT_PUBLIC_SUPABASE_URL);
+console.log(
+  "SUPABASE_SERVICE_ROLE_KEY:",
+  process.env.SUPABASE_SERVICE_ROLE_KEY ? "OK" : "MISSING"
+);
 
 export async function createParticipant(input: CreateParticipantInput) {
   const { data, error } = await supabase
