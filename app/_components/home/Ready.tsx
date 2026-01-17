@@ -64,7 +64,7 @@ const faqs: Array<{
     key: "regras",
     title: "Regras",
     answer:
-      "As lutas seguem o regulamento adotado pela organização, incluindo uniformes, pontuação, tempo e condutas. Orientações finais de pesagem, check-in e chamadas serão informadas antes do evento.",
+      "As lutas seguem o regulamento adotado pela organização, incluindo pontuação, tempo e condutas. Orientações finais de pesagem, check-in e chamadas serão informadas antes do evento.",
   },
   {
     key: "imagem",

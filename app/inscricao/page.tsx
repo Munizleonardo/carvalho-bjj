@@ -57,6 +57,7 @@ const formSchema = z.object({
   mod_gi: z.boolean(),
   mod_nogi: z.boolean(),
   mod_gi_extra: z.boolean(),
+  festival: z.boolean(),
 
   category: z.enum(categoryEnum),
 
@@ -73,20 +74,39 @@ const formSchema = z.object({
 
   belt_color: z.enum(beltEnum),
   gender: z.enum(genderEnum),
+  terms: z.boolean().refine((val) => val === true, {
+    message: "Você deve aceitar os termos para continuar",
+  }),
 }).superRefine((data, ctx) => {
-  if (!data.mod_gi && !data.mod_nogi) {
-    ctx.addIssue({
-      code: z.ZodIssueCode.custom,
-      path: ["mod_gi"],
-      message: "Selecione pelo menos uma modalidade",
-    });
+  if (data.category === "FESTIVAL") {
+    if (!data.festival) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["festival"],
+        message: "Selecione a modalidade Festival",
+      });
+    }
+  } else {
+    if (!data.mod_gi && !data.mod_nogi) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["mod_gi"],
+        message: "Selecione pelo menos uma modalidade",
+      });
+    }
   }
+
+  
 });
 
 export type FormValues = z.infer<typeof formSchema>;
 
 // -------------------- OPTIONS --------------------
 const beltOptions = [
+  { label: "Cinza", value: "CINZA" },
+  { label: "Amarela", value: "AMARELA" },
+  { label: "Laranja", value: "LARANJA" },
+  { label: "Verde", value: "VERDE" },
   { label: "Branca", value: "BRANCA" },
   { label: "Azul", value: "AZUL" },
   { label: "Roxa", value: "ROXA" },
@@ -100,6 +120,7 @@ const genderOptions = [
 ];
 
 const categoryOptions: Array<{ label: string; value: Category }> = [
+  { label: "Festival (Até 8 anos)", value: "FESTIVAL" },
   { label: "Galo", value: "GALO" },
   { label: "Pluma", value: "PLUMA" },
   { label: "Pena", value: "PENA" },
@@ -127,6 +148,8 @@ const form = useForm<FormValues>({
     mod_gi: false,
     mod_nogi: false,
     mod_gi_extra: false,
+    festival: false,
+    terms: false,
   },
 });
 
@@ -138,7 +161,7 @@ const form = useForm<FormValues>({
     setServerError(null);
 
     try {
-      await createParticipant({
+      const id = await createParticipant({
         full_name: values.full_name.trim(),
         whatsapp: values.whatsapp.trim(),
         age: values.age,
@@ -150,15 +173,47 @@ const form = useForm<FormValues>({
         mod_gi: values.mod_gi,
         mod_nogi: values.mod_nogi,
         mod_gi_extra: values.mod_gi_extra,
+        festival: values.festival,
       });
 
-      router.push("/cash");
+      router.push(`/cash?id=${encodeURIComponent(id)}`);
     } catch {
       setServerError("Não foi possível concluir sua inscrição.");
     } finally {
       setSubmitting(false);
     }
   }
+
+  const age = form.watch("age");
+  const category = form.watch("category");
+  const isFestivalAge = typeof age === "number" && age <= 8;
+
+  const filteredCategoryOptions = React.useMemo(() => {
+    if (typeof age === "number" && age > 8) {
+      return categoryOptions.filter((c) => c.value !== "FESTIVAL");
+    }
+    return categoryOptions;
+  }, [age]);
+
+  React.useEffect(() => {
+    if (isFestivalAge) {
+      if (category !== "FESTIVAL") {
+        form.setValue("category", "FESTIVAL");
+      }
+    } else if (category === "FESTIVAL" && typeof age === "number" && age > 8) {
+      form.setValue("category", "" as any);
+    }
+  }, [isFestivalAge, category, age, form]);
+
+  React.useEffect(() => {
+    if (category === "FESTIVAL") {
+      form.setValue("mod_gi", false);
+      form.setValue("mod_nogi", false);
+      form.setValue("mod_gi_extra", false);
+    } else {
+      form.setValue("festival", false);
+    }
+  }, [category, form]);
 
   const giSelected = form.watch("mod_gi");
 
@@ -266,10 +321,11 @@ const form = useForm<FormValues>({
                           type="number"
                           inputMode="numeric"
                           className="w-full rounded-xl bg-black/40 border-zinc-800 text-zinc-100 focus-visible:ring-red-500/30"
-                          value={field.value}
-                          onChange={(e) =>
-                            field.onChange(Number(e.target.value))
-                          }
+                          value={field.value ?? ""}
+                          onChange={(e) => {
+                            const val = e.target.value;
+                            field.onChange(val === "" ? undefined : Number(val));
+                          }}
                         />
                       </FormControl>
                       <FormMessage />
@@ -289,6 +345,7 @@ const form = useForm<FormValues>({
                       <Select
                         value={field.value ?? ""}
                         onValueChange={field.onChange}
+                        disabled={isFestivalAge}
                       >
                         <FormControl>
                           <SelectTrigger className="w-full rounded-2xl border-zinc-800 bg-black/40 text-zinc-100 cursor-pointer">
@@ -297,7 +354,7 @@ const form = useForm<FormValues>({
                         </FormControl>
 
                         <SelectContent className="border-zinc-800 bg-zinc-950 text-zinc-100">
-                          {categoryOptions.map((b) => (
+                          {filteredCategoryOptions.map((b) => (
                             <SelectItem
                               key={b.value}
                               value={b.value}
@@ -438,7 +495,34 @@ const form = useForm<FormValues>({
                   </p>
 
                   <div className="grid  gap-3">
-                    {/* GI */}
+                    {category === "FESTIVAL" ? (
+                      <FormField
+                        control={form.control}
+                        name="festival"
+                        render={({ field }) => (
+                          <FormItem className="flex items-start gap-3 space-y-0">
+                            <FormControl>
+                              <Checkbox
+                                checked={field.value}
+                                onCheckedChange={field.onChange}
+                                className="mt-1"
+                              />
+                            </FormControl>
+                            <div className="grid gap-1 leading-none">
+                              <FormLabel className="text-zinc-100 cursor-pointer">
+                                Festival
+                              </FormLabel>
+                              <p className="text-sm text-zinc-400">
+                                Modalidade participativa para crianças.
+                              </p>
+                            </div>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    ) : (
+                      <>
+                        {/* GI */}
                     <FormField
                       control={form.control}
                       name="mod_gi"
@@ -522,14 +606,49 @@ const form = useForm<FormValues>({
                         </FormItem>
                       )}
                     />
+                      </>
+                    )}
                   </div>
                 </div>
               </div>
+              <FormField
+                control={form.control}
+                name="terms"
+                render={({ field }) => (
+                  <FormItem className="flex items-start gap-3 space-y-0 rounded-xl border border-zinc-800 bg-black/30 p-4">
+                    <FormControl>
+                      <Checkbox
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                        className="mt-1"
+                      />
+                    </FormControl>
 
+                    <div className="grid gap-1 leading-none">
+                      <FormLabel className="text-zinc-100 cursor-pointer">
+                        Declaro que li e aceito os{" "}
+                        <a
+                          href="/termo-de-autorização.pdf"
+                          className="text-white hover:text-red-600"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          Termos de Inscrição
+                        </a>
+                      </FormLabel>
+                      <p className="text-sm text-zinc-400">
+                        Ao prosseguir, confirmo que as informações fornecidas são verdadeiras
+                        e estou ciente das regras do evento.
+                      </p>
+                      <FormMessage />
+                    </div>
+                  </FormItem>
+                )}
+              />
               <div className="flex justify-center gap-4">
                 <Button
                   className="h-12 rounded-xl cursor-pointer px-8 bg-red-600 hover:bg-red-500"
-                  disabled={submitting}
+                  disabled={submitting || !form.watch("terms")}
                   type="submit"
                 >
                   {submitting ? "Enviando..." : "Concluir inscrição"}

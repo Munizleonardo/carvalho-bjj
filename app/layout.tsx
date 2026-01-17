@@ -3,8 +3,8 @@ import "./globals.css";
 
 
 export const metadata: Metadata = {
-  title: "Carvalho Team - Campeonato de Jiu-Jitsu",
-  description: "Carvalho Team - Escola de Jiu-Jitsu",
+  title: "Black Belt - BJJ",
+  description: "Black Belt - BJJ",
 };
 
 export default function RootLayout({
