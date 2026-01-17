@@ -1,5 +1,23 @@
 console.log("TYPES FILE LOADED");
 
+export type ModalityFilter = "ALL" | "GI" | "NOGI" | "ABS";
+
+export const beltDotClasses: Record<BeltColor, string> = {
+  BRANCA: "border-white",
+  AZUL: "border-blue-500",
+  ROXA: "border-purple-500",
+  MARROM: "border-brown-500",
+  PRETA: "border-black",
+};
+
+export const beltLabel: Record<BeltColor, string> = {
+  BRANCA: "Branca",
+  AZUL: "Azul",
+  ROXA: "Roxa",
+  MARROM: "Marrom",
+  PRETA: "Preta",
+};
+
 export const categoryEnum = [  
   "GALO",
   "PLUMA",

@@ -38,7 +38,7 @@ import {
 import { deleteParticipantAdmin } from "@/app/_lib/actions/adminInscricoes";
 import { logout } from "@/app/_lib/auth";
 
-import type { Belt, ModalityFilter, ParticipantAdmin } from "@/app/_lib/types";
+import type { BeltColor, ModalityFilter, ParticipantAdmin } from "@/app/_lib/types";
 import { beltDotClasses, beltLabel } from "@/app/_lib/types";
 
 import { ArrowLeft, FileDown, Info, MoreHorizontal, SlidersHorizontal, Trash2, Users } from "lucide-react";

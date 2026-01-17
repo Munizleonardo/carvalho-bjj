@@ -1,5 +1,5 @@
 import { listParticipantsAdmin } from "@/app/_lib/actions/adminInscricoes";
-import type { Belt, ModalityFilter, ParticipantAdmin } from "@/app/_lib/types";
+import type { BeltColor, ModalityFilter, ParticipantAdmin } from "@/app/_lib/types";
 import { beltLabel } from "@/app/_lib/types";
 
 export const runtime = "nodejs";
@@ -19,7 +19,7 @@ function filterList(
   }: { q?: string; belt?: string; mod?: string; minW?: string; maxW?: string }
 ) {
   const qq = q ? normalize(q) : "";
-  const beltFilter = (belt as "ALL" | Belt | undefined) ?? "ALL";
+  const beltFilter = (belt as "ALL" | BeltColor | undefined) ?? "ALL";
   const modFilter = (mod as ModalityFilter | undefined) ?? "ALL";
   const min = minW ? Number(minW) : undefined;
   const max = maxW ? Number(maxW) : undefined;

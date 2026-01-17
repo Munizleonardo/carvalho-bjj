@@ -19,11 +19,10 @@ type CreateParticipantInput = {
   belt_color: BeltColor;
   gender: Gender;
 
-console.log("NEXT_PUBLIC_SUPABASE_URL:", process.env.NEXT_PUBLIC_SUPABASE_URL);
-console.log(
-  "SUPABASE_SERVICE_ROLE_KEY:",
-  process.env.SUPABASE_SERVICE_ROLE_KEY ? "OK" : "MISSING"
-);
+  mod_gi: boolean;
+  mod_nogi: boolean;
+  mod_gi_extra: boolean;
+}
 
 export async function createParticipant(input: CreateParticipantInput) {
   const { data, error } = await supabase

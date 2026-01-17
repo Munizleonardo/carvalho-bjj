@@ -10,13 +10,13 @@ type ParticipanteRow = {
   idade: number;
   academia: string | null;
   peso: number;
-  faixa: Belt;
+  faixa: BeltColor;
   sexo: "M" | "F";
   categoria: string | null;
 
   mod_gi: boolean;
   mod_nogi: boolean;
-  mod_abs: boolean;
+  mod_gi_extra: boolean;
 
   created_at: string;
 };
@@ -26,7 +26,7 @@ export async function listParticipantsAdmin(): Promise<ParticipantAdmin[]> {
 
   const { data, error } = await supabase
     .from("participantes")
-    .select("id,nome,wpp,idade,academia,peso,faixa,sexo,categoria,mod_gi,mod_nogi,mod_abs,created_at")
+    .select("id,nome,wpp,idade,academia,peso,faixa,sexo,categoria,mod_gi,mod_nogi,mod_gi_extra,created_at")
     .order("created_at", { ascending: false });
 
   if (error) throw new Error(error.message);
@@ -44,7 +44,7 @@ export async function listParticipantsAdmin(): Promise<ParticipantAdmin[]> {
     academy: r.academia,
     mod_gi: Boolean(r.mod_gi),
     mod_nogi: Boolean(r.mod_nogi),
-    mod_abs: Boolean(r.mod_abs),
+    mod_abs: Boolean(r.mod_gi_extra), // mod_gi_extra no banco = mod_abs na aplicação
     created_at: r.created_at,
   }));
 }
