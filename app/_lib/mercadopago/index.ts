@@ -10,28 +10,30 @@ export async function createPixPayment({ amount, reference }: {
   amount: number;
   reference: string;
 }) {
-  const payment = new Payment(client);
-
-  const res = await payment.create({
+  const payment = await paymentClient.create({
     body: {
       transaction_amount: amount,
-      description: "Inscrição Campeonato",
+      description: "Inscrição campeonato",
       payment_method_id: "pix",
-      external_reference: reference,
+      notification_url: `${process.env.APP_URL}/api/webhooks/mercadopago`,
       payer: {
-        email: "pagamento@evento.com",
+        email: "pagador@teste.com",
+        first_name: "Inscrição",
+        last_name: "Atleta",
       },
-    }
+      external_reference: reference,
+    },
   });
   
-  const data = res.point_of_interaction?.transaction_data;
+  
+  const data = payment.point_of_interaction?.transaction_data;
 
   if (!data) {
     throw new Error("Dados PIX não retornados pelo Mercado Pago");
   }
 
   return {
-    id: res.id!,
+    id: payment.id!,
     qr_code: data.qr_code!,
     qr_code_base64: data.qr_code_base64!,
   };

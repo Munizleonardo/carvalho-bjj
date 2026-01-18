@@ -2,9 +2,9 @@
 
 import { useSearchParams } from "next/navigation";
 import * as React from "react";
-import Link from "next/link";
 import { Button } from "../_components/ui/button";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 
 type CashData = {
   id: string;
@@ -32,7 +32,7 @@ export default function CashClient() {
     const [error, setError] = React.useState<string | null>(null);
 
   React.useEffect(() => {
-    if (data?.pix.status === "approved") {
+    if (data?.pix?.status === "approved") {
       const t = setTimeout(() => {
         router.push("/");
       }, 4000);
@@ -43,7 +43,7 @@ export default function CashClient() {
   React.useEffect(() => {
     if (!id) return;
     if (!data) return;
-    if (data.pix.status === "approved") return;
+    if (data.pix?.status === "approved") return;
   
     const interval = setInterval(async () => {
       try {
@@ -142,9 +142,9 @@ export default function CashClient() {
               </svg>
             </div>
             <div className="flex-1">
-              <h4 className="font-medium mb-1">Inscrição registrada com sucesso</h4>
+              <h4 className="font-medium mb-1">Inscrição Quase Finalizada</h4>
               <div className="text-sm text-emerald-200/90">
-                Para confirmar, realize o pagamento via PIX e envie o comprovante no WhatsApp informado, com o nome completo do atleta.
+                Para confirmar, realize o pagamento via PIX pelo QR Code ou Pix Copia e Cola abaixo.
               </div>
             </div>
           </div>
@@ -188,14 +188,17 @@ export default function CashClient() {
                   </span>
 
                   <div className="flex justify-center">
-                  {data.pix && (
-  <img
-    src={`data:image/png;base64,${data.pix.qr_code_base64}`}
-    alt="QR Code PIX"
-    className="w-52 h-52 rounded-xl bg-white p-2"
-  />
-)}
-
+                    {data.pix ? (
+                      <Image
+                        src={`data:image/png;base64,${data.pix.qr_code_base64}`}
+                        alt="QR Code PIX"
+                        className="w-52 h-52 rounded-xl bg-white p-2"
+                      />
+                    ) : (
+                      <div className="w-52 h-52 rounded-xl bg-zinc-900 border border-zinc-800 flex items-center justify-center text-zinc-500 text-sm text-center p-4">
+                        Aguardando QR Code...
+                      </div>
+                    )}
                   </div>
 
                   <div>
@@ -203,17 +206,21 @@ export default function CashClient() {
                       PIX Copia e Cola
                     </span>
                     <div className="flex items-center gap-2">
-                      <code className="flex-1 bg-black/40 px-3 py-2 rounded-lg text-sm font-mono break-all border border-zinc-800">
-                      {data.pix && (
-  <code className="flex-1 bg-black/40 px-3 py-2 rounded-lg text-sm font-mono break-all border border-zinc-800">
-    {data.pix.qr_code}
-  </code>
-)}
-
+                      <code className="flex-1 bg-black/40 px-3 py-2 rounded-lg text-sm font-mono break-all border border-zinc-800 min-h-[40px] flex items-center">
+                        {data.pix?.qr_code || (
+                          <span className="text-zinc-600 italic">
+                            Aguardando geração do PIX...
+                          </span>
+                        )}
                       </code>
                       <Button
                         className="cursor-pointer h-9 rounded-md px-3"
-                        onClick={() => navigator.clipboard.writeText(data.pix.qr_code)}
+                        onClick={() => {
+                          if (data.pix?.qr_code) {
+                            navigator.clipboard.writeText(data.pix.qr_code);
+                          }
+                        }}
+                        disabled={!data.pix?.qr_code}
                       >
                         Copiar
                       </Button>
@@ -222,56 +229,15 @@ export default function CashClient() {
               </div>
 
               </div>
-                {/* Comprovante */}
-           <div className="bg-zinc-950/70 border border-zinc-800 rounded-2xl shadow-sm p-6 backdrop-blur">
-             <div className="mb-4">
-               <div className="flex items-center gap-3">
-                 <div className="p-2 bg-zinc-900 rounded-xl border border-zinc-800">
-                   <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="24" height="24"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    className="h-5 w-5 text-zinc-200"
-                  >
-                    <path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z" />
-                  </svg>
-                </div>
-                <div>
-                  <h3 className="text-xl font-semibold text-zinc-100">
-                    Envio do Comprovante
-                  </h3>
-                  <p className="text-sm text-zinc-400 mt-1">
-                    Após pagar, envie o comprovante para confirmar sua inscrição
-                  </p>
-                </div>
-              </div>
-            </div>
 
             <div className="space-y-4">
               <div className="p-4 bg-black/40 rounded-xl border border-zinc-800 space-y-3">
                 <p className="text-sm text-zinc-200">
-                  Envie o comprovante para{" "}
-                  <strong>(22) 99980-9455 - Bruno Carvalho</strong> informando o
-                  nome completo do atleta.
+                  Após confirmação do pagamento a inscrição será concluída e a página redirecionada.
                 </p>
-
-                <div className="border-t border-zinc-800 pt-3">
-                  <span className="text-sm text-zinc-400 block mb-2">
-                    Mensagem sugerida:
-                  </span>
-                  <code className="flex-1 flex bg-black/50 px-3 py-2 w-full rounded-lg text-sm border border-zinc-800 text-zinc-100">
-                    Pagamento Inscrição - Nome do Atleta
-                  </code>
-                </div>
               </div>
             </div>
           </div>
-            </div>
           )}
         </div>
       </div>
