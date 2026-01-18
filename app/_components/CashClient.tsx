@@ -4,7 +4,10 @@ import { useSearchParams } from "next/navigation";
 import * as React from "react";
 import { Button } from "../_components/ui/button";
 import { useRouter } from "next/navigation";
+<<<<<<< HEAD
 import Image from "next/image";
+=======
+>>>>>>> origin
 
 type CashData = {
   id: string;
@@ -32,7 +35,11 @@ export default function CashClient() {
     const [error, setError] = React.useState<string | null>(null);
 
   React.useEffect(() => {
+<<<<<<< HEAD
     if (data?.pix?.status === "approved") {
+=======
+    if (data?.pix.status === "approved") {
+>>>>>>> origin
       const t = setTimeout(() => {
         router.push("/");
       }, 4000);
@@ -43,7 +50,11 @@ export default function CashClient() {
   React.useEffect(() => {
     if (!id) return;
     if (!data) return;
+<<<<<<< HEAD
     if (data.pix?.status === "approved") return;
+=======
+    if (data.pix.status === "approved") return;
+>>>>>>> origin
   
     const interval = setInterval(async () => {
       try {
@@ -188,6 +199,7 @@ export default function CashClient() {
                   </span>
 
                   <div className="flex justify-center">
+<<<<<<< HEAD
                     {data.pix ? (
                       <Image
                         src={`data:image/png;base64,${data.pix.qr_code_base64}`}
@@ -226,6 +238,41 @@ export default function CashClient() {
                       </Button>
                     </div>
                   </div>
+=======
+                  {data.pix && (
+  <img
+    src={`data:image/png;base64,${data.pix.qr_code_base64}`}
+    alt="QR Code PIX"
+    className="w-52 h-52 rounded-xl bg-white p-2"
+  />
+)}
+
+                  </div>
+
+                  <div>
+                    <span className="text-sm text-zinc-400 block mb-2">
+                      PIX Copia e Cola
+                    </span>
+                    <div className="flex items-center gap-2">
+                      <code className="flex-1 bg-black/40 px-3 py-2 rounded-lg text-sm font-mono break-all border border-zinc-800">
+                      {data.pix && (
+  <code className="flex-1 bg-black/40 px-3 py-2 rounded-lg text-sm font-mono break-all border border-zinc-800">
+    {data.pix.qr_code}
+  </code>
+)}
+
+                      </code>
+                      <Button
+                        className="cursor-pointer h-9 rounded-md px-3"
+                        onClick={() => navigator.clipboard.writeText(data.pix.qr_code)}
+                      >
+                        Copiar
+                      </Button>
+                    </div>
+                  </div>
+              </div>
+
+>>>>>>> origin
               </div>
 
               </div>
@@ -238,6 +285,10 @@ export default function CashClient() {
               </div>
             </div>
           </div>
+<<<<<<< HEAD
+=======
+            </div>
+>>>>>>> origin
           )}
         </div>
       </div>
