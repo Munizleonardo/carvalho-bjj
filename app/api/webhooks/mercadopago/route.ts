@@ -70,7 +70,7 @@ export async function POST(req: Request) {
   // Se aprovado, marca inscrição como paga
   if (status === "approved") {
     await sb
-      .from("registrations")
+      .from("participantes")
       .update({
         status: "paid",
         paid_at: new Date().toISOString(),

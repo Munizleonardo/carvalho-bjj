@@ -274,21 +274,21 @@ const form = useForm<FormValues>({
                 )}
               />
 
-              <div className="flex flex-col md:flex-row gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8 w-full">
                 {/* Idade */}
                 <FormField
                   control={form.control}
                   name="age"
                   render={({ field }) => (
                     <FormItem className="w-full">
-                      <FormLabel className="text-lg text-zinc-200">
+                      <FormLabel className="text-lg w-full flex md:flex-row md:flex text-zinc-200">
                         Idade
                       </FormLabel>
                       <FormControl>
                         <Input
                           type="number"
                           inputMode="numeric"
-                          className="w-full rounded-xl bg-black/40 border-zinc-800 text-zinc-100 focus-visible:ring-red-500/30"
+                          className="w-full rounded-xl bg-black/40 border-zinc-800 text-zinc-100 flex focus-visible:ring-red-500/30"
                           value={field.value ?? ""}
                           onChange={(e) => {
                             const val = e.target.value;
@@ -303,42 +303,45 @@ const form = useForm<FormValues>({
 
                 {/* AVISO FESTIVAL */}
                 {isFestivalAge && (
-                  <div className="rounded-xl border border-zinc-800 bg-zinc-900 p-4 text-sm text-zinc-300">
-                    Atletas até <strong>8 anos</strong> participam automaticamente
-                    no <strong>Festival</strong>. Peso, categoria e modalidades não
-                    se aplicam.
+                  <div className="flex items-center justify-center rounded-xl border border-yellow-600/50 bg-yellow-950/30 p-4 text-yellow-200">
+                    <div className="text-sm">
+                      <span className="font-bold text-lg block mb-1">⚠️ Categoria Festival</span>
+                      Atletas até 8 anos participam automaticamente no Festival.
+                    </div>
                   </div>
                 )}
                 
                 {/* Categoria */}
-                <FormField
-                  control={form.control}
-                  name="category"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-lg text-zinc-200">Categoria</FormLabel>
-                      <Select
-                        value={field.value ?? ""}
-                        onValueChange={field.onChange}
-                      >
-                        <FormControl>
-                          <SelectTrigger className="w-full rounded-2xl border-zinc-800 bg-black/40 text-zinc-100 cursor-pointer">
-                            <SelectValue placeholder="Selecione" />
-                          </SelectTrigger>
-                        </FormControl>
+                {!isFestivalAge && (
+                  <FormField
+                    control={form.control}
+                    name="category"
+                    render={({ field }) => (
+                      <FormItem className="w-full">
+                        <FormLabel className="text-lg w-full flex md:flex-row md:flex text-zinc-200">Categoria</FormLabel>
+                        <Select
+                          value={field.value ?? ""}
+                          onValueChange={field.onChange}
+                        >
+                          <FormControl>
+                            <SelectTrigger className="w-full flex rounded-2xl border-zinc-800 bg-black/40 text-zinc-100 cursor-pointer">
+                              <SelectValue placeholder="Selecione" />
+                            </SelectTrigger>
+                          </FormControl>
 
-                        <SelectContent className="border-zinc-800 bg-zinc-950 text-zinc-100">
-                          {categoryOptions.map((c) => (
-                            <SelectItem key={c.value} value={c.value}>
-                              {c.label}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                          <SelectContent className="border-zinc-800 bg-zinc-950 text-zinc-100">
+                            {categoryOptions.map((c) => (
+                              <SelectItem key={c.value} value={c.value}>
+                                {c.label}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                )}
               </div>
 
               <div className="flex flex-col-reverse md:flex-row gap-8">
@@ -363,30 +366,33 @@ const form = useForm<FormValues>({
                 />
 
                 {/* Peso */}
-                <FormField
-                  control={form.control}
-                  name="weight_kg"
-                  render={({ field }) => (
-                    <FormItem className="w-full">
-                      <FormLabel className="text-lg text-zinc-200">Peso</FormLabel>
-                      <FormControl>
-                        <Input
-                          type="number"
-                          step="0.1"
-                          value={field.value ?? ""}
-                          onChange={(e) =>
-                            field.onChange(
-                              e.target.value === ""
-                                ? null
-                                : Number(e.target.value)
-                            )
-                          }
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                {!isFestivalAge && (
+                  <FormField
+                    control={form.control}
+                    name="weight_kg"
+                    render={({ field }) => (
+                      <FormItem className="w-full">
+                        <FormLabel className="text-lg text-zinc-200">Peso</FormLabel>
+                        <FormControl>
+                          <Input
+                            type="number"
+                            step="0.1"
+                            className="rounded-xl bg-black/40 border-zinc-800 text-zinc-100 placeholder:text-zinc-500 focus-visible:ring-red-500/30"
+                            value={field.value ?? ""}
+                            onChange={(e) =>
+                              field.onChange(
+                                e.target.value === ""
+                                  ? null
+                                  : Number(e.target.value)
+                              )
+                            }
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                )}
               </div>
 
               {/* Faixa e Gênero */}
@@ -405,7 +411,9 @@ const form = useForm<FormValues>({
                         </FormControl>
 
                         <SelectContent className="border-zinc-800 bg-zinc-950 text-zinc-100">
-                          {beltOptions.map((b) => (
+                          {beltOptions
+                            .filter((b) => !isFestivalAge || ["CINZA", "AMARELA", "LARANJA", "VERDE", "BRANCA"].includes(b.value))
+                            .map((b) => (
                             <SelectItem
                               key={b.value}
                               value={b.value}
