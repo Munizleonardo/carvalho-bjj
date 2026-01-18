@@ -1,8 +1,7 @@
+export const runtime = "nodejs";
 import { listParticipantsAdmin } from "@/app/_lib/actions/adminInscricoes";
 import type { BeltColor, ModalityFilter, ParticipantAdmin } from "@/app/_lib/types";
 import { beltLabel } from "@/app/_lib/types";
-
-export const runtime = "nodejs";
 
 function normalize(s: string) {
   return s.trim().toLowerCase();

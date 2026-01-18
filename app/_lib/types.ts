@@ -1,33 +1,32 @@
-console.log("TYPES FILE LOADED");
+// console.log("TYPES FILE LOADED");
 
-export type ModalityFilter = "ALL" | "GI" | "NOGI" | "ABS" | "FESTIVAL";
+export type ModalityFilter = "ALL" | "GI" | "NOGI" | "ABS";
 
 export const beltDotClasses: Record<BeltColor, string> = {
-  BRANCA: "bg-white border-white",
-  CINZA: "bg-gray-500 border-gray-500",
-  AMARELA: "bg-yellow-500 border-yellow-500",
-  LARANJA: "bg-orange-500 border-orange-500",
-  VERDE: "bg-green-500 border-green-500",
-  AZUL: "bg-blue-500 border-blue-500",
-  ROXA: "bg-purple-500 border-purple-500",
-  MARROM: "bg-[#993300] border-[#993300]",
-  PRETA: "bg-black border-black",
+  CINZA: "border-gray-400",
+  AMARELA: "border-yellow-400",
+  LARANJA: "border-orange-400",
+  VERDE: "border-green-500",
+  BRANCA: "border-white",
+  AZUL: "border-blue-500",
+  ROXA: "border-purple-500",
+  MARROM: "border-brown-500",
+  PRETA: "border-black",
 };
 
 export const beltLabel: Record<BeltColor, string> = {
-  BRANCA: "Branca",
   CINZA: "Cinza",
   AMARELA: "Amarela",
   LARANJA: "Laranja",
   VERDE: "Verde",
+  BRANCA: "Branca",
   AZUL: "Azul",
   ROXA: "Roxa",
   MARROM: "Marrom",
   PRETA: "Preta",
 };
 
-export const categoryEnum = [  
-  "FESTIVAL",
+export const categoryEnum = [ 
   "GALO",
   "PLUMA",
   "PENA",
@@ -40,11 +39,11 @@ export const categoryEnum = [
 ] as const;
 
 export const beltEnum = [
-  "BRANCA",
   "CINZA",
   "AMARELA",
   "LARANJA",
   "VERDE",
+  "BRANCA",
   "AZUL",
   "ROXA",
   "MARROM",
@@ -64,11 +63,10 @@ export type ParticipantAdmin = {
   full_name: string; // banco: nome
   whatsapp: string; // banco: wpp 
   age: number; // banco: idade 
-  weight_kg: number; // banco: peso 
+  weight_kg: number | null; // banco: peso 
   gender: Gender; // banco: sexo 
   belt_color: BeltColor; // banco: faixa 
-  category: string; // banco: categoria 
-  
+  category: Category | null; // banco: categoria 
   academy?: string | null; // banco: academia 
 
   mod_gi: boolean; 

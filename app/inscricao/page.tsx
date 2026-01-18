@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { z } from "zod";
+import { nullable, z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import type { Resolver } from "react-hook-form";
 import { useRouter } from "next/navigation";
@@ -34,6 +34,7 @@ import {
   genderEnum,
   type Category,
 } from "@/app/_lib/types";
+import { is } from "zod/v4/locales";
 
 // -------------------- SCHEMA ZOD --------------------
 const formSchema = z.object({
@@ -57,46 +58,35 @@ const formSchema = z.object({
   mod_gi: z.boolean(),
   mod_nogi: z.boolean(),
   mod_gi_extra: z.boolean(),
-  festival: z.boolean(),
 
-  category: z.enum(categoryEnum),
+  category: z.enum(categoryEnum).nullable(),
 
   weight_kg: z.preprocess(
     (val) => {
-      if (val === "" || val === undefined || val === null) return undefined;
+      if (val === "" || val === undefined || val === null) return null;
       return Number(val);
     },
     z
       .number({ message: "Peso inválido" }) // aqui também
       .min(10, { message: "Peso mínimo é 10kg" })
       .max(300, { message: "Peso máximo é 300kg" })
+      .nullable(),
   ),
 
   belt_color: z.enum(beltEnum),
   gender: z.enum(genderEnum),
+
   terms: z.boolean().refine((val) => val === true, {
     message: "Você deve aceitar os termos para continuar",
   }),
 }).superRefine((data, ctx) => {
-  if (data.category === "FESTIVAL") {
-    if (!data.festival) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        path: ["festival"],
-        message: "Selecione a modalidade Festival",
-      });
-    }
-  } else {
-    if (!data.mod_gi && !data.mod_nogi) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        path: ["mod_gi"],
-        message: "Selecione pelo menos uma modalidade",
-      });
-    }
+  if (data.age > 8 && !data.mod_gi && !data.mod_nogi) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ["mod_gi"],
+      message: "Selecione pelo menos uma modalidade",
+    });
   }
-
-  
 });
 
 export type FormValues = z.infer<typeof formSchema>;
@@ -120,7 +110,6 @@ const genderOptions = [
 ];
 
 const categoryOptions: Array<{ label: string; value: Category }> = [
-  { label: "Festival (Até 8 anos)", value: "FESTIVAL" },
   { label: "Galo", value: "GALO" },
   { label: "Pluma", value: "PLUMA" },
   { label: "Pena", value: "PENA" },
@@ -148,13 +137,11 @@ const form = useForm<FormValues>({
     mod_gi: false,
     mod_nogi: false,
     mod_gi_extra: false,
-    festival: false,
     terms: false,
+    category: null,
+    weight_kg: null,
   },
 });
-
-  const selectedCategory =
-    (form.watch("category") as Category | undefined) ?? undefined;
 
   async function onSubmit(values: FormValues) {
     setSubmitting(true);
@@ -166,14 +153,13 @@ const form = useForm<FormValues>({
         whatsapp: values.whatsapp.trim(),
         age: values.age,
         academy: values.academy?.trim(),
-        category: values.category,
-        weight_kg: values.weight_kg,
+        category: values.age <= 8 ? null : values.category,
+        weight_kg: values.age <= 8 ? null : values.weight_kg,
         belt_color: values.belt_color,
         gender: values.gender,
         mod_gi: values.mod_gi,
         mod_nogi: values.mod_nogi,
         mod_gi_extra: values.mod_gi_extra,
-        festival: values.festival,
       });
 
       router.push(`/cash?id=${encodeURIComponent(id)}`);
@@ -185,35 +171,17 @@ const form = useForm<FormValues>({
   }
 
   const age = form.watch("age");
-  const category = form.watch("category");
   const isFestivalAge = typeof age === "number" && age <= 8;
-
-  const filteredCategoryOptions = React.useMemo(() => {
-    if (typeof age === "number" && age > 8) {
-      return categoryOptions.filter((c) => c.value !== "FESTIVAL");
-    }
-    return categoryOptions;
-  }, [age]);
 
   React.useEffect(() => {
     if (isFestivalAge) {
-      if (category !== "FESTIVAL") {
-        form.setValue("category", "FESTIVAL");
-      }
-    } else if (category === "FESTIVAL" && typeof age === "number" && age > 8) {
-      form.setValue("category", "" as any);
-    }
-  }, [isFestivalAge, category, age, form]);
-
-  React.useEffect(() => {
-    if (category === "FESTIVAL") {
+      form.setValue("category", null);
       form.setValue("mod_gi", false);
       form.setValue("mod_nogi", false);
       form.setValue("mod_gi_extra", false);
-    } else {
-      form.setValue("festival", false);
+      form.setValue("weight_kg", null);
     }
-  }, [category, form]);
+  }, [isFestivalAge, form]);
 
   const giSelected = form.watch("mod_gi");
 
@@ -333,19 +301,25 @@ const form = useForm<FormValues>({
                   )}
                 />
 
+                {/* AVISO FESTIVAL */}
+                {isFestivalAge && (
+                  <div className="rounded-xl border border-zinc-800 bg-zinc-900 p-4 text-sm text-zinc-300">
+                    Atletas até <strong>8 anos</strong> participam automaticamente
+                    no <strong>Festival</strong>. Peso, categoria e modalidades não
+                    se aplicam.
+                  </div>
+                )}
+                
                 {/* Categoria */}
                 <FormField
                   control={form.control}
                   name="category"
                   render={({ field }) => (
-                    <FormItem className="w-full">
-                      <FormLabel className="text-lg text-zinc-200">
-                        Categoria
-                      </FormLabel>
+                    <FormItem>
+                      <FormLabel className="text-lg text-zinc-200">Categoria</FormLabel>
                       <Select
                         value={field.value ?? ""}
                         onValueChange={field.onChange}
-                        disabled={isFestivalAge}
                       >
                         <FormControl>
                           <SelectTrigger className="w-full rounded-2xl border-zinc-800 bg-black/40 text-zinc-100 cursor-pointer">
@@ -354,13 +328,9 @@ const form = useForm<FormValues>({
                         </FormControl>
 
                         <SelectContent className="border-zinc-800 bg-zinc-950 text-zinc-100">
-                          {filteredCategoryOptions.map((b) => (
-                            <SelectItem
-                              key={b.value}
-                              value={b.value}
-                              className={itemInteractiveClass}
-                            >
-                              {b.label}
+                          {categoryOptions.map((c) => (
+                            <SelectItem key={c.value} value={c.value}>
+                              {c.label}
                             </SelectItem>
                           ))}
                         </SelectContent>
@@ -402,12 +372,14 @@ const form = useForm<FormValues>({
                       <FormControl>
                         <Input
                           type="number"
-                          inputMode="decimal"
                           step="0.1"
-                          className="rounded-xl bg-black/40 border-zinc-800 text-zinc-100 placeholder:text-zinc-500 focus-visible:ring-red-500/30"
-                          value={field.value}
+                          value={field.value ?? ""}
                           onChange={(e) =>
-                            field.onChange(Number(e.target.value))
+                            field.onChange(
+                              e.target.value === ""
+                                ? null
+                                : Number(e.target.value)
+                            )
                           }
                         />
                       </FormControl>
@@ -489,128 +461,110 @@ const form = useForm<FormValues>({
 
               {/* Modalidades */}
               <div className="flex flex-wrap gap-6 w-full">
-                <div className="rounded-2xl border border-zinc-800 bg-black/30 p-4 w-full flex flex-col ">
-                  <p className="text-lg text-zinc-200 font-medium mb-3 justify-center flex">
+                <div className="rounded-2xl border border-zinc-800 bg-black/30 p-4 w-full flex flex-col">
+                  <p className="text-lg text-zinc-200 font-medium mb-3 flex justify-center">
                     Seleção de Modalidades
                   </p>
 
-                  <div className="grid  gap-3">
-                    {category === "FESTIVAL" ? (
-                      <FormField
-                        control={form.control}
-                        name="festival"
-                        render={({ field }) => (
-                          <FormItem className="flex items-start gap-3 space-y-0">
-                            <FormControl>
-                              <Checkbox
-                                checked={field.value}
-                                onCheckedChange={field.onChange}
-                                className="mt-1"
-                              />
-                            </FormControl>
-                            <div className="grid gap-1 leading-none">
-                              <FormLabel className="text-zinc-100 cursor-pointer">
-                                Festival
-                              </FormLabel>
-                              <p className="text-sm text-zinc-400">
-                                Modalidade participativa para crianças.
-                              </p>
-                            </div>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                    ) : (
+                  <div className="grid gap-3">
+                    {!isFestivalAge ? (
                       <>
                         {/* GI */}
-                    <FormField
-                      control={form.control}
-                      name="mod_gi"
-                      render={({ field }) => (
-                        <FormItem className="flex items-start gap-3 space-y-0">
-                          <FormControl>
-                            <Checkbox
-                              checked={field.value}
-                              onCheckedChange={field.onChange}
-                              className="mt-1"
-                            />
-                          </FormControl>
-
-                          <div className="grid gap-1 leading-none">
-                            <FormLabel className="text-zinc-100 cursor-pointer">
-                              Gi (com kimono)
-                            </FormLabel>
-                            <p className="text-sm text-zinc-400">
-                              Inclui a inscrição na modalidade tradicional.
-                            </p>
-
-                            {giSelected && (
-                              <div className="mt-3 pl-1">
-                                <FormField
-                                  control={form.control}
-                                  name="mod_gi_extra"
-                                  render={({ field: extraField }) => (
-                                    <FormItem className="flex items-start gap-3 space-y-0 rounded-xl border border-zinc-800 bg-black/30 p-3">
-                                      <FormControl>
-                                        <Checkbox
-                                          checked={extraField.value}
-                                          onCheckedChange={extraField.onChange}
-                                          className="mt-1"
-                                        />
-                                      </FormControl>
-
-                                      <div className="grid gap-1 leading-none">
-                                        <FormLabel className="text-zinc-100 cursor-pointer">
-                                          Absoluto
-                                        </FormLabel>
-                                        <p className="text-sm text-zinc-400">
-                                          Inclui a inscrição no Absoluto, campeão dos campeões.
-                                        </p>
-                                        <FormMessage />
-                                      </div>
-                                    </FormItem>
-                                  )}
+                        <FormField
+                          control={form.control}
+                          name="mod_gi"
+                          render={({ field }) => (
+                            <FormItem className="flex items-start gap-3 space-y-0">
+                              <FormControl>
+                                <Checkbox
+                                  checked={field.value}
+                                  onCheckedChange={field.onChange}
+                                  className="mt-1"
                                 />
+                              </FormControl>
+
+                              <div className="grid gap-1 leading-none">
+                                <FormLabel className="text-zinc-100 cursor-pointer">
+                                  Gi (com kimono)
+                                </FormLabel>
+                                <p className="text-sm text-zinc-400">
+                                  Inclui a inscrição na modalidade tradicional.
+                                </p>
+
+                                {/* GI EXTRA / ABSOLUTO */}
+                                {field.value && (
+                                  <div className="mt-3 pl-1">
+                                    <FormField
+                                      control={form.control}
+                                      name="mod_gi_extra"
+                                      render={({ field: extraField }) => (
+                                        <FormItem className="flex items-start gap-3 space-y-0 rounded-xl border border-zinc-800 bg-black/30 p-3">
+                                          <FormControl>
+                                            <Checkbox
+                                              checked={extraField.value}
+                                              onCheckedChange={extraField.onChange}
+                                              className="mt-1"
+                                            />
+                                          </FormControl>
+
+                                          <div className="grid gap-1 leading-none">
+                                            <FormLabel className="text-zinc-100 cursor-pointer">
+                                              Absoluto
+                                            </FormLabel>
+                                            <p className="text-sm text-zinc-400">
+                                              Inclui a inscrição no Absoluto, campeão dos campeões.
+                                            </p>
+                                            <FormMessage />
+                                          </div>
+                                        </FormItem>
+                                      )}
+                                    />
+                                  </div>
+                                )}
                               </div>
-                            )}
-                          </div>
 
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
 
-                    {/* NOGI */}
-                    <FormField
-                      control={form.control}
-                      name="mod_nogi"
-                      render={({ field }) => (
-                        <FormItem className="flex items-start gap-3 space-y-0">
-                          <FormControl>
-                            <Checkbox
-                              checked={field.value}
-                              onCheckedChange={field.onChange}
-                            />
-                          </FormControl>
+                        {/* NOGI */}
+                        <FormField
+                          control={form.control}
+                          name="mod_nogi"
+                          render={({ field }) => (
+                            <FormItem className="flex items-start gap-3 space-y-0">
+                              <FormControl>
+                                <Checkbox
+                                  checked={field.value}
+                                  onCheckedChange={field.onChange}
+                                />
+                              </FormControl>
 
-                          <div className="grid gap-1 leading-none">
-                            <FormLabel className="cursor-pointer text-zinc-100">
-                              NoGi (sem kimono)
-                            </FormLabel>
-                            <p className="text-sm text-zinc-400">
-                              Inclui a inscrição na modalidade sem kimono.
-                            </p>
-                          </div>
+                              <div className="grid gap-1 leading-none">
+                                <FormLabel className="cursor-pointer text-zinc-100">
+                                  No-Gi (sem kimono)
+                                </FormLabel>
+                                <p className="text-sm text-zinc-400">
+                                  Inclui a inscrição na modalidade sem kimono.
+                                </p>
+                              </div>
 
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
                       </>
+                    ) : (
+                      <p className="text-sm text-zinc-400 text-center">
+                        Categoria Festival não possui seleção de modalidades
+                      </p>
                     )}
                   </div>
                 </div>
               </div>
+
+              {/* TERMOS */}
               <FormField
                 control={form.control}
                 name="terms"
@@ -645,6 +599,7 @@ const form = useForm<FormValues>({
                   </FormItem>
                 )}
               />
+
               <div className="flex justify-center gap-4">
                 <Button
                   className="h-12 rounded-xl cursor-pointer px-8 bg-red-600 hover:bg-red-500"
@@ -654,10 +609,10 @@ const form = useForm<FormValues>({
                   {submitting ? "Enviando..." : "Concluir inscrição"}
                 </Button>
               </div>
-            </form>
-          </Form>
-        </div>
-      </div>
-    </div>
-  );
-}
+                          </form>
+                        </Form>
+                      </div>
+                    </div>
+                  </div>
+                );
+              }

@@ -17,10 +17,19 @@ type CreateParticipantInput = {
   mod_gi: boolean;
   mod_nogi: boolean;
   mod_gi_extra: boolean;
-  festival: boolean;
 }
 
-function calcFee({ mod_gi, mod_nogi, mod_gi_extra, festival }: Pick<CreateParticipantInput, "mod_gi" | "mod_nogi" | "mod_gi_extra" | "festival">) {
+function calcFee({
+  mod_gi,
+  mod_nogi,
+  mod_gi_extra,
+  festival,
+}: {
+  mod_gi: boolean;
+  mod_nogi: boolean;
+  mod_gi_extra: boolean;
+  festival: boolean;
+}) {
   // Primeira modalidade = R$ 100
   // Cada modalidade adicional = +R$ 50
   const modalidades = [mod_gi, mod_nogi, mod_gi_extra, festival].filter(Boolean).length;
@@ -31,9 +40,20 @@ function calcFee({ mod_gi, mod_nogi, mod_gi_extra, festival }: Pick<CreatePartic
 }
 
 export async function createParticipant(input: CreateParticipantInput) {
-  const sb = supabaseAdmin();
+  const sb = await supabaseAdmin();
+  console.log("SB TYPE:", typeof sb, sb);
 
-  const valor = calcFee(input);
+  const isFestival = input.age <= 8;
+
+  const categoriaFinal = isFestival ? null : input.category;
+  const pesoFinal = isFestival ? null : input.weight_kg;
+
+  const valor = calcFee({
+    mod_gi: input.mod_gi,
+    mod_nogi: input.mod_nogi,
+    mod_gi_extra: input.mod_gi_extra,
+    festival: isFestival,
+  });
 
   const { data, error } = await sb
     .from("participantes")
@@ -42,14 +62,14 @@ export async function createParticipant(input: CreateParticipantInput) {
       wpp: input.whatsapp,
       idade: input.age,
       academia: input.academy ?? null,
-      categoria: input.category ?? null,
-      peso: input.weight_kg ?? null,
+      categoria: categoriaFinal,
+      peso: pesoFinal,
       faixa: input.belt_color ?? null,
       sexo: input.gender ?? null,
       mod_gi: input.mod_gi,
       mod_nogi: input.mod_nogi,
       mod_gi_extra: input.mod_gi_extra,
-      festival: input.festival,
+      festival: isFestival,
       valor_inscricao: valor,
     })
     .select("id")

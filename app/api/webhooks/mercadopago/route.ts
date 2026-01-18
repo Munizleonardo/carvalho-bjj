@@ -1,3 +1,4 @@
+export const runtime = "nodejs";
 import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/app/_lib/supabase/admin";
 import { getPaymentById } from "@/app/_lib/mercadopago";

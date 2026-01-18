@@ -2,6 +2,7 @@
 
 import { supabaseAdmin } from "@/app/_lib/supabase/admin";
 import type { ParticipantAdmin, BeltColor } from "@/app/_lib/types";
+import type { Category } from "@/app/_lib/types";
 
 type ParticipanteRow = {
   id: string;
@@ -9,10 +10,10 @@ type ParticipanteRow = {
   wpp: string;
   idade: number;
   academia: string | null;
-  peso: number;
+  peso: number | null;
   faixa: BeltColor;
   sexo: "M" | "F";
-  categoria: string | null;
+  categoria: Category | null;
 
   mod_gi: boolean;
   mod_nogi: boolean;
@@ -43,7 +44,7 @@ export async function listParticipantsAdmin(): Promise<ParticipantAdmin[]> {
     weight_kg: r.peso,
     belt_color: r.faixa,
     gender: r.sexo,
-    category: r.categoria ?? "",
+    category: r.categoria,
     academy: r.academia,
     mod_gi: Boolean(r.mod_gi),
     mod_nogi: Boolean(r.mod_nogi),
@@ -56,6 +57,10 @@ export async function listParticipantsAdmin(): Promise<ParticipantAdmin[]> {
 export async function deleteParticipantAdmin(id: string): Promise<void> {
   const supabase = supabaseAdmin();
 
-  const { error } = await supabase.from("participantes").delete().eq("id", id);
+  const { error } = await supabase
+    .from("participantes")
+    .delete()
+    .eq("id", id);
+
   if (error) throw new Error(error.message);
 }
