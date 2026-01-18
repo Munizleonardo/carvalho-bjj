@@ -4,6 +4,7 @@ import { useSearchParams } from "next/navigation";
 import * as React from "react";
 import Link from "next/link";
 import { Button } from "../_components/ui/button";
+import { useRouter } from "next/navigation";
 
 type CashData = {
   id: string;
@@ -11,15 +12,70 @@ type CashData = {
   wpp: string;
   valor: number;
   mods: { gi: boolean; nogi: boolean; abs: boolean; festival: boolean };
+  pix?: {
+    qr_code_base64: string;
+    qr_code: string;
+    status: "pending" | "approved";
+  };
 };
+
+
 
 export default function CashClient() {
   const sp = useSearchParams();
   const id = sp.get("id");
 
+  const router = useRouter();
+
   const [data, setData] = React.useState<CashData | null>(null);
     const [loading, setLoading] = React.useState(true);
     const [error, setError] = React.useState<string | null>(null);
+
+  React.useEffect(() => {
+    if (data?.pix.status === "approved") {
+      const t = setTimeout(() => {
+        router.push("/");
+      }, 4000);
+      return () => clearTimeout(t);
+    }
+  }, [data, router]);
+  
+  React.useEffect(() => {
+    if (!id) return;
+    if (!data) return;
+    if (data.pix.status === "approved") return;
+  
+    const interval = setInterval(async () => {
+      try {
+        const res = await fetch(
+          `/api/payments/status?registrationId=${encodeURIComponent(id)}`
+        );
+  
+        if (!res.ok) return;
+  
+        const json = await res.json();
+  
+        if (json.status === "approved") {
+          setData((prev) =>
+            prev && prev.pix
+              ? {
+                  ...prev,
+                  pix: {
+                    ...prev.pix,
+                    status: "approved",
+                  },
+                }
+              : prev
+          );
+        }
+      } catch {
+        // silêncio proposital
+      }
+    }, 5000); // 5s é o ponto ideal
+  
+    return () => clearInterval(interval);
+  }, [id, data]);
+
   
     React.useEffect(() => {
       if (!id) {
@@ -126,19 +182,45 @@ export default function CashClient() {
                    <span className="font-medium text-zinc-200">Federação de Jiu-Jitsu</span>
                  </div>
 
-                <div className="mt-4 border-t border-zinc-800 pt-4">
-                  <span className="text-sm text-zinc-400 block mb-2">
-                    Chave PIX: <strong>(Telefone)</strong>
+                 <div className="mt-4 border-t border-zinc-800 pt-4 space-y-4">
+                  <span className="text-sm text-zinc-400 block">
+                    Pague via PIX para confirmar sua inscrição
                   </span>
-                  <div className="flex items-center gap-2">
-                    <code className="flex-1 bg-black/40 px-3 py-2 rounded-lg text-sm font-mono break-all border border-zinc-800">
-                      22999809455
-                    </code>
-                    <Button className="cursor-pointer h-9 rounded-md px-3">
-                      Copiar
-                    </Button>
+
+                  <div className="flex justify-center">
+                  {data.pix && (
+  <img
+    src={`data:image/png;base64,${data.pix.qr_code_base64}`}
+    alt="QR Code PIX"
+    className="w-52 h-52 rounded-xl bg-white p-2"
+  />
+)}
+
                   </div>
-                </div>
+
+                  <div>
+                    <span className="text-sm text-zinc-400 block mb-2">
+                      PIX Copia e Cola
+                    </span>
+                    <div className="flex items-center gap-2">
+                      <code className="flex-1 bg-black/40 px-3 py-2 rounded-lg text-sm font-mono break-all border border-zinc-800">
+                      {data.pix && (
+  <code className="flex-1 bg-black/40 px-3 py-2 rounded-lg text-sm font-mono break-all border border-zinc-800">
+    {data.pix.qr_code}
+  </code>
+)}
+
+                      </code>
+                      <Button
+                        className="cursor-pointer h-9 rounded-md px-3"
+                        onClick={() => navigator.clipboard.writeText(data.pix.qr_code)}
+                      >
+                        Copiar
+                      </Button>
+                    </div>
+                  </div>
+              </div>
+
               </div>
                 {/* Comprovante */}
            <div className="bg-zinc-950/70 border border-zinc-800 rounded-2xl shadow-sm p-6 backdrop-blur">
@@ -187,21 +269,8 @@ export default function CashClient() {
                   </code>
                 </div>
               </div>
-              <Link href="https://wa.me/+5522999809455" target="_blank">
-                <Button
-                  className="cursor-pointer w-full rounded-xl h-11 bg-zinc-100 text-black hover:bg-emerald-200/90"
-                  type="button"
-                >
-                  Abrir WhatsApp
-                </Button>
-              </Link>  
             </div>
           </div>
-              <div className="mt-8 text-center">
-                <Link href="/">
-                  <Button className="cursor-pointer rounded-xl">Voltar para o início</Button>
-                </Link>
-              </div>
             </div>
           )}
         </div>
