@@ -322,7 +322,7 @@ export default function CategoriesClient({ all }: { all: ParticipantAdmin[] }) {
             <Button
               asChild
               variant="outline"
-              className="h-9 rounded-xl border-zinc-800 bg-zinc-950/40 hover:bg-white"
+              className="h-8 rounded-xl border-zinc-800 bg-zinc-950/40 hover:bg-white"
             >
               <Link href="/admin/painel">Voltar ao Painel</Link>
             </Button>
