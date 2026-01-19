@@ -63,6 +63,12 @@ const modalityOptions: Array<{ label: string; value: ModalityFilter }> = [
   { label: "Modalidade Absoluto", value: "ABS" },
 ];
 
+const paymentOptions = [
+  { label: "Todos os pagamentos", value: "ALL" },
+  { label: "Pago", value: "approved" },
+  { label: "Pendente", value: "pending" },
+];
+
 function normalize(s: string) {
   return s.trim().toLowerCase();
 }
@@ -96,6 +102,12 @@ function passesWeight(p: ParticipantAdmin, minW?: number, maxW?: number) {
   return true;
 }
 
+function passesPayment(p: any, status: string) {
+  if (status === "ALL") return true;
+  const ps = p.payment_status || "pending";
+  return ps === status;
+}
+
 function countByModality(list: ParticipantAdmin[]) {
   let gi = 0;
   let nogi = 0;
@@ -120,6 +132,7 @@ export default function AdminInscricoesClient({ initialParticipants }: Props) {
   const [search, setSearch] = React.useState("");
   const [belt, setBelt] = React.useState<"ALL" | BeltColor>("ALL");
   const [modality, setModality] = React.useState<ModalityFilter>("ALL");
+  const [paymentStatus, setPaymentStatus] = React.useState("ALL");
 
   const [minWeight, setMinWeight] = React.useState<string>("");
   const [maxWeight, setMaxWeight] = React.useState<string>("");
@@ -135,8 +148,9 @@ export default function AdminInscricoesClient({ initialParticipants }: Props) {
       .filter((p) => includesText(p, search))
       .filter((p) => passesBelt(p, belt))
       .filter((p) => passesModality(p, modality))
-      .filter((p) => passesWeight(p, minW, maxW));
-  }, [participants, search, belt, modality, minW, maxW]);
+      .filter((p) => passesWeight(p, minW, maxW))
+      .filter((p) => passesPayment(p, paymentStatus));
+  }, [participants, search, belt, modality, minW, maxW, paymentStatus]);
 
   const counts = React.useMemo(() => countByModality(filtered), [filtered]);
 
@@ -322,6 +336,26 @@ export default function AdminInscricoesClient({ initialParticipants }: Props) {
               </Select>
             </div>
 
+            <div className="w-full md:w-48">
+              <label className="mb-2 block text-sm text-zinc-400">Pagamento</label>
+              <Select value={paymentStatus} onValueChange={setPaymentStatus}>
+                <SelectTrigger className="cursor-pointer h-10 rounded-xl border-zinc-800 bg-black/40 text-zinc-100">
+                  <SelectValue placeholder="Todos" />
+                </SelectTrigger>
+                <SelectContent className="border-zinc-800 bg-zinc-950 text-zinc-100">
+                  {paymentOptions.map((o) => (
+                    <SelectItem
+                      key={o.value}
+                      value={o.value}
+                      className="cursor-pointer data-[highlighted]:bg-white"
+                    >
+                      {o.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
             <div className="w-full md:w-56">
               <label className="mb-2 block text-sm text-zinc-400">Peso (kg)</label>
               <div className="flex gap-2">
@@ -365,12 +399,13 @@ export default function AdminInscricoesClient({ initialParticipants }: Props) {
             <Table>
               <TableHeader>
                 <TableRow className="border-b border-zinc-900">
-                  <TableHead className="text-zinc-400">Atleta (Nome e Telefone)</TableHead>
+                  <TableHead className="text-zinc-400">Atleta</TableHead>
                   <TableHead className="text-zinc-400">Idade</TableHead>
                   <TableHead className="text-zinc-400">Peso</TableHead>
                   <TableHead className="text-zinc-400">Faixa</TableHead>
                   <TableHead className="text-zinc-400">Categoria</TableHead>
                   <TableHead className="text-zinc-400">Academia</TableHead>
+                  <TableHead className="text-zinc-400">Status</TableHead>
                   <TableHead className="text-right text-zinc-400">Ações</TableHead>
                 </TableRow>
               </TableHeader>
@@ -400,6 +435,18 @@ export default function AdminInscricoesClient({ initialParticipants }: Props) {
 
                     <TableCell className="text-zinc-100">{p.category || "-"}</TableCell>
                     <TableCell className="text-zinc-100">{p.academy ?? "-"}</TableCell>
+
+                    <TableCell>
+                      {(p as any).payment_status === "approved" ? (
+                        <span className="inline-flex items-center rounded-full border border-green-900 bg-green-950/50 px-2.5 py-0.5 text-xs font-medium text-green-400">
+                          Pago
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center rounded-full border border-yellow-900 bg-yellow-950/50 px-2.5 py-0.5 text-xs font-medium text-yellow-400">
+                          Pendente
+                        </span>
+                      )}
+                    </TableCell>
 
                     <TableCell className="text-right">
                       <DropdownMenu>

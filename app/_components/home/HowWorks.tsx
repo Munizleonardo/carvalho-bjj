@@ -1,4 +1,4 @@
-import { ClipboardList, CreditCard, MessageSquareShare } from "lucide-react";
+import { CheckCheck, ClipboardList, CreditCard } from "lucide-react";
 
 export default function HowWorks() {
   return (
@@ -62,14 +62,14 @@ export default function HowWorks() {
 
             <div className="relative pt-6">
               <div className="mb-4 w-fit rounded-xl bg-red-500/15 p-3 text-red-200 transition group-hover:bg-red-500/25">
-                <MessageSquareShare className="h-5 w-5" />
+                <CheckCheck className="h-5 w-5" />
               </div>
 
               <h3 className="mb-2 text-lg font-semibold text-zinc-100">
-                Envie o comprovante
+                Inscrição Realizada
               </h3>
               <p className="text-sm text-zinc-400">
-                Mande o comprovante no WhatsApp com seu nome completo
+                Prepare-se para o campeonato.
               </p>
             </div>
           </div>

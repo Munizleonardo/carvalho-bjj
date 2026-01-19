@@ -32,8 +32,8 @@ export default function HeroSection() {
           </h1>
 
           <p className="mx-auto mb-12 max-w-2xl text-lg text-zinc-300 md:text-xl">
-            Participe do maior evento de Jiu-Jitsu da Região dos Lagos. Inscreva-se
-            agora e mostre todo o seu potencial no tatame.
+            Participe do maior evento de Jiu-Jitsu da Região dos Lagos. <br/>
+            Inscreva-se agora e mostre todo o seu potencial no tatame.
           </p>
 
           <div className="flex flex-col justify-center gap-4 sm:flex-row">
@@ -51,10 +51,16 @@ export default function HeroSection() {
             >
               <Link href="/login">Área Administrativa</Link>
             </Button>
+            
           </div>
-
-          <div className="mt-14 text-sm text-zinc-500">
-            Inscrição rápida. Pagamento via PIX. Confirmação por WhatsApp.
+          <div className="flex justify-center mt-5">
+            <Button
+                asChild
+                variant="outline"
+                className="h-14 w-full rounded-xl px-8 text-base font-medium sm:w-auto border-zinc-700 bg-black text-zinc-200 hover:bg-red-600 hover:text-white"
+              >
+                <Link href="/edital-camp.pdf" target="_blank">Edital do Campeonato</Link>
+              </Button>
           </div>
         </div>
       </div>

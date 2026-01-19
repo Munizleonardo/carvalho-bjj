@@ -214,8 +214,8 @@ const form = useForm<FormValues>({
         <div className="mb-6">
           <h1 className="text-3xl font-semibold text-zinc-100">Inscrição</h1>
           <p className="mt-1 text-lg text-zinc-400">
-            Preencha os dados do atleta. Após enviar, você verá o PIX e as
-            instruções de pagamento.
+            Preencha os dados do atleta. <br/> 
+            Realize o pagamento para concluir a inscrição.
           </p>
         </div>
 
@@ -225,7 +225,7 @@ const form = useForm<FormValues>({
               Formulário de Inscrição
             </h2>
             <p className="mt-1 text-lg text-zinc-400 mb-2">
-              Preencha todos os campos para concluir.
+              Preencha todos os campos para continuar.
             </p>
           </div>
 
@@ -439,7 +439,17 @@ const form = useForm<FormValues>({
 
                         <SelectContent className="border-zinc-800 bg-zinc-950 text-zinc-100">
                           {beltOptions
-                            .filter((b) => !isFestivalAge || ["CINZA", "AMARELA", "LARANJA", "VERDE", "BRANCA"].includes(b.value))
+                            .filter((b) => {
+                              if (isFestivalAge) {
+                                return ["CINZA", "AMARELA", "LARANJA", "VERDE", "BRANCA"].includes(
+                                  b.value
+                                );
+                              }
+                              if (typeof age === "number" && age > 8) {
+                                return !["CINZA", "AMARELA", "LARANJA", "VERDE"].includes(b.value);
+                              }
+                              return true;
+                            })
                             .map((b) => (
                             <SelectItem
                               key={b.value}
@@ -592,7 +602,7 @@ const form = useForm<FormValues>({
                       </>
                     ) : (
                       <p className="text-sm text-zinc-400 text-center">
-                        Categoria Festival não possui seleção de modalidades
+                        Atletas de até 8 anos participarão da modalidade <strong>Festival!</strong>
                       </p>
                     )}
                   </div>

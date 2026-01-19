@@ -29,7 +29,7 @@ export async function listParticipantsAdmin(): Promise<ParticipantAdmin[]> {
 
   const { data, error } = await supabase
     .from("participantes")
-    .select("id,nome,wpp,idade,academia,peso,faixa,sexo,categoria,mod_gi,mod_nogi,mod_gi_extra,festival,created_at")
+    .select("id,nome,idade,academia,peso,faixa,sexo,categoria,mod_gi,mod_nogi,mod_gi_extra,festival,created_at")
     .order("created_at", { ascending: false });
 
   if (error) throw new Error(error.message);

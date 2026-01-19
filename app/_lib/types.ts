@@ -3,15 +3,15 @@
 export type ModalityFilter = "ALL" | "GI" | "NOGI" | "ABS";
 
 export const beltDotClasses: Record<BeltColor, string> = {
-  CINZA: "border-gray-400",
-  AMARELA: "border-yellow-400",
-  LARANJA: "border-orange-400",
-  VERDE: "border-green-500",
-  BRANCA: "border-white",
-  AZUL: "border-blue-500",
-  ROXA: "border-purple-500",
-  MARROM: "border-brown-500",
-  PRETA: "border-black",
+  CINZA: "border-gray-400 bg-gray-400",
+  AMARELA: "border-yellow-400 bg-yellow-400",
+  LARANJA: "border-orange-400 bg-orange-400",
+  VERDE: "border-green-500 bg-green-500",
+  BRANCA: "border-white bg-white",
+  AZUL: "border-blue-500 bg-blue-500",
+  ROXA: "border-purple-500 bg-purple-500",
+  MARROM: "border-brown-500 bg-brown-500",
+  PRETA: "border-black bg-black",
 };
 
 export const beltLabel: Record<BeltColor, string> = {

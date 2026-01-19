@@ -5,6 +5,7 @@ import * as React from "react";
 import { Button } from "../_components/ui/button";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
+import Link from "next/link";
 
 type CashData = {
   id: string;
@@ -222,15 +223,16 @@ export default function CashClient() {
                       )}
                     </div>
 
-                    <div>
+                    <div className="flex flex-col gap-2">
                       <span className="text-sm text-zinc-400 block mb-2">
                         PIX Copia e Cola
                       </span>
-                      <div className="flex items-center gap-2">
-                        <code className="flex-1 bg-black/40 px-3 py-2 rounded-lg text-sm font-mono break-all border border-zinc-800 min-w-[300px]" >
-                          <input type="text" value={data.pix?.pixCopyPaste} readOnly className="min-w-[390px]"/>
+                      <div className="flex-1 gap-2 md:flex">
+                        <code className="mb-3 md:mb-0 w-full flex bg-black/40 px-3 py-2 rounded-lg text-sm font-mono break-all border border-zinc-800 min-w-[300px]" >
+                          <input type="text" value={data.pix?.pixCopyPaste} readOnly className="w-full"/>
                         </code>
                         <Button
+                          className="md:flex md:flex-row flex justify-center items-center cursor-pointer bg-red-600 hover:bg-black"
                           onClick={() =>
                             data.pix?.pixCopyPaste &&
                             navigator.clipboard.writeText(data.pix?.pixCopyPaste)
@@ -245,10 +247,16 @@ export default function CashClient() {
                 </div>
 
                 <div className="p-4 bg-black/40 rounded-xl border border-zinc-800">
-                  <p className="text-sm text-zinc-200">
-                    Após confirmação do pagamento a inscrição será concluída e a
-                    página redirecionada.
+                  <p className="text-center text-sm text-zinc-200">
+                    Após confirmação do pagamento a inscrição será concluída.
                   </p>
+                </div>
+                <div className="flex items-center justify-center">
+                  <Link href="/">
+                    <Button className="cursor-pointer inline-flex items-center gap-2 text-sm bg-red-600/10 text-white hover:text-zinc-100 mb-8 transition-colors">
+                      Voltar para o início
+                    </Button>
+                  </Link>  
                 </div>
               </div>
             )}
