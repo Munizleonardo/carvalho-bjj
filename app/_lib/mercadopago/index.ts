@@ -1,11 +1,6 @@
 import { MercadoPagoConfig, Payment } from "mercadopago";
 import crypto from "crypto";
 
-if (!process.env.APP_URL) throw new Error("APP_URL não definida");
-if (!/^https?:\/\/.+/.test(process.env.APP_URL)) throw new Error("APP_URL inválida");
-
-const notificationUrl = `${process.env.APP_URL}/api/webhooks/mercadopago`;
-
 const client = new MercadoPagoConfig({
   accessToken: process.env.MERCADO_PAGO_ACCESS_TOKEN!,
 });
@@ -21,6 +16,11 @@ interface CreatePixPaymentInput {
 }
 
 export async function createPixPayment({ amount, reference, name, areaCode, phoneNumber }: CreatePixPaymentInput) {
+  if (!process.env.APP_URL) throw new Error("APP_URL não definida");
+  if (!/^https?:\/\/.+/.test(process.env.APP_URL)) throw new Error("APP_URL inválida");
+
+  const notificationUrl = `${process.env.APP_URL}/api/webhooks/mercadopago`;
+
   const payment = await paymentClient.create({
     body: {
       transaction_amount: amount,
