@@ -10,7 +10,7 @@ export const beltDotClasses: Record<BeltColor, string> = {
   BRANCA: "border-white bg-white",
   AZUL: "border-blue-500 bg-blue-500",
   ROXA: "border-purple-500 bg-purple-500",
-  MARROM: "border-brown-500 bg-brown-500",
+  MARROM: "border-[#cc6600] bg-[#cc6600]",
   PRETA: "border-black bg-black",
 };
 
@@ -61,6 +61,7 @@ export type ParticipantAdmin = {
   id: string; 
 
   full_name: string; // banco: nome
+  cpf: string; //banco: cpf
   whatsapp: string; // banco: wpp 
   age: number; // banco: idade 
   weight_kg: number | null; // banco: peso 

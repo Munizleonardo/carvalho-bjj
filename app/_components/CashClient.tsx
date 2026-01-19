@@ -9,6 +9,7 @@ import Link from "next/link";
 
 type CashData = {
   id: string;
+  cpf: string;
   nome: string;
   wpp: string;
   valor: number;

@@ -6,6 +6,7 @@ import type { Category } from "@/app/_lib/types";
 
 type ParticipanteRow = {
   id: string;
+  cpf: string;
   nome: string;
   wpp: string;
   idade: number;
@@ -38,6 +39,7 @@ export async function listParticipantsAdmin(): Promise<ParticipantAdmin[]> {
 
   return rows.map((r) => ({
     id: r.id,
+    cpf: r.cpf,
     full_name: r.nome,
     whatsapp: r.wpp,
     age: r.idade,

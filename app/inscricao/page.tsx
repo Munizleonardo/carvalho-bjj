@@ -39,6 +39,7 @@ import { is } from "zod/v4/locales";
 // -------------------- SCHEMA ZOD --------------------
 const formSchema = z.object({
   full_name: z.string().min(3, { message: "Informe o nome completo" }),
+  cpf: z.string().min(11, { message: "Informe um CPF válido" }),
   phone_number: z.string().min(8, { message: "Informe um phone_number válido" }),
   area_code: z.string().min(2).max(2, { message: "Código de área deve ter 2 dígitos" }),
 
@@ -151,6 +152,7 @@ const form = useForm<FormValues>({
     try {
       const id = await createParticipant({
         full_name: values.full_name.trim(),
+        cpf: values.cpf.trim(),
         phone_number: values.phone_number.trim(),
         area_code: values.area_code.trim(),
         age: values.age,
@@ -246,6 +248,26 @@ const form = useForm<FormValues>({
                     <FormControl>
                       <Input
                         placeholder="Nome do Atleta"
+                        {...field}
+                        className="rounded-xl bg-black/40 border-zinc-800 text-zinc-100 placeholder:text-zinc-500 focus-visible:ring-red-500/30"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="cpf"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-lg text-zinc-200">
+                      CPF
+                    </FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder="CPF do Atleta"
                         {...field}
                         className="rounded-xl bg-black/40 border-zinc-800 text-zinc-100 placeholder:text-zinc-500 focus-visible:ring-red-500/30"
                       />
@@ -446,7 +468,7 @@ const form = useForm<FormValues>({
                                 );
                               }
                               if (typeof age === "number" && age > 8) {
-                                return !["CINZA", "AMARELA", "LARANJA", "VERDE"].includes(b.value);
+                                return !["CINZA"].includes(b.value);
                               }
                               return true;
                             })
