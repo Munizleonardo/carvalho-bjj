@@ -97,8 +97,8 @@ function passesBelt(p: ParticipantAdmin, belt: "ALL" | BeltColor) {
 }
 
 function passesWeight(p: ParticipantAdmin, minW?: number, maxW?: number) {
-  if (minW !== undefined && p.weight_kg < minW) return false;
-  if (maxW !== undefined && p.weight_kg > maxW) return false;
+  if (minW !== undefined && (p.weight_kg === null || p.weight_kg < minW)) return false;
+  if (maxW !== undefined && (p.weight_kg === null || p.weight_kg > maxW)) return false;
   return true;
 }
 

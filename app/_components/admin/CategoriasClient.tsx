@@ -59,13 +59,13 @@ function beltDotClass(belt: BeltColor) {
 }
 
 function clusterByWeight(list: ParticipantAdmin[]) {
-  const sorted = [...list].sort((a, b) => a.weight_kg - b.weight_kg);
+  const sorted = [...list].sort((a, b) => (a.weight_kg ?? 0) - (b.weight_kg ?? 0));
 
   const clusters: Array<{ min: number; max: number; athletes: ParticipantAdmin[] }> = [];
   let current: { min: number; max: number; athletes: ParticipantAdmin[] } | null = null;
 
   for (const a of sorted) {
-    const w = a.weight_kg;
+    const w = a.weight_kg ?? 0;
 
     if (!current) {
       current = { min: w, max: w, athletes: [a] };
@@ -197,7 +197,7 @@ function buildGroupsBeltOnly(list: ParticipantAdmin[]): Group[] {
   return belts
     .filter((b) => (byBelt.get(b)?.length ?? 0) > 0)
     .map((belt) => {
-      const athletes = (byBelt.get(belt) ?? []).sort((a, b) => a.weight_kg - b.weight_kg);
+      const athletes = (byBelt.get(belt) ?? []).sort((a, b) => (a.weight_kg ?? 0) - (b.weight_kg ?? 0));
       return {
         key: `belt:${belt}`,
         title: beltLabel[belt],
@@ -459,7 +459,7 @@ export default function CategoriesClient({ all }: { all: ParticipantAdmin[] }) {
                           ) : null}
                         </TableCell>
 
-                        <TableCell className="text-zinc-100">{round1(p.weight_kg)} kg</TableCell>
+                    <TableCell className="text-zinc-100">{round1(p.weight_kg ?? 0)} kg</TableCell>
 
                         <TableCell>
                           <div className="flex items-center gap-2">

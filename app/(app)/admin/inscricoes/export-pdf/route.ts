@@ -41,8 +41,8 @@ function filterList(
       return true;
     })
     .filter((p) => {
-      if (min !== undefined && !Number.isNaN(min) && p.weight_kg < min) return false;
-      if (max !== undefined && !Number.isNaN(max) && p.weight_kg > max) return false;
+      if (min !== undefined && !Number.isNaN(min) && (p.weight_kg === null || p.weight_kg < min)) return false;
+      if (max !== undefined && !Number.isNaN(max) && (p.weight_kg === null || p.weight_kg > max)) return false;
       return true;
     });
 }
