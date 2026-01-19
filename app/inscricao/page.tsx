@@ -34,7 +34,6 @@ import {
   genderEnum,
   type Category,
 } from "@/app/_lib/types";
-import { is } from "zod/v4/locales";
 
 // -------------------- SCHEMA ZOD --------------------
 const formSchema = z.object({
@@ -157,8 +156,8 @@ const form = useForm<FormValues>({
         area_code: values.area_code.trim(),
         age: values.age,
         academy: values.academy?.trim(),
-        category: values.age <= 8 ? null : values.category,
-        weight_kg: values.age <= 8 ? null : values.weight_kg,
+        category: values.age <= 8 ? undefined : (values.category ?? undefined),
+        weight_kg: values.age <= 8 ? undefined : (values.weight_kg ?? undefined),
         belt_color: values.belt_color,
         gender: values.gender,
         mod_gi: values.mod_gi,

@@ -52,19 +52,19 @@ export async function createPixPayment({ amount, reference, name, areaCode, phon
     qrCode: transactionData.qr_code,
     qrCodeBase64: transactionData.qr_code_base64,
     pixCopyPaste: transactionData.qr_code,
-    expiresAt: transactionData.qr_code_expiration_date,
+    expiresAt: payment.date_of_expiration,
   };
 }
 
 export async function getPaymentStatus(paymentId: number) {
   const result = await paymentClient.get({ id: paymentId });
-  return result.response;
+  return result;
 }
 
 export async function getPaymentById(paymentId: number) {
   const result = await paymentClient.get({ id: paymentId });
   return {
-    id: result.response.id,
-    status: result.response.status,
+    id: result.id,
+    status: result.status,
   };
 }

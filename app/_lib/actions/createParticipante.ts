@@ -11,8 +11,8 @@ type CreateParticipantInput = {
   age: number;
   academy?: string;
   
-  category: Category;
-  weight_kg: number;
+  category?: Category;
+  weight_kg?: number;
   belt_color: BeltColor;
   gender: Gender;
 

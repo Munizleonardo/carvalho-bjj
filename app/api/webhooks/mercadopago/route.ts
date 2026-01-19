@@ -33,7 +33,7 @@ export async function POST(req: Request) {
   const sb = supabaseAdmin();
 
   // Busca pagamento direto no Mercado Pago (fonte da verdade)
-  const payment = await getPaymentById(paymentId);
+  const payment = await getPaymentById(Number(paymentId));
 
   if (!payment) {
     return NextResponse.json(
