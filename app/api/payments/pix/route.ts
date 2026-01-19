@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/app/_lib/supabase/admin";
 import { createPixPayment } from "@/app/_lib/mercadopago";
 
+
 export async function POST(req: Request) {
   const { registrationId } = await req.json();
   
@@ -16,7 +17,7 @@ export async function POST(req: Request) {
   const sb = supabaseAdmin();
   const { data: registration, error } = await sb
     .from("participantes")
-    .select("id, valor_inscricao")
+    .select("id, valor_inscricao, nome, area_code, phone_number")
     .eq("id", registrationId)
     .single();
 
@@ -28,9 +29,14 @@ export async function POST(req: Request) {
     );
   }
 
+  console.log(`${process.env.APP_URL}/api/webhooks/mercadopago`);
+
   const payment = await createPixPayment({
     amount: registration.valor_inscricao,
     reference: registration.id,
+    name: registration.nome,
+    areaCode: registration.area_code || undefined,
+    phoneNumber: registration.phone_number || undefined,
   });
 
   const { error: insertError } = await sb.from("payments").insert({
@@ -53,7 +59,7 @@ export async function POST(req: Request) {
 
   return NextResponse.json({
     qrCodeBase64: payment.qrCodeBase64,
-    copyPaste: payment.qrCode,
+    pixCopyPaste: payment.qrCode,
     status: payment.status,
   });
 }

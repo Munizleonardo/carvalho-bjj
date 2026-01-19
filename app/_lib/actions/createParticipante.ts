@@ -5,7 +5,8 @@ import { supabaseAdmin } from "@/app/_lib/supabase/admin";
 
 type CreateParticipantInput = {
   full_name: string;
-  whatsapp: string;
+  phone_number: string;
+  area_code: string;
   age: number;
   academy?: string;
   
@@ -59,7 +60,8 @@ export async function createParticipant(input: CreateParticipantInput) {
     .from("participantes")
     .insert({
       nome: input.full_name,
-      wpp: input.whatsapp,
+      phone_number: input.phone_number,
+      area_code: input.area_code,
       idade: input.age,
       academia: input.academy ?? null,
       categoria: categoriaFinal,

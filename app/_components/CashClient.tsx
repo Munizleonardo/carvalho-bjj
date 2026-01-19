@@ -14,7 +14,7 @@ type CashData = {
   mods: { gi: boolean; nogi: boolean; abs: boolean; festival: boolean };
   pix?: {
     qrCodeBase64: string;
-    copyPaste: string;
+    pixCopyPaste: string;
     status: "pending" | "approved";
   };
 };
@@ -126,7 +126,7 @@ export default function CashClient() {
             ? {
                 ...prev,
                 pix: {
-                  copyPaste: json.qrCode,
+                  pixCopyPaste: json.pixCopyPaste,
                   qrCodeBase64: json.qrCodeBase64,
                   status: json.status,
                 },
@@ -227,15 +227,15 @@ export default function CashClient() {
                         PIX Copia e Cola
                       </span>
                       <div className="flex items-center gap-2">
-                        <code className="flex-1 bg-black/40 px-3 py-2 rounded-lg text-sm font-mono break-all border border-zinc-800">
-                          {data.pix?.copyPaste || "Aguardando geração do PIX..."}
+                        <code className="flex-1 bg-black/40 px-3 py-2 rounded-lg text-sm font-mono break-all border border-zinc-800 min-w-[300px]" >
+                          <input type="text" value={data.pix?.pixCopyPaste} readOnly className="min-w-[390px]"/>
                         </code>
                         <Button
                           onClick={() =>
-                            data.pix?.copyPaste &&
-                            navigator.clipboard.writeText(data.pix.copyPaste)
+                            data.pix?.pixCopyPaste &&
+                            navigator.clipboard.writeText(data.pix?.pixCopyPaste)
                           }
-                          disabled={!data.pix?.copyPaste}
+                          disabled={!data.pix?.pixCopyPaste}
                         >
                           Copiar
                         </Button>

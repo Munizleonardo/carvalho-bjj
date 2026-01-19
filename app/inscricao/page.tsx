@@ -39,7 +39,8 @@ import { is } from "zod/v4/locales";
 // -------------------- SCHEMA ZOD --------------------
 const formSchema = z.object({
   full_name: z.string().min(3, { message: "Informe o nome completo" }),
-  whatsapp: z.string().min(8, { message: "Informe um WhatsApp válido" }),
+  phone_number: z.string().min(8, { message: "Informe um phone_number válido" }),
+  area_code: z.string().min(2).max(2, { message: "Código de área deve ter 2 dígitos" }),
 
   age: z.preprocess(
     (val) => {
@@ -150,7 +151,8 @@ const form = useForm<FormValues>({
     try {
       const id = await createParticipant({
         full_name: values.full_name.trim(),
-        whatsapp: values.whatsapp.trim(),
+        phone_number: values.phone_number.trim(),
+        area_code: values.area_code.trim(),
         age: values.age,
         academy: values.academy?.trim(),
         category: values.age <= 8 ? null : values.category,
@@ -253,26 +255,51 @@ const form = useForm<FormValues>({
                 )}
               />
 
-              {/* WhatsApp */}
-              <FormField
-                control={form.control}
-                name="whatsapp"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-lg text-zinc-200">
-                      Telefone (WhatsApp)
-                    </FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder="(DD) 9XXXX-XXXX"
-                        {...field}
-                        className="rounded-xl bg-black/40 border-zinc-800 text-zinc-100 placeholder:text-zinc-500 focus-visible:ring-red-500/30"
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-8 w-full">
+                {/* Area Code */}
+                <FormField
+                  control={form.control}
+                  name="area_code"
+                  render={({ field }) => (
+                    <FormItem className="w-full">
+                      <FormLabel className="text-lg text-zinc-200">
+                        Código de Área
+                      </FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder="DDD"
+                          maxLength={2}
+                          inputMode="numeric"
+                          {...field}
+                          className="rounded-xl bg-black/40 border-zinc-800 text-zinc-100 placeholder:text-zinc-500 focus-visible:ring-red-500/30"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                {/* phone_number */}
+                <FormField
+                  control={form.control}
+                  name="phone_number"
+                  render={({ field }) => (
+                    <FormItem className="w-full md:col-span-2">
+                      <FormLabel className="text-lg text-zinc-200">
+                        Telefone (WhatsApp)
+                      </FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder="9XXXX-XXXX"
+                          {...field}
+                          className="rounded-xl bg-black/40 border-zinc-800 text-zinc-100 placeholder:text-zinc-500 focus-visible:ring-red-500/30"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8 w-full">
                 {/* Idade */}

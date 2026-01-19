@@ -13,7 +13,7 @@ export async function GET(req: Request) {
   const sb = supabaseAdmin();
   const { data, error } = await sb
     .from("participantes")
-    .select("id, nome, wpp, valor_inscricao, mod_gi, mod_nogi, mod_gi_extra")
+    .select("id, nome, phone_number, area_code, valor_inscricao, mod_gi, mod_nogi, mod_gi_extra")
     .eq("id", id)
     .single();
 
@@ -24,7 +24,8 @@ export async function GET(req: Request) {
   return NextResponse.json({
     id: data.id,
     nome: data.nome,
-    wpp: data.wpp,
+    phone_number: data.phone_number,
+    area_code: data.area_code,
     valor: data.valor_inscricao,
     mods: { gi: data.mod_gi, nogi: data.mod_nogi, abs: data.mod_gi_extra },
   });
