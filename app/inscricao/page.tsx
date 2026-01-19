@@ -166,9 +166,8 @@ const form = useForm<FormValues>({
       });
 
       router.push(`/cash?id=${encodeURIComponent(id)}`);
-    } catch (err) {
-      const message = err instanceof Error ? err.message : "Não foi possível concluir sua inscrição.";
-      setServerError(message);
+    } catch {
+      setServerError("Não foi possível concluir sua inscrição.");
     } finally {
       setSubmitting(false);
     }
