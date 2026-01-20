@@ -62,14 +62,6 @@ export async function POST(req: Request) {
     );
   }
 
-  await sb
-    .from("payments")
-    .update({
-      status,
-      paid_at: new Date().toISOString(),
-    })
-    .eq("id", localPayment.id);
-
   if (status === "approved") {
     await sb
       .from("participantes")
@@ -77,6 +69,14 @@ export async function POST(req: Request) {
         status: "paid",
       })
       .eq("id", localPayment.registration_id);
+
+      await sb
+      .from("payments")
+      .update({
+        status,
+        paid_at: new Date().toISOString(),
+      })
+      .eq("id", localPayment.id);
   }
 
   return NextResponse.json({ ok: true });
