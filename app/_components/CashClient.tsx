@@ -30,6 +30,7 @@ export default function CashClient() {
   const [data, setData] = React.useState<CashData | null>(null);
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState<string | null>(null);
+  const pixRequestedRef = React.useRef(false);
 
   // Redireciona após pagamento aprovado
   React.useEffect(() => {
@@ -104,7 +105,10 @@ export default function CashClient() {
   React.useEffect(() => {
     if (!id) return;
     if (!data) return;
-    if (data.pix) return; // já existe PIX, não recria
+    if (data.pix) return;
+
+    if (pixRequestedRef.current) return;
+    pixRequestedRef.current = true;
 
     (async () => {
       try {
@@ -119,7 +123,10 @@ export default function CashClient() {
           }),
         });
 
-        if (!res.ok) return;
+        if (!res.ok) {
+          pixRequestedRef.current = false; // permite retry
+          return;
+        }
 
         const json = await res.json();
 
@@ -136,10 +143,10 @@ export default function CashClient() {
             : prev
         );
       } catch {
-        // silêncio proposital
+        pixRequestedRef.current = false; // permite retry
       }
     })();
-  }, [id, data]);
+  }, [id, data?.valor]);
 
   const valorFormatado = React.useMemo(() => {
     if (!data) return "";

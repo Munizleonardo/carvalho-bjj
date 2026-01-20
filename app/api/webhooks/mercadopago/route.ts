@@ -11,6 +11,10 @@ type MercadoPagoWebhookPayload = {
   type?: string;
 };
 
+export async function GET() {
+  return new Response("OK", { status: 200 });
+}
+
 export async function POST(req: Request) {
   let payload: MercadoPagoWebhookPayload;
 

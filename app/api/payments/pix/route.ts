@@ -31,6 +31,23 @@ export async function POST(req: Request) {
 
   console.log(`${process.env.APP_URL}/api/webhooks/mercadopago`);
 
+  const { data: openPayment } = await sb
+    .from("payments")
+    .select("*")
+    .eq("registration_id", registrationId)
+    .eq("status", "pending")
+    .order("created_at", { ascending: false })
+    .maybeSingle();
+
+  if (openPayment) {
+    // retorna PIX existente
+    return NextResponse.json({
+      pixCopyPaste: openPayment.pix_copy_paste,
+      qrCodeBase64: openPayment.qr_code_base64,
+      status: openPayment.status,
+    });
+  }
+
   const payment = await createPixPayment({
     amount: registration.valor_inscricao,
     reference: registration.id,
