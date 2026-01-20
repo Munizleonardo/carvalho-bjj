@@ -59,21 +59,19 @@ export type Gender = (typeof genderEnum)[number];
 
 export type ParticipantAdmin = { 
   id: string; 
-
-  full_name: string; // banco: nome
-  cpf: string; //banco: cpf
-  whatsapp: string; // banco: wpp 
-  age: number; // banco: idade 
-  weight_kg: number | null; // banco: peso 
-  gender: Gender; // banco: sexo 
-  belt_color: BeltColor; // banco: faixa 
-  category: Category | null; // banco: categoria 
-  academy?: string | null; // banco: academia 
-
+  full_name: string; 
+  cpf: string; 
+  whatsapp: string; 
+  age: number; 
+  weight_kg: number | null; 
+  gender: Gender; 
+  belt_color: BeltColor; 
+  category: Category | null; 
+  academy?: string | null; 
   mod_gi: boolean; 
   mod_nogi: boolean; 
   mod_abs: boolean;
   festival: boolean;
-
   created_at?: string; 
+  status: string;
 };

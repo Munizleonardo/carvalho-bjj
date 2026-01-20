@@ -1,8 +1,7 @@
 "use server";
 
 import { supabaseAdmin } from "@/app/_lib/supabase/admin";
-import type { ParticipantAdmin, BeltColor } from "@/app/_lib/types";
-import type { Category } from "@/app/_lib/types";
+import type { BeltColor, Category, ParticipantAdmin } from "@/app/_lib/types";
 
 type ParticipanteRow = {
   id: string;
@@ -15,14 +14,12 @@ type ParticipanteRow = {
   faixa: BeltColor;
   sexo: "M" | "F";
   categoria: Category | null;
-
   mod_gi: boolean;
   mod_nogi: boolean;
   mod_gi_extra: boolean;
   festival: boolean;
-
-
   created_at: string;
+  status: string;
 };
 
 export async function listParticipantsAdmin(): Promise<ParticipantAdmin[]> {
@@ -30,8 +27,9 @@ export async function listParticipantsAdmin(): Promise<ParticipantAdmin[]> {
 
   const { data, error } = await supabase
     .from("participantes")
-    .select("id,nome,idade,academia,peso,faixa,sexo,categoria,mod_gi,mod_nogi,mod_gi_extra,festival,created_at")
-    .order("created_at", { ascending: false });
+    .select("*")
+    .order("created_at", { ascending: false })
+    .limit(100);
 
   if (error) throw new Error(error.message);
 
@@ -53,6 +51,7 @@ export async function listParticipantsAdmin(): Promise<ParticipantAdmin[]> {
     mod_abs: Boolean(r.mod_gi_extra), // mod_gi_extra no banco = mod_abs na aplicação
     festival: Boolean(r.festival),
     created_at: r.created_at,
+    status: r.status,
   }));
 }
 

@@ -102,9 +102,9 @@ function passesWeight(p: ParticipantAdmin, minW?: number, maxW?: number) {
   return true;
 }
 
-function passesPayment(p: any, status: string) {
+function passesPayment(p: ParticipantAdmin, status: string) {
   if (status === "ALL") return true;
-  const ps = p.payment_status || "pending";
+  const ps = p.status || "pending";
   return ps === status;
 }
 
@@ -307,7 +307,7 @@ export default function AdminInscricoesClient({ initialParticipants }: Props) {
                     <SelectItem
                       key={b.value}
                       value={b.value}
-                      className="cursor-pointer data-[highlighted]:bg-white"
+                      className="cursor-pointer data-highlighted:bg-white"
                     >
                       {b.label}
                     </SelectItem>
@@ -347,7 +347,7 @@ export default function AdminInscricoesClient({ initialParticipants }: Props) {
                     <SelectItem
                       key={o.value}
                       value={o.value}
-                      className="cursor-pointer data-[highlighted]:bg-white"
+                      className="cursor-pointer data-highlighted:bg-white"
                     >
                       {o.label}
                     </SelectItem>
@@ -437,7 +437,7 @@ export default function AdminInscricoesClient({ initialParticipants }: Props) {
                     <TableCell className="text-zinc-100">{p.academy ?? "-"}</TableCell>
 
                     <TableCell>
-                      {(p as any).payment_status === "approved" ? (
+                      {p.status === "paid" ? (
                         <span className="inline-flex items-center rounded-full border border-green-900 bg-green-950/50 px-2.5 py-0.5 text-xs font-medium text-green-400">
                           Pago
                         </span>
