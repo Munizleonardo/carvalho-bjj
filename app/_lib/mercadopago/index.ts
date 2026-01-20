@@ -1,5 +1,5 @@
-import { MercadoPagoConfig, Payment } from "mercadopago";
 import crypto from "crypto";
+import { MercadoPagoConfig, Payment } from "mercadopago";
 
 const client = new MercadoPagoConfig({
   accessToken: process.env.MERCADO_PAGO_ACCESS_TOKEN!,
@@ -19,27 +19,47 @@ export async function createPixPayment({ amount, reference, name, areaCode, phon
   if (!process.env.APP_URL) throw new Error("APP_URL não definida");
   if (!/^https?:\/\/.+/.test(process.env.APP_URL)) throw new Error("APP_URL inválida");
 
-  const notificationUrl = `${process.env.APP_URL}/api/webhooks/mercadopago`;
+  // Mercado Pago não aceita localhost - só envia notification_url se for URL pública
+  const isLocalhost = process.env.APP_URL.includes("localhost") || process.env.APP_URL.includes("127.0.0.1");
+  const notificationUrl = isLocalhost 
+    ? undefined 
+    : `${process.env.APP_URL}/api/webhooks/mercadopago`;
+
+  const paymentBody: {
+    transaction_amount: number;
+    description: string;
+    payment_method_id: string;
+    external_reference: string;
+    notification_url?: string;
+    payer: { 
+      email: string; 
+      first_name: string;
+      phone: { area_code: string; number: string };
+    };
+  } = {
+    transaction_amount: amount,
+    description: "Inscrição campeonato",
+    payment_method_id: "pix",
+    external_reference: reference,
+    payer: { 
+      email: "pagador@teste.com", 
+      first_name: name,
+      phone: { area_code: "11", number: "999999999" },
+    },
+  };
+
+  // Só adiciona notification_url se não for localhost
+  if (notificationUrl) {
+    paymentBody.notification_url = notificationUrl;
+  }
 
   const payment = await paymentClient.create({
-    body: {
-      transaction_amount: amount,
-      description: "Inscrição campeonato",
-      payment_method_id: "pix",
-      notification_url: notificationUrl,
-      external_reference: reference,
-      payer: { 
-        email: "pagador@teste.com", 
-        first_name: name,
-        phone: { area_code: "11", number: "999999999" },
-      },
-    },
+    body: paymentBody,
     requestOptions: { idempotencyKey: crypto.randomUUID() },
   });
 
   const transactionData = payment.point_of_interaction?.transaction_data;
 
-  console.log("Payment completo Mercado Pago:", JSON.stringify(payment, null, 2));
 
   if (!transactionData) {
     console.error("Resposta completa MP:", payment);
@@ -66,5 +86,6 @@ export async function getPaymentById(paymentId: number) {
   return {
     id: result.id,
     status: result.status,
+    external_reference: result.external_reference,
   };
 }
