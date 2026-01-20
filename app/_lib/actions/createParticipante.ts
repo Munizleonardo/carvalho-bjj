@@ -36,9 +36,9 @@ function calcFee({
   // Cada modalidade adicional = +R$ 50
   const modalidades = [mod_gi, mod_nogi, mod_gi_extra, festival].filter(Boolean).length;
   if (modalidades === 0) return 0;
-  if (modalidades === 1) return 100;
+  if (modalidades === 1) return 0.90;
   // 2 ou mais modalidades: 100 + (modalidades - 1) * 50
-  return 100 + (modalidades - 1) * 50;
+  return 0.90 + (modalidades - 1) * 0.50;
 }
 
 export async function createParticipant(input: CreateParticipantInput) {
