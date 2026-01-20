@@ -70,6 +70,7 @@ const paymentOptions = [
 ];
 
 function normalize(s: string) {
+  if (!s) return "";
   return s.trim().toLowerCase();
 }
 
