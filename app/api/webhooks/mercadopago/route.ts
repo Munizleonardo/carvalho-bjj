@@ -1,7 +1,7 @@
 export const runtime = "nodejs";
-import { NextResponse } from "next/server";
-import { supabaseAdmin } from "@/app/_lib/supabase/admin";
 import { getPaymentById } from "@/app/_lib/mercadopago";
+import { supabaseAdmin } from "@/app/_lib/supabase/admin";
+import { NextResponse } from "next/server";
 
 type MercadoPagoWebhookPayload = {
   action?: string;
@@ -51,7 +51,7 @@ export async function POST(req: Request) {
   // Busca o pagamento no banco
   const { data: localPayment } = await sb
     .from("payments")
-    .select("id, registration_id, status")
+    .select("id, registration_id")
     .eq("gateway_payment_id", paymentId)
     .single();
 
@@ -62,22 +62,19 @@ export async function POST(req: Request) {
     );
   }
 
-  // Atualiza status do pagamento
   await sb
     .from("payments")
     .update({
       status,
-      updated_at: new Date().toISOString(),
+      paid_at: new Date().toISOString(),
     })
     .eq("id", localPayment.id);
 
-  // Se aprovado, marca inscrição como paga
   if (status === "approved") {
     await sb
       .from("participantes")
       .update({
         status: "paid",
-        paid_at: new Date().toISOString(),
       })
       .eq("id", localPayment.registration_id);
   }

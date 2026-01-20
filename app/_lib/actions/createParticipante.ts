@@ -1,7 +1,7 @@
 "use server";
 
-import type { Category, BeltColor, Gender } from "@/app/_lib/types";
 import { supabaseAdmin } from "@/app/_lib/supabase/admin";
+import type { BeltColor, Category, Gender } from "@/app/_lib/types";
 
 type CreateParticipantInput = {
   full_name: string;
