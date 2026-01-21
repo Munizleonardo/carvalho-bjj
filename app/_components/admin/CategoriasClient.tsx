@@ -5,7 +5,8 @@ import Link from "next/link";
 
 import type { ParticipantAdmin, BeltColor } from "@/app/_lib/types";
 import { beltLabel } from "@/app/_lib/types";
-
+import { useRouter } from "next/navigation";
+import { logout } from "@/app/_lib/auth";
 import { Button } from "@/app/_components/ui/button";
 import {
   Table,
@@ -15,6 +16,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/app/_components/ui/table";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "../ui/dropdown-menu";
+import { Menu } from "lucide-react";
 
 type ViewMode = "cat" | "cat_belt" | "belt" | "cat_age";
 
@@ -296,6 +299,14 @@ function buildCategoryCards(all: ParticipantAdmin[]) {
 }
 
 export default function CategoriesClient({ all }: { all: ParticipantAdmin[] }) {
+  
+  const router = useRouter();
+  
+  function handleLogout() {
+    logout();
+    router.push("/");
+  };
+
   const [view, setView] = React.useState<ViewMode>("cat");
 
   const categoryCards = React.useMemo(() => buildCategoryCards(all), [all]);
@@ -318,14 +329,49 @@ export default function CategoriesClient({ all }: { all: ParticipantAdmin[] }) {
                 Visão atual: {viewLabel(view)} • Total atletas: {all.length} • Grupos: {groups.length}
               </p>
             </div>
-
-            <Button
+            <div className="hidden md:flex items-center gap-3">
+              <Button
+                asChild
+                variant="outline"
+                className="h-8 rounded-xl border-zinc-800 bg-zinc-950/40 hover:bg-white"
+              >
+                <Link href="/admin/painel">Painel</Link>
+              </Button>
+              <Button
               asChild
               variant="outline"
               className="h-8 rounded-xl border-zinc-800 bg-zinc-950/40 hover:bg-white"
             >
-              <Link href="/admin/painel">Voltar ao Painel</Link>
+              <Link href="/admin/chaveamento">Chaveamento(Em breve)</Link>
             </Button>
+
+            <Button
+                  variant="ghost"
+                  className="cursor-pointer h-9 rounded-xl px-3 text-zinc-300 hover:text-zinc-100 hover:bg-zinc-900"
+                  type="button"
+                  onClick={handleLogout}
+                >
+                  Sair
+                </Button>
+            </div>
+            
+            <div className="md:hidden">
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      className="cursor-pointer h-9 w-9 rounded-xl p-0 text-zinc-300 hover:bg-zinc-900 hover:text-zinc-100"
+                    >
+                      <Menu className="h-4 w-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="border-zinc-800 bg-zinc-950 text-zinc-100">
+                    <Link href="/admin/painel"><DropdownMenuItem className="cursor-pointer data-highlighted:bg-white">Painel</DropdownMenuItem></Link>
+                    <Link href="/admin/chaveamento"><DropdownMenuItem className="cursor-pointer data-highlighted:bg-white">Chaveamento(Em breve)</DropdownMenuItem></Link>
+                    <Link href="/"><DropdownMenuItem className="cursor-pointer data-highlighted:bg-white">Sair</DropdownMenuItem></Link>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
           </div>
         </div>
       </header>

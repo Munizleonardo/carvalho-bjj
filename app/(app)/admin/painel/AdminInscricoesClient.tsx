@@ -41,7 +41,7 @@ import { logout } from "@/app/_lib/auth";
 import type { BeltColor, ModalityFilter, ParticipantAdmin } from "@/app/_lib/types";
 import { beltDotClasses, beltLabel } from "@/app/_lib/types";
 
-import { ArrowLeft, FileDown, Info, MoreHorizontal, SlidersHorizontal, Trash2, Users } from "lucide-react";
+import { FileDown, Info, MoreHorizontal, SlidersHorizontal, Trash2, Users, Menu } from "lucide-react";
 
 type Props = {
   initialParticipants: ParticipantAdmin[];
@@ -65,7 +65,7 @@ const modalityOptions: Array<{ label: string; value: ModalityFilter }> = [
 
 const paymentOptions = [
   { label: "Todos os pagamentos", value: "ALL" },
-  { label: "Pago", value: "approved" },
+  { label: "Pago", value: "paid" },
   { label: "Pendente", value: "pending" },
 ];
 
@@ -201,33 +201,54 @@ export default function AdminInscricoesClient({ initialParticipants }: Props) {
             </div>
 
             <div className="flex items-center gap-3">
-              <Link href="/">
+              {/* Desktop buttons */}
+              <div className="hidden md:flex items-center gap-3">
+                <Link href="/admin/categorias">
+                  <Button
+                    variant="outline"
+                    className="cursor-pointer h-9 rounded-xl px-3 border-zinc-800 bg-transparent text-zinc-100 hover:bg-white hover:text-black"
+                  >
+                    Categorias
+                  </Button>
+                </Link>
+
+                <Link href="/admin/chaveamento">
+                  <Button
+                    variant="outline"
+                    className="cursor-pointer h-9 rounded-xl px-3 border-zinc-800 bg-transparent text-zinc-100 hover:bg-white hover:text-black"
+                  >
+                    Chaveamento(Em Breve)
+                  </Button>
+                </Link>
+
                 <Button
                   variant="ghost"
                   className="cursor-pointer h-9 rounded-xl px-3 text-zinc-300 hover:text-zinc-100 hover:bg-zinc-900"
+                  type="button"
+                  onClick={handleLogout}
                 >
-                  <ArrowLeft className="mr-2 h-4 w-4" />
-                  Voltar
+                  Sair
                 </Button>
-              </Link>
+              </div>
 
-              <Link href="/admin/categorias">
-                <Button
-                  variant="outline"
-                  className="cursor-pointer h-9 rounded-xl px-3 border-zinc-800 bg-transparent text-zinc-100 hover:bg-white hover:text-black"
-                >
-                  Categorias
-                </Button>
-              </Link>
-
-              <Button
-                variant="ghost"
-                className="cursor-pointer h-9 rounded-xl px-3 text-zinc-300 hover:text-zinc-100 hover:bg-zinc-900"
-                type="button"
-                onClick={handleLogout}
-              >
-                Sair
-              </Button>
+              {/* Mobile dropdown menu */}
+              <div className="md:hidden">
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      className="cursor-pointer h-9 w-9 rounded-xl p-0 text-zinc-300 hover:bg-zinc-900 hover:text-zinc-100"
+                    >
+                      <Menu className="h-4 w-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="border-zinc-800 bg-zinc-950 text-zinc-100">
+                    <Link href="/admin/categorias"><DropdownMenuItem className="cursor-pointer data-highlighted:bg-white">Categorias</DropdownMenuItem></Link>
+                    <Link href="/admin/chaveamento"><DropdownMenuItem className="cursor-pointer data-highlighted:bg-white">Chaveamento(Em breve)</DropdownMenuItem></Link>
+                    <Link href="/"><DropdownMenuItem className="cursor-pointer data-highlighted:bg-white">Sair</DropdownMenuItem></Link>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
             </div>
           </div>
         </div>
