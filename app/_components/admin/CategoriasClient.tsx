@@ -16,15 +16,22 @@ import {
   TableHeader,
   TableRow,
 } from "@/app/_components/ui/table";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "../ui/dropdown-menu";
+import { Input } from "@/app/_components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/app/_components/ui/select";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "../ui/dropdown-menu";
 import { Menu } from "lucide-react";
 
-type ViewMode = "cat" | "cat_belt" | "belt" | "cat_age";
+type ViewMode = "cat" | "cat_belt" | "cat_age";
 
 type Group = {
   key: string;
   title: string;
-  subtitle: string;
   athletes: ParticipantAdmin[];
   category?: string;
   minW?: number;
@@ -111,7 +118,6 @@ function buildGroupsCategory(list: ParticipantAdmin[]): Group[] {
       groups.push({
         key: `cat:${category}:${c.min}:${c.max}:${idx}`,
         title: category,
-        subtitle: `Peso: ${round1(c.min)}kg até ${round1(c.max)}kg • ${c.athletes.length} atleta(s)`,
         athletes: c.athletes,
         category,
         minW: c.min,
@@ -159,7 +165,6 @@ function buildGroupsCategoryBelt(list: ParticipantAdmin[]): Group[] {
         groups.push({
           key: `cat_belt:${category}:${belt}:${c.min}:${c.max}:${idx}`,
           title: `${category} • ${beltLabel[belt]}`,
-          subtitle: `Peso: ${round1(c.min)}kg até ${round1(c.max)}kg • ${c.athletes.length} atleta(s)`,
           athletes: c.athletes,
           category,
           belt,
@@ -183,32 +188,6 @@ function buildGroupsCategoryBelt(list: ParticipantAdmin[]): Group[] {
   });
 
   return groups;
-}
-
-/** VIEW 3: somente faixa */
-function buildGroupsBeltOnly(list: ParticipantAdmin[]): Group[] {
-  const byBelt = new Map<BeltColor, ParticipantAdmin[]>();
-
-  for (const p of list) {
-    const arr = byBelt.get(p.belt_color) ?? [];
-    arr.push(p);
-    byBelt.set(p.belt_color, arr);
-  }
-
-  const belts: BeltColor[] = ["BRANCA", "AZUL", "ROXA", "MARROM", "PRETA"];
-
-  return belts
-    .filter((b) => (byBelt.get(b)?.length ?? 0) > 0)
-    .map((belt) => {
-      const athletes = (byBelt.get(belt) ?? []).sort((a, b) => (a.weight_kg ?? 0) - (b.weight_kg ?? 0));
-      return {
-        key: `belt:${belt}`,
-        title: beltLabel[belt],
-        subtitle: `${athletes.length} atleta(s)`,
-        athletes,
-        belt,
-      };
-    });
 }
 
 /** --- NOVO: VIEW 4: categoria -> idade -> clusters por peso --- */
@@ -252,7 +231,6 @@ function buildGroupsCategoryAge(list: ParticipantAdmin[]): Group[] {
         groups.push({
           key: `cat_age:${category}:${band.key}:${c.min}:${c.max}:${idx}`,
           title: `${category} • Idade ${band.label}`,
-          subtitle: `Peso: ${round1(c.min)}kg até ${round1(c.max)}kg • ${c.athletes.length} atleta(s)`,
           athletes: c.athletes,
           category,
           ageBand: band.label,
@@ -282,7 +260,6 @@ function buildGroupsCategoryAge(list: ParticipantAdmin[]): Group[] {
 function viewLabel(view: ViewMode) {
   if (view === "cat") return "Categorias + Peso";
   if (view === "cat_belt") return "Categoria + Peso + Faixa";
-  if (view === "belt") return "Somente Faixa";
   return "Peso + Categoria + Idade";
 }
 
@@ -309,14 +286,66 @@ export default function CategoriesClient({ all }: { all: ParticipantAdmin[] }) {
 
   const [view, setView] = React.useState<ViewMode>("cat");
 
+  // --- Filtros ---
+  const [filterCategory, setFilterCategory] = React.useState<string>("ALL");
+  const [filterMinWeight, setFilterMinWeight] = React.useState<string>("");
+  const [filterMaxWeight, setFilterMaxWeight] = React.useState<string>("");
+  const [filterBelt, setFilterBelt] = React.useState<string>("ALL");
+  const [filterMinAge, setFilterMinAge] = React.useState<string>("");
+  const [filterMaxAge, setFilterMaxAge] = React.useState<string>("");
+
+  // Reseta filtros ao mudar de view
+  React.useEffect(() => {
+    setFilterCategory("ALL");
+    setFilterMinWeight("");
+    setFilterMaxWeight("");
+    setFilterBelt("ALL");
+    setFilterMinAge("");
+    setFilterMaxAge("");
+  }, [view]);
+
+  const uniqueCategories = React.useMemo(() => {
+    const cats = new Set(all.map((p) => normalizeCategory(p.category)));
+    return Array.from(cats).sort();
+  }, [all]);
+
+  const uniqueBelts = React.useMemo(() => {
+    const order: BeltColor[] = ["BRANCA", "AZUL", "ROXA", "MARROM", "PRETA"];
+    const present = new Set(all.map((p) => p.belt_color));
+    return order.filter((b) => present.has(b));
+  }, [all]);
+
+  const filteredList = React.useMemo(() => {
+    return all.filter((p) => {
+      // 1. Categoria (presente em todas as views)
+      if (filterCategory !== "ALL" && normalizeCategory(p.category) !== filterCategory) {
+        return false;
+      }
+      // 2. Peso (presente em todas as views)
+      const w = p.weight_kg ?? 0;
+      if (filterMinWeight && w < Number(filterMinWeight)) return false;
+      if (filterMaxWeight && w > Number(filterMaxWeight)) return false;
+
+      // 3. Faixa (apenas cat_belt)
+      if (view === "cat_belt" && filterBelt !== "ALL" && p.belt_color !== filterBelt) return false;
+
+      // 4. Idade (apenas cat_age)
+      if (view === "cat_age") {
+        if (filterMinAge && p.age < Number(filterMinAge)) return false;
+        if (filterMaxAge && p.age > Number(filterMaxAge)) return false;
+      }
+
+      return true;
+    });
+  }, [all, view, filterCategory, filterMinWeight, filterMaxWeight, filterBelt, filterMinAge, filterMaxAge]);
+
   const categoryCards = React.useMemo(() => buildCategoryCards(all), [all]);
 
   const groups = React.useMemo(() => {
-    if (view === "cat") return buildGroupsCategory(all);
-    if (view === "cat_belt") return buildGroupsCategoryBelt(all);
-    if (view === "belt") return buildGroupsBeltOnly(all);
-    return buildGroupsCategoryAge(all);
-  }, [all, view]);
+    if (view === "cat") return buildGroupsCategory(filteredList);
+    if (view === "cat_belt") return buildGroupsCategoryBelt(filteredList);
+    return buildGroupsCategoryAge(filteredList);
+  }, [filteredList, view]);
 
   return (
     <div className="min-h-screen bg-black text-zinc-100">
@@ -342,12 +371,12 @@ export default function CategoriesClient({ all }: { all: ParticipantAdmin[] }) {
               variant="outline"
               className="h-8 rounded-xl border-zinc-800 bg-zinc-950/40 hover:bg-white"
             >
-              <Link href="/admin/chaveamento">Chaveamento(Em breve)</Link>
+              <Link href="/admin/chaveamento">Chaveamento</Link>
             </Button>
 
             <Button
                   variant="ghost"
-                  className="cursor-pointer h-9 rounded-xl px-3 text-zinc-300 hover:text-zinc-100 hover:bg-zinc-900"
+                  className="cursor-pointer h-9 rounded-xl px-3 text-zinc-300 hover:text-red-700 hover:bg-zinc-900"
                   type="button"
                   onClick={handleLogout}
                 >
@@ -367,8 +396,9 @@ export default function CategoriesClient({ all }: { all: ParticipantAdmin[] }) {
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end" className="border-zinc-800 bg-zinc-950 text-zinc-100">
                     <Link href="/admin/painel"><DropdownMenuItem className="cursor-pointer data-highlighted:bg-white">Painel</DropdownMenuItem></Link>
-                    <Link href="/admin/chaveamento"><DropdownMenuItem className="cursor-pointer data-highlighted:bg-white">Chaveamento(Em breve)</DropdownMenuItem></Link>
-                    <Link href="/"><DropdownMenuItem className="cursor-pointer data-highlighted:bg-white">Sair</DropdownMenuItem></Link>
+                    <Link href="/admin/chaveamento"><DropdownMenuItem className="cursor-pointer data-highlighted:bg-white">Chaveamento</DropdownMenuItem></Link>
+                    <DropdownMenuSeparator />
+                    <Link href="/"><DropdownMenuItem className="cursor-pointer hover:text-red-700 data-highlighted:bg-white">Sair</DropdownMenuItem></Link>
                   </DropdownMenuContent>
                 </DropdownMenu>
               </div>
@@ -425,19 +455,6 @@ export default function CategoriesClient({ all }: { all: ParticipantAdmin[] }) {
 
             <Button
               type="button"
-              onClick={() => setView("belt")}
-              className={[
-                "h-9 rounded-xl cursor-pointer",
-                view === "belt"
-                  ? "bg-white text-black hover:bg-zinc-200"
-                  : "border border-zinc-800 bg-transparent text-zinc-100 hover:bg-zinc-900",
-              ].join(" ")}
-            >
-              Somente Faixa
-            </Button>
-
-            <Button
-              type="button"
               onClick={() => setView("cat_age")}
               className={[
                 "h-9 rounded-xl cursor-pointer",
@@ -449,6 +466,93 @@ export default function CategoriesClient({ all }: { all: ParticipantAdmin[] }) {
               Categoria + Idade + Peso
             </Button>
           </div>
+        </div>
+
+        {/* Área de Filtros */}
+        <div className="mb-8 flex flex-wrap items-end justify-center gap-4 rounded-2xl border border-zinc-900 bg-zinc-950/40 p-4">
+          {/* Categoria (Todas as views) */}
+          <div className="flex flex-col gap-1.5">
+            <label className="text-xs text-zinc-400">Categoria</label>
+            <Select value={filterCategory} onValueChange={setFilterCategory}>
+              <SelectTrigger className="w-[180px] border-zinc-800 bg-black/40 text-zinc-100">
+                <SelectValue placeholder="Todas" />
+              </SelectTrigger>
+              <SelectContent className="border-zinc-800 bg-zinc-950 text-zinc-100">
+                <SelectItem value="ALL">Todas</SelectItem>
+                {uniqueCategories.map((c) => (
+                  <SelectItem key={c} value={c}>
+                    {c}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Peso (Todas as views) */}
+          <div className="flex flex-col gap-1.5">
+            <label className="text-xs text-zinc-400">Peso (kg)</label>
+            <div className="flex items-center gap-2">
+              <Input
+                placeholder="Min"
+                type="number"
+                className="w-[80px] border-zinc-800 bg-black/40 text-zinc-100 placeholder:text-zinc-600"
+                value={filterMinWeight}
+                onChange={(e) => setFilterMinWeight(e.target.value)}
+              />
+              <span className="text-zinc-500">-</span>
+              <Input
+                placeholder="Max"
+                type="number"
+                className="w-[80px] border-zinc-800 bg-black/40 text-zinc-100 placeholder:text-zinc-600"
+                value={filterMaxWeight}
+                onChange={(e) => setFilterMaxWeight(e.target.value)}
+              />
+            </div>
+          </div>
+
+          {/* Faixa (Apenas cat_belt) */}
+          {view === "cat_belt" && (
+            <div className="flex flex-col gap-1.5">
+              <label className="text-xs text-zinc-400">Faixa</label>
+              <Select value={filterBelt} onValueChange={setFilterBelt}>
+                <SelectTrigger className="w-[140px] border-zinc-800 bg-black/40 text-zinc-100">
+                  <SelectValue placeholder="Todas" />
+                </SelectTrigger>
+                <SelectContent className="border-zinc-800 bg-zinc-950 text-zinc-100">
+                  <SelectItem value="ALL">Todas</SelectItem>
+                  {uniqueBelts.map((b) => (
+                    <SelectItem key={b} value={b}>
+                      {beltLabel[b]}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
+
+          {/* Idade (Apenas cat_age) */}
+          {view === "cat_age" && (
+            <div className="flex flex-col gap-1.5">
+              <label className="text-xs text-zinc-400">Idade</label>
+              <div className="flex items-center gap-2">
+                <Input
+                  placeholder="Min"
+                  type="number"
+                  className="w-[70px] border-zinc-800 bg-black/40 text-zinc-100 placeholder:text-zinc-600"
+                  value={filterMinAge}
+                  onChange={(e) => setFilterMinAge(e.target.value)}
+                />
+                <span className="text-zinc-500">-</span>
+                <Input
+                  placeholder="Max"
+                  type="number"
+                  className="w-[70px] border-zinc-800 bg-black/40 text-zinc-100 placeholder:text-zinc-600"
+                  value={filterMaxAge}
+                  onChange={(e) => setFilterMaxAge(e.target.value)}
+                />
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Tabelas / grupos */}
@@ -472,7 +576,7 @@ export default function CategoriesClient({ all }: { all: ParticipantAdmin[] }) {
                   )}
                   <div>
                     <h3 className="text-lg font-semibold text-zinc-100">{g.title}</h3>
-                    <p className="text-sm text-zinc-400">{g.subtitle}</p>
+                    
                   </div>
                 </div>
               </div>

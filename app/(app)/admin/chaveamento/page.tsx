@@ -1,7 +1,11 @@
-export default function Chaveamento() {
+// app/(app)/admin/chaveamento/page.tsx
+import { Suspense } from "react";
+import ChaveamentoClient from "../../../_components/admin/ChaveamentoClient";
+
+export default function ChaveamentoPage() {
   return (
-    <div>
-      <h1>Chaveamento</h1>
-    </div>
-  )
+    <Suspense fallback={<div className="text-zinc-400 p-6">Carregando chaveamento...</div>}>
+      <ChaveamentoClient />
+    </Suspense>
+  );
 }

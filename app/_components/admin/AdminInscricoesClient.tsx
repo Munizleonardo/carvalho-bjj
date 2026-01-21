@@ -16,6 +16,7 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/app/_components/ui/dropdown-menu";
 import { Input } from "@/app/_components/ui/input";
@@ -217,13 +218,13 @@ export default function AdminInscricoesClient({ initialParticipants }: Props) {
                     variant="outline"
                     className="cursor-pointer h-9 rounded-xl px-3 border-zinc-800 bg-transparent text-zinc-100 hover:bg-white hover:text-black"
                   >
-                    Chaveamento(Em Breve)
+                    Chaveamento
                   </Button>
                 </Link>
 
                 <Button
                   variant="ghost"
-                  className="cursor-pointer h-9 rounded-xl px-3 text-zinc-300 hover:text-zinc-100 hover:bg-zinc-900"
+                  className="cursor-pointer h-9 rounded-xl px-3 text-zinc-300 hover:text-red-700 hover:bg-zinc-900"
                   type="button"
                   onClick={handleLogout}
                 >
@@ -244,8 +245,9 @@ export default function AdminInscricoesClient({ initialParticipants }: Props) {
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end" className="border-zinc-800 bg-zinc-950 text-zinc-100">
                     <Link href="/admin/categorias"><DropdownMenuItem className="cursor-pointer data-highlighted:bg-white">Categorias</DropdownMenuItem></Link>
-                    <Link href="/admin/chaveamento"><DropdownMenuItem className="cursor-pointer data-highlighted:bg-white">Chaveamento(Em breve)</DropdownMenuItem></Link>
-                    <Link href="/"><DropdownMenuItem className="cursor-pointer data-highlighted:bg-white">Sair</DropdownMenuItem></Link>
+                    <Link href="/admin/chaveamento"><DropdownMenuItem className="cursor-pointer data-highlighted:bg-white">Chaveamento</DropdownMenuItem></Link>
+                    <DropdownMenuSeparator />
+                    <Link href="/"><DropdownMenuItem className="cursor-pointer hover:text-red-700 data-highlighted:bg-white">Sair</DropdownMenuItem></Link>
                   </DropdownMenuContent>
                 </DropdownMenu>
               </div>

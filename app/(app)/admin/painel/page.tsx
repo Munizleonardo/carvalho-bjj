@@ -1,5 +1,5 @@
 import { listParticipantsAdmin } from "@/app/_lib/actions/adminInscricoes";
-import AdminInscricoesClient from "./AdminInscricoesClient";
+import AdminInscricoesClient from "../../../_components/admin/AdminInscricoesClient";
 
 export const dynamic = "force-dynamic";
 
