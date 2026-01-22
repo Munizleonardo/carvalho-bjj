@@ -1,7 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { Button } from "../ui/button";
-import { Trophy } from "lucide-react";
+import { MessageCircleCodeIcon, MessageCircleIcon, Trophy } from "lucide-react";
 
 export default function HeroSection() {
   return (
@@ -47,19 +47,28 @@ export default function HeroSection() {
             <Button
               asChild
               variant="outline"
-              className="h-14 w-full rounded-xl px-8 text-base font-medium sm:w-auto border-zinc-700 bg-transparent text-zinc-200 hover:bg-white hover:text-black"
+              className="h-14 w-full rounded-xl px-8 text-base font-medium sm:w-auto border-zinc-700 sm:bg-transparent sm:text-zinc-200 bg-white text-black hover:bg-white hover:text-black"
             >
               <Link href="/login">Área Administrativa</Link>
             </Button>
             
           </div>
-          <div className="flex justify-center mt-5">
+          <div className="flex justify-center mt-5 gap-4 flex-col sm:flex-row">
             <Button
                 asChild
                 variant="outline"
-                className="h-14 w-full rounded-xl px-8 text-base font-medium sm:w-auto border-zinc-700 bg-black text-zinc-200 hover:bg-red-600 hover:text-white"
+                className="h-14 w-full rounded-xl px-8 text-base font-medium sm:w-auto border-zinc-700 sm:bg-black bg-red-600 text-zinc-200 hover:bg-red-600 hover:text-white"
               >
                 <Link href="/edital-camp.pdf" target="_blank">Edital do Campeonato</Link>
+              </Button>
+
+              <Button
+                asChild
+                variant="outline"
+                className="h-14 w-full rounded-xl px-8 text-base font-medium sm:w-auto border-zinc-700 sm:bg-black bg-green-600 text-zinc-200 hover:bg-green-600 hover:text-white"
+              >
+                <Link href="https://wa.me/5522999809455" target="_blank">
+                <MessageCircleIcon className="h-5 w-5"/>Contate a Organização</Link>
               </Button>
           </div>
         </div>

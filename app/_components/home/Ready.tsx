@@ -1,6 +1,9 @@
 "use client";
 
 import * as React from "react";
+import { Button } from "../ui/button";
+import Link from "next/link";
+import { MessageCircleIcon } from "lucide-react";
 
 type FAQKey =
   | "evento"
@@ -171,6 +174,16 @@ export default function Ready() {
             <div className="mt-10 text-center text-sm text-zinc-400">
               Se ainda restar alguma dúvida, finalize a inscrição e fale com a organização pelo WhatsApp.
             </div>
+          </div>
+          <div className="flex justify-center mt-5 gap-4 flex-col sm:flex-row">
+            <Button
+              asChild
+              variant="outline"
+              className="cursor-pointer flex justify-center items-center mt-3 h-14 sm: w-2xlrounded-xl text-base font-medium border-zinc-700 sm:bg-black bg-green-600 text-zinc-200 hover:bg-green-600 hover:text-white"
+            >
+              <Link href="https://wa.me/5522999809455" target="_blank" className="cursor-pointer">
+              <MessageCircleIcon className="h-5 w-5 cursor-pointer"/>Contate a Organização</Link>
+            </Button>
           </div>
         </div>
       </div>
