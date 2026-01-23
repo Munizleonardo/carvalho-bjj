@@ -1,7 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { Button } from "../ui/button";
-import { MessageCircleCodeIcon, MessageCircleIcon, Trophy } from "lucide-react";
+import { BookOpenText, LockKeyhole, MessageCircleCodeIcon, MessageCircleIcon, SquarePen, Trophy } from "lucide-react";
 
 export default function HeroSection() {
   return (
@@ -41,7 +41,8 @@ export default function HeroSection() {
               asChild
               className="h-14 w-full rounded-xl px-8 text-base font-medium sm:w-auto bg-red-600 hover:bg-red-500"
             >
-              <Link href="/inscricao">Fazer Inscrição</Link>
+              <Link href="/inscricao/cpf">
+              <SquarePen className="h-5 w-5"/>Fazer Inscrição</Link>
             </Button>
 
             <Button
@@ -49,7 +50,8 @@ export default function HeroSection() {
               variant="outline"
               className="h-14 w-full rounded-xl px-8 text-base font-medium sm:w-auto border-zinc-700 sm:bg-transparent sm:text-zinc-200 bg-white text-black hover:bg-white hover:text-black"
             >
-              <Link href="/login">Área Administrativa</Link>
+              <Link href="/login">
+              <LockKeyhole className="h-5 w-5"/>Área Administrativa</Link>
             </Button>
             
           </div>
@@ -59,7 +61,8 @@ export default function HeroSection() {
                 variant="outline"
                 className="h-14 w-full rounded-xl px-8 text-base font-medium sm:w-auto border-zinc-700 sm:bg-black bg-red-600 text-zinc-200 hover:bg-red-600 hover:text-white"
               >
-                <Link href="/edital-camp.pdf" target="_blank">Edital do Campeonato</Link>
+                <Link href="/edital-camp.pdf" target="_blank">
+               <BookOpenText className="h-5 w-5"/>Edital do Campeonato</Link>
               </Button>
 
               <Button

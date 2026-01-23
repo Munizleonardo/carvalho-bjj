@@ -1,5 +1,6 @@
 "use client";
 
+import { useSearchParams } from "next/navigation";
 import * as React from "react";
 import { nullable, z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -125,16 +126,21 @@ const categoryOptions: Array<{ label: string; value: Category }> = [
 const itemInteractiveClass =
   "cursor-pointer focus:outline-none data-[highlighted]:bg-zinc-900 data-[highlighted]:text-zinc-100 hover:bg-zinc-900/60";
 
+  
+
 // -------------------- COMPONENT --------------------
 export default function InscricaoPage() {
   const router = useRouter();
   const [submitting, setSubmitting] = React.useState(false);
   const [serverError, setServerError] = React.useState<string | null>(null);
+  const searchParams = useSearchParams();
+  const cpfFromQuery = searchParams.get("cpf");
 
 const form = useForm<FormValues>({
   resolver: zodResolver(formSchema) as unknown as Resolver<FormValues>,
   shouldUnregister: true,
   defaultValues: {
+    cpf: cpfFromQuery ?? "",
     mod_gi: false,
     mod_nogi: false,
     mod_gi_extra: false,
