@@ -129,7 +129,7 @@ const itemInteractiveClass =
   
 
 // -------------------- COMPONENT --------------------
-export default function InscricaoPage() {
+function InscricaoContent() {
   const router = useRouter();
   const [submitting, setSubmitting] = React.useState(false);
   const [serverError, setServerError] = React.useState<string | null>(null);
@@ -688,3 +688,11 @@ const form = useForm<FormValues>({
                   </div>
                 );
               }
+
+export default function InscricaoPage() {
+  return (
+    <React.Suspense fallback={<div className="min-h-screen bg-black text-zinc-100 flex items-center justify-center">Carregando...</div>}>
+      <InscricaoContent />
+    </React.Suspense>
+  );
+}
