@@ -1,10 +1,9 @@
-"use client";
+﻿"use client";
 
 import { useSearchParams } from "next/navigation";
 import * as React from "react";
-import { nullable, z } from "zod";
+import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import type { Resolver } from "react-hook-form";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Checkbox } from "@/app/_components/ui/checkbox";
@@ -43,17 +42,11 @@ const formSchema = z.object({
   phone_number: z.string().min(8, { message: "Informe um phone_number válido" }),
   area_code: z.string().min(2).max(2, { message: "Código de área deve ter 2 dígitos" }),
 
-  age: z.preprocess(
-    (val) => {
-      if (val === "" || val === undefined || val === null) return undefined;
-      return Number(val);
-    },
-    z
-      .number({ message: "Idade inválida" }) // aqui substituí invalid_type_error por message
-      .int({ message: "Idade deve ser um número inteiro" })
-      .min(4, { message: "Idade mínima é 4 anos" })
-      .max(90, { message: "Idade máxima é 90 anos" })
-  ),
+  age: z
+    .number({ message: "Idade inválida" })
+    .int({ message: "Idade deve ser um número inteiro" })
+    .min(4, { message: "Idade mínima é 4 anos" })
+    .max(90, { message: "Idade máxima é 90 anos" }),
 
   academy: z.string().optional(),
 
@@ -63,31 +56,58 @@ const formSchema = z.object({
 
   category: z.enum(categoryEnum).nullable(),
 
-  weight_kg: z.preprocess(
-    (val) => {
-      if (val === "" || val === undefined || val === null) return null;
-      return Number(val);
-    },
-    z
-      .number({ message: "Peso inválido" }) // aqui também
-      .min(10, { message: "Peso mínimo é 10kg" })
-      .max(300, { message: "Peso máximo é 300kg" })
-      .nullable(),
-  ),
+  weight_kg: z
+    .number({ message: "Peso inválido" })
+    .min(10, { message: "Peso mínimo é 10kg" })
+    .max(300, { message: "Peso máximo é 300kg" })
+    .nullable(),
 
   belt_color: z.enum(beltEnum),
   gender: z.enum(genderEnum),
+
+  responsavel_name: z.string().optional(),
+  responsavel_cpf: z.string().optional(),
+  responsavel_telefone: z.string().optional(),
 
   terms: z.boolean().refine((val) => val === true, {
     message: "Você deve aceitar os termos para continuar",
   }),
 }).superRefine((data, ctx) => {
-  if (data.age > 8 && !data.mod_gi && !data.mod_nogi) {
+  const isFestivalAge = typeof data.age === "number" && data.age < 8;
+
+  if (!isFestivalAge && !data.mod_gi && !data.mod_nogi) {
     ctx.addIssue({
       code: z.ZodIssueCode.custom,
       path: ["mod_gi"],
       message: "Selecione pelo menos uma modalidade",
     });
+  }
+
+  // 👶 VALIDAÇÃO RESPONSÁVEL LEGAL
+  if (isFestivalAge) {
+    if (!data.responsavel_name || data.responsavel_name.trim().length < 3) {
+      ctx.addIssue({
+        path: ["responsavel_name"],
+        message: "Informe o nome do responsável legal",
+        code: z.ZodIssueCode.custom,
+      });
+    }
+
+    if (!data.responsavel_cpf || data.responsavel_cpf.trim().length < 11) {
+      ctx.addIssue({
+        path: ["responsavel_cpf"],
+        message: "Informe o CPF do responsável legal",
+        code: z.ZodIssueCode.custom,
+      });
+    }
+
+    if (!data.responsavel_telefone || data.responsavel_telefone.trim().length < 8) {
+      ctx.addIssue({
+        path: ["responsavel_telefone"],
+        message: "Informe o telefone do responsável legal",
+        code: z.ZodIssueCode.custom,
+      });
+    }
   }
 });
 
@@ -137,16 +157,22 @@ function InscricaoContent() {
   const cpfFromQuery = searchParams.get("cpf");
 
 const form = useForm<FormValues>({
-  resolver: zodResolver(formSchema) as unknown as Resolver<FormValues>,
+  resolver: zodResolver(formSchema),
   shouldUnregister: true,
   defaultValues: {
     cpf: cpfFromQuery ?? "",
+    full_name: "",
+    phone_number: "",
+    area_code: "",
     mod_gi: false,
     mod_nogi: false,
     mod_gi_extra: false,
     terms: false,
     category: null,
     weight_kg: null,
+    responsavel_name: "",
+    responsavel_cpf: "",
+    responsavel_telefone: "",
   },
 });
 
@@ -155,6 +181,7 @@ const form = useForm<FormValues>({
     setServerError(null);
 
     try {
+      const isFestivalAge = values.age < 8;
       const id = await createParticipant({
         full_name: values.full_name.trim(),
         cpf: values.cpf.trim(),
@@ -162,25 +189,29 @@ const form = useForm<FormValues>({
         area_code: values.area_code.trim(),
         age: values.age,
         academy: values.academy?.trim(),
-        category: values.age <= 8 ? null : values.category,
-        weight_kg: values.age <= 8 ? null : values.weight_kg,
+        category: isFestivalAge ? null : values.category,
+        weight_kg: isFestivalAge ? null : values.weight_kg,
         belt_color: values.belt_color,
         gender: values.gender,
         mod_gi: values.mod_gi,
         mod_nogi: values.mod_nogi,
         mod_gi_extra: values.mod_gi_extra,
+        responsavel_name: isFestivalAge ? values.responsavel_name?.trim() : undefined,
+        responsavel_cpf: isFestivalAge ? values.responsavel_cpf?.trim() : undefined,
+        responsavel_telefone: isFestivalAge ? values.responsavel_telefone?.trim() : undefined,
       });
 
       router.push(`/cash?id=${encodeURIComponent(id)}`);
-    } catch {
-      setServerError("Não foi possível concluir sua inscrição.");
+    } catch (e) {
+      console.error(e);
+      setServerError(e instanceof Error ? e.message : "Não foi possível concluir sua inscrição.");
     } finally {
       setSubmitting(false);
     }
   }
 
   const age = form.watch("age");
-  const isFestivalAge = typeof age === "number" && age <= 8;
+  const isFestivalAge = typeof age === "number" && age < 8;
 
   React.useEffect(() => {
     if (isFestivalAge) {
@@ -360,8 +391,78 @@ const form = useForm<FormValues>({
                   <div className="flex items-center justify-center rounded-xl border border-yellow-600/50 bg-yellow-950/30 p-4 text-yellow-200">
                     <div className="text-sm">
                       <span className="font-bold text-lg block mb-1">⚠️ Categoria Festival</span>
-                      Atletas até 8 anos participam automaticamente no Festival.
+                      Atletas abaixo de 8 anos participam automaticamente no Festival.
                     </div>
+                  </div>
+                )}
+                {isFestivalAge && (
+                  <div className="flex flex-col w-full gap-6 rounded-2xl border border-yellow-600/40 bg-yellow-950/20 p-4 md:col-span-2">
+                    <h3 className="text-lg font-semibold text-yellow-200">
+                      Dados do Responsável Legal
+                    </h3>
+
+                    {/* Nome do Responsável */}
+                    <FormField
+                      control={form.control}
+                      name="responsavel_name"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-zinc-200">
+                            Nome do Responsável
+                          </FormLabel>
+                          <FormControl>
+                            <Input
+                              {...field}
+                              placeholder="Nome completo do responsável"
+                              className="rounded-xl bg-black/40 w-full border-zinc-800 text-zinc-100"
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    {/* CPF do Responsável */}
+                    <FormField
+                      control={form.control}
+                      name="responsavel_cpf"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-zinc-200">
+                            CPF do Responsável
+                          </FormLabel>
+                          <FormControl>
+                            <Input
+                              {...field}
+                              placeholder="CPF do responsável"
+                              className="rounded-xl bg-black/40 border-zinc-800 text-zinc-100"
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    {/* Telefone do Responsável */}
+                    <FormField
+                      control={form.control}
+                      name="responsavel_telefone"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-zinc-200">
+                            Telefone do Responsável
+                          </FormLabel>
+                          <FormControl>
+                            <Input
+                              {...field}
+                              placeholder="Telefone (WhatsApp)"
+                              className="rounded-xl bg-black/40 border-zinc-800 text-zinc-100"
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
                   </div>
                 )}
                 
@@ -629,7 +730,7 @@ const form = useForm<FormValues>({
                       </>
                     ) : (
                       <p className="text-sm text-zinc-400 text-center">
-                        Atletas de até 8 anos participarão da modalidade <strong>Festival!</strong>
+                        Atletas abaixo de 8 anos participarão da modalidade <strong>Festival!</strong>
                       </p>
                     )}
                   </div>
@@ -696,3 +797,4 @@ export default function InscricaoPage() {
     </React.Suspense>
   );
 }
+
