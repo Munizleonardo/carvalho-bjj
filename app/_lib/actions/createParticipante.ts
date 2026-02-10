@@ -22,7 +22,8 @@ type CreateParticipantInput = {
 
   responsavel_name?: string;
   responsavel_cpf?: string;
-  responsavel_telefone?: string;
+  responsavel_area_code?: string;
+  responsavel_phone_number?: string;
 };
 
 function digitsOnly(value: string) {
@@ -96,11 +97,6 @@ export async function createParticipant(input: CreateParticipantInput) {
 
   const isFestival = input.age < 8;
 
-  const athletePhone = formatPhoneBRFromParts(input.area_code, input.phone_number);
-  const responsavelTelefone = input.responsavel_telefone?.trim()
-    ? formatPhoneBR(input.responsavel_telefone)
-    : undefined;
-
   const valor = calcFee({
     mod_gi: input.mod_gi,
     mod_nogi: input.mod_nogi,
@@ -112,8 +108,8 @@ export async function createParticipant(input: CreateParticipantInput) {
     created_at: new Date().toISOString(),
     nome: normalizeFullNameUppercase(input.full_name),
     cpf: input.cpf,
-    phone_number: athletePhone.formatted,
-    area_code: athletePhone.areaCode,
+    phone_number: input.phone_number,
+    area_code: input.area_code,
     idade: input.age,
     academia: input.academy ?? null,
     ...(isFestival ? {} : { categoria: input.category, peso: input.weight_kg }),
@@ -130,7 +126,8 @@ export async function createParticipant(input: CreateParticipantInput) {
             ? normalizeFullNameUppercase(input.responsavel_name)
             : null,
           responsavel_cpf: input.responsavel_cpf ?? null,
-          responsavel_telefone: responsavelTelefone ?? null,
+          responsavel_area_code: input.responsavel_area_code ?? null,
+          responsavel_phone_number: input.responsavel_phone_number ?? null,
         }
       : {}),
   };
