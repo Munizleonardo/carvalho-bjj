@@ -87,8 +87,8 @@ export default function CheckCpfPage() {
 
       const data = await res.json();
       setPix(data.pixCopyPaste);
-    } catch (e: any) {
-      setError(e.message || "Erro ao gerar PIX");
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Erro ao gerar PIX");
     } finally {
       setPixLoading(false);
     }

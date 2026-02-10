@@ -25,6 +25,52 @@ type CreateParticipantInput = {
   responsavel_telefone?: string;
 };
 
+function digitsOnly(value: string) {
+  return (value ?? "").replace(/\D/g, "");
+}
+
+function normalizeFullNameUppercase(value: string) {
+  return value.trim().replace(/\s+/g, " ").toLocaleUpperCase("pt-BR");
+}
+
+function formatPhoneBRFromParts(areaCodeRaw: string, phoneNumberRaw: string) {
+  const areaCodeDigits = digitsOnly(areaCodeRaw).slice(-2);
+  const phoneDigitsRaw = digitsOnly(phoneNumberRaw);
+
+  let areaCode = areaCodeDigits;
+  let phoneDigits = phoneDigitsRaw;
+
+  // Se o usuário digitou o telefone com DDD no campo errado, tenta corrigir.
+  if (phoneDigitsRaw.length === 10 || phoneDigitsRaw.length === 11) {
+    areaCode = phoneDigitsRaw.slice(0, 2);
+    phoneDigits = phoneDigitsRaw.slice(2);
+  }
+
+  if (!/^\d{2}$/.test(areaCode)) throw new Error("DDD inválido");
+  if (!(phoneDigits.length === 8 || phoneDigits.length === 9)) throw new Error("Telefone inválido");
+
+  const formatted =
+    phoneDigits.length === 9
+      ? `(${areaCode}) ${phoneDigits.slice(0, 5)}-${phoneDigits.slice(5)}`
+      : `(${areaCode}) ${phoneDigits.slice(0, 4)}-${phoneDigits.slice(4)}`;
+
+  return { areaCode, formatted };
+}
+
+function formatPhoneBR(value: string) {
+  const digits = digitsOnly(value);
+  if (digits.length === 11) {
+    return `(${digits.slice(0, 2)}) ${digits.slice(2, 7)}-${digits.slice(7)}`;
+  }
+  if (digits.length === 10) {
+    return `(${digits.slice(0, 2)}) ${digits.slice(2, 6)}-${digits.slice(6)}`;
+  }
+  if (digits.length === 8 || digits.length === 9) {
+    throw new Error("Informe o telefone com DDD (ex: (11) 91234-5678)");
+  }
+  throw new Error("Telefone inválido");
+}
+
 function calcFee({
   mod_gi,
   mod_nogi,
@@ -50,6 +96,11 @@ export async function createParticipant(input: CreateParticipantInput) {
 
   const isFestival = input.age < 8;
 
+  const athletePhone = formatPhoneBRFromParts(input.area_code, input.phone_number);
+  const responsavelTelefone = input.responsavel_telefone?.trim()
+    ? formatPhoneBR(input.responsavel_telefone)
+    : undefined;
+
   const valor = calcFee({
     mod_gi: input.mod_gi,
     mod_nogi: input.mod_nogi,
@@ -59,10 +110,10 @@ export async function createParticipant(input: CreateParticipantInput) {
 
   const payload = {
     created_at: new Date().toISOString(),
-    nome: input.full_name,
+    nome: normalizeFullNameUppercase(input.full_name),
     cpf: input.cpf,
-    phone_number: input.phone_number,
-    area_code: input.area_code,
+    phone_number: athletePhone.formatted,
+    area_code: athletePhone.areaCode,
     idade: input.age,
     academia: input.academy ?? null,
     ...(isFestival ? {} : { categoria: input.category, peso: input.weight_kg }),
@@ -75,9 +126,11 @@ export async function createParticipant(input: CreateParticipantInput) {
     valor_inscricao: valor,
     ...(isFestival
       ? {
-          responsavel_name: input.responsavel_name ?? null,
+          responsavel_name: input.responsavel_name?.trim()
+            ? normalizeFullNameUppercase(input.responsavel_name)
+            : null,
           responsavel_cpf: input.responsavel_cpf ?? null,
-          responsavel_telefone: input.responsavel_telefone ?? null,
+          responsavel_telefone: responsavelTelefone ?? null,
         }
       : {}),
   };

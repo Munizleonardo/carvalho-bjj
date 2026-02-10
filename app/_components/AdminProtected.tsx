@@ -2,7 +2,7 @@
 
 import { isAuthenticated } from "@/app/_lib/auth";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 
 interface AdminProtectedProps {
   children: React.ReactNode;
@@ -10,17 +10,15 @@ interface AdminProtectedProps {
 
 export default function AdminProtected({ children }: AdminProtectedProps) {
   const router = useRouter();
-  const [isChecking, setIsChecking] = useState(true);
+  const authed = isAuthenticated();
 
   useEffect(() => {
-    if (!isAuthenticated()) {
+    if (!authed) {
       router.push("/");
-    } else {
-      setIsChecking(false);
     }
-  }, [router]);
+  }, [authed, router]);
 
-  if (isChecking) {
+  if (!authed) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-muted-foreground">Verificando autenticação...</div>

@@ -25,6 +25,21 @@ export async function createPixPayment({ amount, reference, name, areaCode, phon
     ? undefined 
     : `${process.env.APP_URL}/api/webhooks/mercadopago`;
 
+  const digitsOnly = (value?: string) => (value ?? "").replace(/\D/g, "");
+
+  const areaDigits = digitsOnly(areaCode);
+  const phoneDigitsRaw = digitsOnly(phoneNumber);
+  const phoneHasDdd = phoneDigitsRaw.length === 10 || phoneDigitsRaw.length === 11;
+
+  const payerAreaCode =
+    phoneHasDdd ? phoneDigitsRaw.slice(0, 2) : areaDigits.length === 2 ? areaDigits : "11";
+  const payerNumber =
+    phoneHasDdd
+      ? phoneDigitsRaw.slice(2)
+      : phoneDigitsRaw.length === 8 || phoneDigitsRaw.length === 9
+        ? phoneDigitsRaw
+        : "999999999";
+
   const paymentBody: {
     transaction_amount: number;
     description: string;
@@ -44,7 +59,7 @@ export async function createPixPayment({ amount, reference, name, areaCode, phon
     payer: { 
       email: "pagador@teste.com", 
       first_name: name,
-      phone: { area_code: "11", number: "999999999" },
+      phone: { area_code: payerAreaCode, number: payerNumber },
     },
   };
 

@@ -1,7 +1,6 @@
 import Link from "next/link";
-import Image from "next/image";
 import { Button } from "../ui/button";
-import { BookOpenText, LockKeyhole, MessageCircleCodeIcon, MessageCircleIcon, SquarePen, Trophy } from "lucide-react";
+import { BookOpenText, LockKeyhole, MessageCircleIcon, SquarePen, Trophy } from "lucide-react";
 
 export default function HeroSection() {
   return (

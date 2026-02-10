@@ -93,8 +93,8 @@ export default function CashClient() {
         const json = await res.json();
         if (!res.ok) throw new Error(json?.error ?? "Erro ao carregar pagamento");
         setData(json);
-      } catch (e: any) {
-        setError(e?.message ?? "Erro ao carregar pagamento");
+      } catch (err: unknown) {
+        setError(err instanceof Error ? err.message : "Erro ao carregar pagamento");
       } finally {
         setLoading(false);
       }
@@ -146,7 +146,7 @@ export default function CashClient() {
         pixRequestedRef.current = false; // permite retry
       }
     })();
-  }, [id, data?.valor]);
+  }, [id, data]);
 
   const valorFormatado = React.useMemo(() => {
     if (!data) return "";
