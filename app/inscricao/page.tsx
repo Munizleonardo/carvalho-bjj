@@ -35,12 +35,19 @@ import {
   type Category,
 } from "@/app/_lib/types";
 
+import { phoneMask } from "@/app/_lib/utils";
+import { isValidBrazilianCellPhone } from "@/app/_lib/utils";
+
 // -------------------- SCHEMA ZOD --------------------
 const formSchema = z.object({
   full_name: z.string().min(3, { message: "Informe o nome completo" }),
   cpf: z.string().min(11, { message: "Informe um CPF válido" }),
-  phone_number: z.string().min(8, { message: "Informe um phone_number válido" }),
-  area_code: z.string().min(2).max(2, { message: "Código de área deve ter 2 dígitos" }),
+  phone: z
+    .string()
+    .nonempty({ message: "Informe um telefone para contato" })
+    .refine(isValidBrazilianCellPhone, {
+      message: "Informe um telefone válido com DDD (ex: (11) 98765-4321)",
+    }),
 
   age: z
     .number({ message: "Idade inválida" })
@@ -67,24 +74,29 @@ const formSchema = z.object({
 
   responsavel_name: z.string().optional(),
   responsavel_cpf: z.string().optional(),
-  responsavel_telefone: z.string().optional(),
+  responsavel_telefone: z
+    .string()
+    .nonempty()
+    .refine(isValidBrazilianCellPhone, {
+      message: "Informe um telefone válido do responsável",
+    }),
 
   terms: z.boolean().refine((val) => val === true, {
     message: "Você deve aceitar os termos para continuar",
   }),
-}).superRefine((data, ctx) => {
-  const isFestivalAge = typeof data.age === "number" && data.age < 8;
+  }).superRefine((data, ctx) => {
+    const isFestivalAge = typeof data.age === "number" && data.age < 8;
 
-  if (!isFestivalAge && !data.mod_gi && !data.mod_nogi) {
-    ctx.addIssue({
-      code: z.ZodIssueCode.custom,
-      path: ["mod_gi"],
-      message: "Selecione pelo menos uma modalidade",
-    });
-  }
+    if (!isFestivalAge && !data.mod_gi && !data.mod_nogi) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["mod_gi"],
+        message: "Selecione pelo menos uma modalidade",
+      });
+    }
 
-  // 👶 VALIDAÇÃO RESPONSÁVEL LEGAL
-  if (isFestivalAge) {
+    // 👶 VALIDAÇÃO RESPONSÁVEL LEGAL
+    if (isFestivalAge) {
     if (!data.responsavel_name || data.responsavel_name.trim().length < 3) {
       ctx.addIssue({
         path: ["responsavel_name"],
@@ -101,10 +113,14 @@ const formSchema = z.object({
       });
     }
 
-    if (!data.responsavel_telefone || data.responsavel_telefone.trim().length < 8) {
+    if (
+      !data.responsavel_telefone ||
+      !isValidBrazilianCellPhone(data.responsavel_telefone)
+    ) {
       ctx.addIssue({
         path: ["responsavel_telefone"],
-        message: "Informe o telefone do responsável legal",
+        message:
+          "Informe um telefone válido do responsável (ex: (11) 98765-4321)",
         code: z.ZodIssueCode.custom,
       });
     }
@@ -162,8 +178,7 @@ const form = useForm<FormValues>({
   defaultValues: {
     cpf: cpfFromQuery ?? "",
     full_name: "",
-    phone_number: "",
-    area_code: "",
+    phone: "",
     mod_gi: false,
     mod_nogi: false,
     mod_gi_extra: false,
@@ -182,11 +197,20 @@ const form = useForm<FormValues>({
 
     try {
       const isFestivalAge = values.age < 8;
+      const phoneClean = values.phone.replace(/\D/g, "");
+      const area_code = phoneClean.slice(0, 2);
+      const phone_number = phoneClean.slice(2);
+
+      const responsavelPhoneClean = values.responsavel_telefone?.replace(/\D/g, "") ?? "";
+
+      const responsavel_area_code = responsavelPhoneClean.slice(0, 2);
+      const responsavel_phone_number = responsavelPhoneClean.slice(2);
+
       const id = await createParticipant({
         full_name: values.full_name.trim(),
         cpf: values.cpf.trim(),
-        phone_number: values.phone_number.trim(),
-        area_code: values.area_code.trim(),
+        phone_number,
+        area_code,
         age: values.age,
         academy: values.academy?.trim(),
         category: isFestivalAge ? null : values.category,
@@ -198,7 +222,8 @@ const form = useForm<FormValues>({
         mod_gi_extra: values.mod_gi_extra,
         responsavel_name: isFestivalAge ? values.responsavel_name?.trim() : undefined,
         responsavel_cpf: isFestivalAge ? values.responsavel_cpf?.trim() : undefined,
-        responsavel_telefone: isFestivalAge ? values.responsavel_telefone?.trim() : undefined,
+        responsavel_area_code,
+        responsavel_phone_number,
       });
 
       router.push(`/cash?id=${encodeURIComponent(id)}`);
@@ -313,34 +338,10 @@ const form = useForm<FormValues>({
                 )}
               />
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-8 w-full">
-                {/* Area Code */}
-                <FormField
-                  control={form.control}
-                  name="area_code"
-                  render={({ field }) => (
-                    <FormItem className="w-full">
-                      <FormLabel className="text-lg text-zinc-200">
-                        Código de Área
-                      </FormLabel>
-                      <FormControl>
-                        <Input
-                          placeholder="DDD"
-                          maxLength={2}
-                          inputMode="numeric"
-                          {...field}
-                          className="rounded-xl bg-black/40 border-zinc-800 text-zinc-100 placeholder:text-zinc-500 focus-visible:ring-red-500/30"
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
                 {/* phone_number */}
                 <FormField
                   control={form.control}
-                  name="phone_number"
+                  name="phone"
                   render={({ field }) => (
                     <FormItem className="w-full md:col-span-2">
                       <FormLabel className="text-lg text-zinc-200">
@@ -348,16 +349,21 @@ const form = useForm<FormValues>({
                       </FormLabel>
                       <FormControl>
                         <Input
-                          placeholder="9XXXX-XXXX"
+                          inputMode="numeric"
+                          placeholder="(22) 9 9999-9999"
                           {...field}
                           className="rounded-xl bg-black/40 border-zinc-800 text-zinc-100 placeholder:text-zinc-500 focus-visible:ring-red-500/30"
+                          maxLength={15}
+                          onChange={(e) => {
+                            const value = phoneMask(e.target.value);
+                            field.onChange(value);
+                          }}
                         />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
-              </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8 w-full">
                 {/* Idade */}
@@ -454,9 +460,15 @@ const form = useForm<FormValues>({
                           </FormLabel>
                           <FormControl>
                             <Input
+                              inputMode="numeric"
                               {...field}
-                              placeholder="Telefone (WhatsApp)"
+                              placeholder="(22) 9 9999-9999"
                               className="rounded-xl bg-black/40 border-zinc-800 text-zinc-100"
+                              maxLength={15}
+                              onChange={(e) => {
+                                const value = phoneMask(e.target.value);
+                                field.onChange(value);
+                              }}
                             />
                           </FormControl>
                           <FormMessage />
@@ -797,4 +809,3 @@ export default function InscricaoPage() {
     </React.Suspense>
   );
 }
-
