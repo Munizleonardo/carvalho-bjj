@@ -60,8 +60,12 @@ export type Gender = (typeof genderEnum)[number];
 export type ParticipantAdmin = { 
   id: string; 
   full_name: string; 
+  responsavel_name?: string | null;
+  responsavel_phone?: string | null;
   cpf: string; 
-  whatsapp: string; 
+  phone_number: string;
+  whatsapp: string;
+  area_code?: string | null;
   age: number; 
   weight_kg: number | null; 
   gender: Gender; 

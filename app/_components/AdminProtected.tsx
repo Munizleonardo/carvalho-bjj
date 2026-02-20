@@ -2,7 +2,7 @@
 
 import { isAuthenticated } from "@/app/_lib/auth";
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useSyncExternalStore } from "react";
 
 interface AdminProtectedProps {
   children: React.ReactNode;
@@ -10,18 +10,23 @@ interface AdminProtectedProps {
 
 export default function AdminProtected({ children }: AdminProtectedProps) {
   const router = useRouter();
-  const authed = isAuthenticated();
+  const hydrated = useSyncExternalStore(
+    () => () => {},
+    () => true,
+    () => false
+  );
+  const authed = hydrated ? isAuthenticated() : false;
 
   useEffect(() => {
-    if (!authed) {
-      router.push("/");
+    if (hydrated && !authed) {
+      router.replace("/");
     }
-  }, [authed, router]);
+  }, [authed, hydrated, router]);
 
-  if (!authed) {
+  if (!hydrated || !authed) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="text-muted-foreground">Verificando autenticação...</div>
+        <div className="text-muted-foreground">Verificando autenticacao...</div>
       </div>
     );
   }

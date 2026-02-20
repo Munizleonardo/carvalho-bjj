@@ -80,7 +80,7 @@ function includesText(p: ParticipantAdmin, q: string) {
   const n = normalize(q);
   return (
     normalize(p.full_name).includes(n) ||
-    normalize(p.whatsapp).includes(n) ||
+    normalize(p.phone_number).includes(n) ||
     normalize(p.academy ?? "").includes(n)
   );
 }
@@ -443,7 +443,7 @@ export default function AdminInscricoesClient({ initialParticipants }: Props) {
                     <TableCell className="py-4">
                       <div>
                         <p className="font-medium text-zinc-100">{p.full_name}</p>
-                        <p className="text-sm text-zinc-400">{p.whatsapp}</p>
+                        <p className="text-sm text-zinc-400">{p.phone_number}</p>
                       </div>
                     </TableCell>
 
@@ -541,7 +541,7 @@ export default function AdminInscricoesClient({ initialParticipants }: Props) {
                   </div>
                   <div className="flex items-center justify-between gap-4">
                     <span className="text-zinc-400">WhatsApp</span>
-                    <span className="text-zinc-100">{detailsItem.whatsapp}</span>
+                    <span className="text-zinc-100">{detailsItem.phone_number}</span>
                   </div>
                   <div className="flex items-center justify-between gap-4">
                     <span className="text-zinc-400">Idade</span>
@@ -566,6 +566,18 @@ export default function AdminInscricoesClient({ initialParticipants }: Props) {
                       <span className="text-zinc-100">{beltLabel[detailsItem.belt_color]}</span>
                     </span>
                   </div>
+                  {detailsItem.responsavel_name ? (
+                    <div className="flex items-center justify-between gap-4">
+                      <span className="text-zinc-400">Responsavel</span>
+                      <span className="text-zinc-100">{detailsItem.responsavel_name}</span>
+                    </div>
+                  ) : null}
+                  {detailsItem.responsavel_phone ? (
+                    <div className="flex items-center justify-between gap-4">
+                      <span className="text-zinc-400">Contato do responsavel</span>
+                      <span className="text-zinc-100">{detailsItem.responsavel_phone}</span>
+                    </div>
+                  ) : null}
                 </div>
               </div>
 
@@ -599,3 +611,4 @@ export default function AdminInscricoesClient({ initialParticipants }: Props) {
     </div>
   );
 }
+
