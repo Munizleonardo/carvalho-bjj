@@ -168,14 +168,14 @@ export default function CashClient() {
   }, [data]);
 
   return (
-    <div className="min-h-screen gap-3 bg-black text-zinc-100 py-10 md:py-16 relative overflow-hidden">
+    <div className="min-h-screen bg-black text-zinc-100 py-10 md:py-16 relative overflow-hidden">
       <div className="absolute -top-24 left-1/2 h-[520px] w-[520px] -translate-x-1/2 rounded-full bg-red-600/15 blur-3xl" />
       <div className="absolute -bottom-40 right-[-120px] h-[520px] w-[520px] rounded-full bg-red-500/10 blur-3xl" />
 
-      <div className="min-h-screen bg-black gap-3 text-zinc-100 py-8 md:py-16">
+      <div className="relative bg-black text-zinc-100 py-4 md:py-8">
         <div className="container mx-auto px-4">
           <div className="max-w-xl mx-auto gap-3">
-            <h1 className="text-3xl font-bold mb-2">Pagamento da Inscrição</h1>
+            <h1 className="text-2xl md:text-3xl font-bold mb-2">Pagamento da Inscrição</h1>
             <p className="text-zinc-400 mb-3">
               Finalize o pagamento para confirmar sua participação
             </p>
@@ -235,12 +235,12 @@ export default function CashClient() {
                       <span className="text-sm text-zinc-400 block mb-2">
                         PIX Copia e Cola
                       </span>
-                      <div className="flex-1 gap-2 md:flex">
-                        <code className="mb-3 md:mb-0 w-full flex bg-black/40 px-3 py-2 rounded-lg text-sm font-mono break-all border border-zinc-800 min-w-[300px]" >
+                      <div className="flex flex-col md:flex-row gap-2">
+                        <code className="w-full min-w-0 bg-black/40 px-3 py-2 rounded-lg text-sm font-mono break-all border border-zinc-800" >
                           <input type="text" value={data.pix?.pixCopyPaste} readOnly className="w-full"/>
                         </code>
                         <Button
-                          className="md:flex md:flex-row flex justify-center items-center cursor-pointer bg-red-600 hover:bg-black"
+                          className="w-full md:w-auto flex justify-center items-center cursor-pointer bg-red-600 hover:bg-black"
                           onClick={() =>
                             data.pix?.pixCopyPaste &&
                             navigator.clipboard.writeText(data.pix?.pixCopyPaste)
@@ -274,3 +274,4 @@ export default function CashClient() {
     </div>
   );
 }
+

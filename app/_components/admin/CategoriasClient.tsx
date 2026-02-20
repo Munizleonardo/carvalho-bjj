@@ -265,11 +265,11 @@ export default function CategoriesClient({ all }: { all: ParticipantAdmin[] }) {
           ))}
         </div>
 
-        <div className="mb-8 flex flex-wrap items-end justify-center gap-4 rounded-2xl border border-zinc-900 bg-zinc-950/40 p-4">
+        <div className="mb-8 flex flex-wrap items-end justify-start gap-4 rounded-2xl border border-zinc-900 bg-zinc-950/40 p-4 md:justify-center">
           <div className="flex flex-col gap-1.5">
             <label className="text-xs text-zinc-400">Categoria</label>
             <Select value={filterCategory} onValueChange={setFilterCategory}>
-              <SelectTrigger className="w-[180px] border-zinc-800 bg-black/40 text-zinc-100">
+              <SelectTrigger className="w-full sm:w-[180px] border-zinc-800 bg-black/40 text-zinc-100">
                 <SelectValue placeholder="Todas" />
               </SelectTrigger>
               <SelectContent className="border-zinc-800 bg-zinc-950 text-zinc-100">
@@ -289,7 +289,7 @@ export default function CategoriesClient({ all }: { all: ParticipantAdmin[] }) {
               <Input
                 placeholder="Min"
                 type="number"
-                className="w-[80px] border-zinc-800 bg-black/40 text-zinc-100 placeholder:text-zinc-600"
+                className="w-[72px] sm:w-[80px] border-zinc-800 bg-black/40 text-zinc-100 placeholder:text-zinc-600"
                 value={filterMinWeight}
                 onChange={(e) => setFilterMinWeight(e.target.value)}
               />
@@ -297,7 +297,7 @@ export default function CategoriesClient({ all }: { all: ParticipantAdmin[] }) {
               <Input
                 placeholder="Max"
                 type="number"
-                className="w-[80px] border-zinc-800 bg-black/40 text-zinc-100 placeholder:text-zinc-600"
+                className="w-[72px] sm:w-[80px] border-zinc-800 bg-black/40 text-zinc-100 placeholder:text-zinc-600"
                 value={filterMaxWeight}
                 onChange={(e) => setFilterMaxWeight(e.target.value)}
               />
@@ -307,7 +307,7 @@ export default function CategoriesClient({ all }: { all: ParticipantAdmin[] }) {
           <div className="flex flex-col gap-1.5">
             <label className="text-xs text-zinc-400">Faixa</label>
             <Select value={filterBelt} onValueChange={setFilterBelt}>
-              <SelectTrigger className="w-[160px] border-zinc-800 bg-black/40 text-zinc-100">
+              <SelectTrigger className="w-full sm:w-[160px] border-zinc-800 bg-black/40 text-zinc-100">
                 <SelectValue placeholder="Todas" />
               </SelectTrigger>
               <SelectContent className="border-zinc-800 bg-zinc-950 text-zinc-100">
@@ -327,7 +327,7 @@ export default function CategoriesClient({ all }: { all: ParticipantAdmin[] }) {
               <Input
                 placeholder="Min"
                 type="number"
-                className="w-[70px] border-zinc-800 bg-black/40 text-zinc-100 placeholder:text-zinc-600"
+                className="w-[64px] sm:w-[70px] border-zinc-800 bg-black/40 text-zinc-100 placeholder:text-zinc-600"
                 value={filterMinAge}
                 onChange={(e) => setFilterMinAge(e.target.value)}
               />
@@ -335,7 +335,7 @@ export default function CategoriesClient({ all }: { all: ParticipantAdmin[] }) {
               <Input
                 placeholder="Max"
                 type="number"
-                className="w-[70px] border-zinc-800 bg-black/40 text-zinc-100 placeholder:text-zinc-600"
+                className="w-[64px] sm:w-[70px] border-zinc-800 bg-black/40 text-zinc-100 placeholder:text-zinc-600"
                 value={filterMaxAge}
                 onChange={(e) => setFilterMaxAge(e.target.value)}
               />

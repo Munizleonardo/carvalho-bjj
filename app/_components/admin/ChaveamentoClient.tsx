@@ -186,9 +186,9 @@ export default function ChaveamentoClient() {
           </div>
         </div>
       </header>
-      <main className="container mx-auto max-w-6xl space-y-8 px-4 py-10">
-        <div className="flex justify-end">
-          <Button onClick={createBracket} className="bg-red-600 hover:bg-red-500 cursor-pointer">
+      <main className="container mx-auto max-w-6xl space-y-8 px-4 py-6 md:py-10">
+        <div className="flex justify-stretch md:justify-end">
+          <Button onClick={createBracket} className="w-full md:w-auto bg-red-600 hover:bg-red-500 cursor-pointer">
             Criar nova chave
           </Button>
         </div>
@@ -198,8 +198,8 @@ export default function ChaveamentoClient() {
             key={bracket.id}
             className="rounded-2xl border border-zinc-800 bg-zinc-950 p-6 flex flex-col gap-4"
           >
-            <div className="flex items-center justify-between">
-              <h2 className="text-xl font-semibold">{bracket.name}</h2>
+            <div className="flex items-center justify-between gap-3">
+              <h2 className="text-lg md:text-xl font-semibold">{bracket.name}</h2>
               <Button
               className="cursor-pointer"
                 variant="destructive"
@@ -210,7 +210,7 @@ export default function ChaveamentoClient() {
               </Button>
             </div>
 
-            <div className="text-sm text-zinc-400">
+            <div className="text-xs md:text-sm text-zinc-400">
               {bracket.fights.length} luta(s) configurada(s)
             </div>
 
@@ -229,10 +229,10 @@ export default function ChaveamentoClient() {
       {/* Modal de Chaveamento */}
       {activeBracket && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
-          <div className="relative w-full max-w-4xl max-h-[90vh] overflow-y-auto rounded-2xl border border-zinc-800 bg-zinc-950 p-6 shadow-2xl">
-            <div className="flex items-center justify-between mb-6 sticky top-0 bg-zinc-950 z-10 pb-4 border-b border-zinc-800">
+          <div className="relative w-full max-w-4xl max-h-[90vh] overflow-y-auto rounded-2xl border border-zinc-800 bg-zinc-950 p-4 md:p-6 shadow-2xl">
+            <div className="flex items-start justify-between gap-3 mb-6 sticky top-0 bg-zinc-950 z-10 pb-4 border-b border-zinc-800">
               <div>
-                <h2 className="text-2xl font-bold">{activeBracket.name}</h2>
+                <h2 className="text-xl md:text-2xl font-bold">{activeBracket.name}</h2>
                 <p className="text-zinc-400 text-sm">
                   Gerencie as lutas desta chave
                 </p>
@@ -282,9 +282,9 @@ export default function ChaveamentoClient() {
                   </select>
                 ))}
 
-                <div className="flex gap-2">
+                <div className="flex flex-col sm:flex-row gap-2">
                   <Button
-                  className="cursor-pointer"
+                  className="cursor-pointer w-full sm:w-auto"
                     size="sm"
                     onClick={() =>
                       updateFight(activeBracket.id, fight.id, { winner: "a" })
@@ -293,7 +293,7 @@ export default function ChaveamentoClient() {
                     Vencedor A
                   </Button>
                   <Button
-                  className="cursor-pointer"
+                  className="cursor-pointer w-full sm:w-auto"
                     size="sm"
                     onClick={() =>
                       updateFight(activeBracket.id, fight.id, { winner: "b" })
@@ -302,7 +302,7 @@ export default function ChaveamentoClient() {
                     Vencedor B
                   </Button>
                   <Button
-                  className="cursor-pointer"
+                  className="cursor-pointer w-full sm:w-auto"
                     size="sm"
                     variant="destructive"
                     onClick={() => removeFight(activeBracket.id, fight.id)}
@@ -326,7 +326,7 @@ export default function ChaveamentoClient() {
               
                 variant="outline"
                 onClick={() => addFight(activeBracket.id)}
-                className="w-full py-8 border-dashed text-black cursor-pointer"
+                className="w-full py-6 md:py-8 border-dashed text-black cursor-pointer"
               >
                 + Adicionar nova luta
               </Button>
