@@ -6,5 +6,6 @@ export const revalidate = 0;
 
 export default async function AdminCategoriasPage() {
   const all = await listParticipantsAdmin();
-  return <CategoriesClient all={all} />;
+  const paid = all.filter((participant) => participant.status === "paid");
+  return <CategoriesClient all={paid} />;
 }
