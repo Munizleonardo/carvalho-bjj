@@ -768,19 +768,19 @@ const form = useForm<FormValues>({
                       />
                     </FormControl>
 
-                    <div className="grid gap-1 leading-none">
-                      <FormLabel className="text-zinc-100 cursor-pointer">
-                        Declaro que li e aceito os{" "}
+                    <div className="flex flex-col gap-2 leading-none">
+                      <FormLabel className="flex flex-wrap  text-zinc-100 cursor-pointer">
+                        Declaro que li e aceito os {" "}
                         <a
                           href="/termo-de-autorização.pdf"
-                          className="text-white hover:text-red-600"
+                          className="flex flex-row justify-between text-white hover:text-red-600"
                           target="_blank"
                           rel="noopener noreferrer"
                         >
                           Termos de Inscrição
                         </a>
                       </FormLabel>
-                      <p className="text-sm text-zinc-400">
+                      <p className="flex text-sm text-zinc-400">
                         Ao prosseguir, confirmo que as informações fornecidas são verdadeiras
                         e estou ciente das regras do evento.
                       </p>

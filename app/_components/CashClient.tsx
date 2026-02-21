@@ -159,8 +159,8 @@ export default function CashClient() {
       <div className="relative bg-black text-zinc-100 py-4 md:py-8">
         <div className="container mx-auto px-4">
           <div className="max-w-xl mx-auto gap-3">
-            <h1 className="text-2xl md:text-3xl font-bold mb-2">Pagamento da Inscricao</h1>
-            <p className="text-zinc-400 mb-3">Finalize o pagamento para confirmar sua participacao</p>
+            <h1 className="text-2xl md:text-3xl font-bold mb-2">Pagamento da Inscrição</h1>
+            <p className="text-zinc-400 mb-3">Finalize o pagamento para confirmar sua participação</p>
 
             {loading && (
               <div className="mt-6 rounded-2xl border border-zinc-800 bg-zinc-950/70 p-6">Carregando...</div>
@@ -233,14 +233,14 @@ export default function CashClient() {
 
                 <div className="p-4 bg-black/40 rounded-xl border border-zinc-800">
                   <p className="text-center text-sm text-zinc-200">
-                    Apos confirmacao do pagamento a inscricao sera concluida.
+                    Após confirmação do pagamento a inscrição será concluída.
                   </p>
                 </div>
 
                 <div className="flex items-center justify-center">
                   <Link href="/">
                     <Button className="cursor-pointer inline-flex items-center gap-2 text-sm bg-red-600/10 text-white hover:text-zinc-100 mb-8 transition-colors">
-                      Voltar para o inicio
+                      Voltar para o início
                     </Button>
                   </Link>
                 </div>

@@ -72,9 +72,9 @@ export default function CheckCpfPage() {
         <div className="rounded-2xl border border-zinc-800 bg-zinc-950/70 p-6 shadow-sm backdrop-blur">
           {!participante ? (
             <>
-              <h1 className="text-3xl font-semibold mb-2">Verificacao de Inscricao</h1>
+              <h1 className="text-3xl font-semibold mb-2">Verificação de Inscrição</h1>
               <p className="text-zinc-400 mb-6">
-                Informe o CPF do atleta para localizar sua inscricao.
+                Informe o CPF do atleta para localizar sua inscrição.
               </p>
 
               <Input
@@ -100,7 +100,7 @@ export default function CheckCpfPage() {
             </>
           ) : (
             <>
-              <h2 className="text-2xl font-semibold mb-4">Dados da inscricao</h2>
+              <h2 className="text-2xl font-semibold mb-4">Dados da inscrição</h2>
 
               <div className="space-y-2 text-sm text-zinc-300">
                 <p>
@@ -135,14 +135,14 @@ export default function CheckCpfPage() {
 
               {participante.status === "paid" ? (
                 <div className="mt-5 rounded-xl bg-green-900/30 p-3 text-green-300 text-sm">
-                  Esta inscricao ja foi paga e esta confirmada.
+                  Esta inscrição já foi paga e está confirmada.
                 </div>
               ) : (
                 <Button
                   className="cursor-pointer mt-6 w-full h-12 rounded-xl bg-red-600 hover:bg-red-500"
                   onClick={goToPayment}
                 >
-                  Pagar Inscricao
+                  Pagar Inscrição
                 </Button>
               )}
             </>
@@ -151,7 +151,7 @@ export default function CheckCpfPage() {
           <div className="mt-6 flex justify-center">
             <Link href="/">
               <Button className="cursor-pointer bg-red-600/10 text-white hover:bg-red-600/20">
-                Voltar para o inicio
+                Voltar para o início
               </Button>
             </Link>
           </div>
