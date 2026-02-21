@@ -1,4 +1,4 @@
-﻿"use server";
+"use server";
 
 import { supabaseAdmin } from "@/app/_lib/supabase/admin";
 import type { BeltColor, Category, Gender } from "@/app/_lib/types";
@@ -10,66 +10,31 @@ type CreateParticipantInput = {
   area_code: string;
   age: number;
   academy?: string;
-
   category: Category | null;
   weight_kg: number | null;
   belt_color: BeltColor;
   gender: Gender;
-
   mod_gi: boolean;
   mod_nogi: boolean;
   mod_gi_extra: boolean;
-
   responsavel_name?: string;
   responsavel_cpf?: string;
   responsavel_area_code?: string;
   responsavel_phone_number?: string;
 };
 
-function digitsOnly(value: string) {
+type DbError = {
+  code?: string;
+  message?: string;
+  constraint?: string;
+};
+
+function digitsOnly(value: string | undefined) {
   return (value ?? "").replace(/\D/g, "");
 }
 
 function normalizeFullNameUppercase(value: string) {
   return value.trim().replace(/\s+/g, " ").toLocaleUpperCase("pt-BR");
-}
-
-function formatPhoneBRFromParts(areaCodeRaw: string, phoneNumberRaw: string) {
-  const areaCodeDigits = digitsOnly(areaCodeRaw).slice(-2);
-  const phoneDigitsRaw = digitsOnly(phoneNumberRaw);
-
-  let areaCode = areaCodeDigits;
-  let phoneDigits = phoneDigitsRaw;
-
-  // Se o usuário digitou o telefone com DDD no campo errado, tenta corrigir.
-  if (phoneDigitsRaw.length === 10 || phoneDigitsRaw.length === 11) {
-    areaCode = phoneDigitsRaw.slice(0, 2);
-    phoneDigits = phoneDigitsRaw.slice(2);
-  }
-
-  if (!/^\d{2}$/.test(areaCode)) throw new Error("DDD inválido");
-  if (!(phoneDigits.length === 8 || phoneDigits.length === 9)) throw new Error("Telefone inválido");
-
-  const formatted =
-    phoneDigits.length === 9
-      ? `(${areaCode}) ${phoneDigits.slice(0, 5)}-${phoneDigits.slice(5)}`
-      : `(${areaCode}) ${phoneDigits.slice(0, 4)}-${phoneDigits.slice(4)}`;
-
-  return { areaCode, formatted };
-}
-
-function formatPhoneBR(value: string) {
-  const digits = digitsOnly(value);
-  if (digits.length === 11) {
-    return `(${digits.slice(0, 2)}) ${digits.slice(2, 7)}-${digits.slice(7)}`;
-  }
-  if (digits.length === 10) {
-    return `(${digits.slice(0, 2)}) ${digits.slice(2, 6)}-${digits.slice(6)}`;
-  }
-  if (digits.length === 8 || digits.length === 9) {
-    throw new Error("Informe o telefone com DDD (ex: (11) 91234-5678)");
-  }
-  throw new Error("Telefone inválido");
 }
 
 function calcFee({
@@ -83,19 +48,29 @@ function calcFee({
   mod_gi_extra: boolean;
   festival: boolean;
 }) {
-  // Primeira modalidade = R$ 100
-  // Cada modalidade adicional = +R$ 50
   const modalidades = [mod_gi, mod_nogi, mod_gi_extra, festival].filter(Boolean).length;
   if (modalidades === 0) return 0;
   if (modalidades === 1) return 100;
-  // 2 ou mais modalidades: 100 + (modalidades - 1) * 50
   return 100 + (modalidades - 1) * 50;
+}
+
+function isDuplicateError(error: DbError | null | undefined) {
+  if (!error) return false;
+  if (error.code === "23505") return true;
+  return (error.message ?? "").toLowerCase().includes("duplicate key value");
+}
+
+function isPrimaryKeyError(error: DbError | null | undefined) {
+  if (!error) return false;
+  const constraint = (error.constraint ?? "").toLowerCase();
+  const message = (error.message ?? "").toLowerCase();
+  return constraint === "participantes_pkey" || message.includes("participantes_pkey");
 }
 
 export async function createParticipant(input: CreateParticipantInput) {
   const sb = supabaseAdmin();
-
   const isFestival = input.age < 8;
+  const normalizedCpf = digitsOnly(input.cpf);
 
   const valor = calcFee({
     mod_gi: input.mod_gi,
@@ -104,10 +79,10 @@ export async function createParticipant(input: CreateParticipantInput) {
     festival: isFestival,
   });
 
-  const payload = {
+  const payloadBase = {
     created_at: new Date().toISOString(),
     nome: normalizeFullNameUppercase(input.full_name),
-    cpf: input.cpf,
+    cpf: normalizedCpf,
     phone_number: input.phone_number,
     area_code: input.area_code,
     idade: input.age,
@@ -125,29 +100,85 @@ export async function createParticipant(input: CreateParticipantInput) {
           responsavel_name: input.responsavel_name?.trim()
             ? normalizeFullNameUppercase(input.responsavel_name)
             : null,
-          responsavel_cpf: input.responsavel_cpf ?? null,
+          responsavel_cpf: input.responsavel_cpf ? digitsOnly(input.responsavel_cpf) : null,
           responsavel_area_code: input.responsavel_area_code ?? null,
           responsavel_phone_number: input.responsavel_phone_number ?? null,
         }
       : {}),
   };
 
-  const { data, error } = await sb
-    .from("participantes")
-    .insert(payload)
-    .select("id")
-    .single();
+  const getExistingByCpfId = async () => {
+    const { data } = await sb
+      .from("participantes")
+      .select("id")
+      .eq("cpf", normalizedCpf)
+      .maybeSingle();
+    return data?.id ? String(data.id) : null;
+  };
 
-  if (error || !data?.id) {
+  const existingBeforeInsert = await getExistingByCpfId();
+  if (existingBeforeInsert) return existingBeforeInsert;
+
+  const MAX_ATTEMPTS = 30;
+
+  for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
+    const { data: lastRow } = await sb
+      .from("participantes")
+      .select("id")
+      .order("id", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    const maxId = Number(lastRow?.id ?? 0);
+    const nextId = Number.isFinite(maxId) ? maxId + 1 : 1;
+
+    const { data, error } = await sb
+      .from("participantes")
+      .insert({ id: nextId, ...payloadBase })
+      .select("id")
+      .single();
+
+    if (!error && data?.id) return String(data.id);
+
+    const typedError = error as DbError | null;
+
+    if (typedError?.code === "428C9") {
+      const regularInsert = await sb
+        .from("participantes")
+        .insert(payloadBase)
+        .select("id")
+        .single();
+
+      if (!regularInsert.error && regularInsert.data?.id) {
+        return String(regularInsert.data.id);
+      }
+
+      const regularError = regularInsert.error as DbError | null;
+      if (isDuplicateError(regularError)) {
+        const existing = await getExistingByCpfId();
+        if (existing) return existing;
+        if (isPrimaryKeyError(regularError) && attempt < MAX_ATTEMPTS) continue;
+      }
+
+      throw new Error(regularError?.message ?? "Erro ao criar inscricao");
+    }
+
+    if (isDuplicateError(typedError)) {
+      const existing = await getExistingByCpfId();
+      if (existing) return existing;
+      if (isPrimaryKeyError(typedError) && attempt < MAX_ATTEMPTS) continue;
+    }
+
     console.error("createParticipant insert error:", {
       isFestival,
-      error,
-      payload,
+      error: typedError,
+      payloadBase,
+      attempt,
+      nextId,
     });
-    throw new Error(error?.message ?? "Erro ao criar inscrição");
+
+    throw new Error(typedError?.message ?? "Erro ao criar inscricao");
   }
 
-  return data.id as string;
+  throw new Error("Nao foi possivel concluir a inscricao. Tente novamente.");
 }
-
-

@@ -1,22 +1,20 @@
 "use client";
 
-import { useSearchParams } from "next/navigation";
 import * as React from "react";
-import { Button } from "../_components/ui/button";
-import { useRouter } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter, useSearchParams } from "next/navigation";
+import { Button } from "../_components/ui/button";
 
 type CashData = {
   id: string;
-  cpf: string;
   nome: string;
   wpp: string;
   valor: number;
   mods: { gi: boolean; nogi: boolean; abs: boolean; festival: boolean };
   pix?: {
-    qrCodeBase64: string;
-    pixCopyPaste: string;
+    qrCodeBase64: string | null;
+    pixCopyPaste: string | null;
     status: "pending" | "approved";
   };
 };
@@ -24,7 +22,6 @@ type CashData = {
 export default function CashClient() {
   const sp = useSearchParams();
   const id = sp.get("id");
-
   const router = useRouter();
 
   const [data, setData] = React.useState<CashData | null>(null);
@@ -32,7 +29,6 @@ export default function CashClient() {
   const [error, setError] = React.useState<string | null>(null);
   const pixRequestedRef = React.useRef(false);
 
-  // Redireciona após pagamento aprovado
   React.useEffect(() => {
     if (data?.pix?.status === "approved") {
       const t = setTimeout(() => {
@@ -42,22 +38,16 @@ export default function CashClient() {
     }
   }, [data, router]);
 
-  // Polling de status do pagamento
   React.useEffect(() => {
-    if (!id) return;
-    if (!data) return;
+    if (!id || !data) return;
     if (data.pix?.status === "approved") return;
 
     const interval = setInterval(async () => {
       try {
-        const res = await fetch(
-          `/api/payments/status?registrationId=${encodeURIComponent(id)}`
-        );
-
+        const res = await fetch(`/api/payments/status?registrationId=${encodeURIComponent(id)}`);
         if (!res.ok) return;
 
         const json = await res.json();
-
         if (json.status === "approved") {
           setData((prev) =>
             prev && prev.pix
@@ -72,17 +62,16 @@ export default function CashClient() {
           );
         }
       } catch {
-        // silêncio proposital
+        // sem ruido no polling
       }
     }, 5000);
 
     return () => clearInterval(interval);
   }, [id, data]);
 
-  // Carrega dados da inscrição
   React.useEffect(() => {
     if (!id) {
-      setError("Inscrição não encontrada. Volte e faça a inscrição novamente.");
+      setError("Inscricao nao encontrada. Volte e faca a inscricao novamente.");
       setLoading(false);
       return;
     }
@@ -101,10 +90,8 @@ export default function CashClient() {
     })();
   }, [id]);
 
-  // 🔑 GERA O PIX (QR CODE)
   React.useEffect(() => {
-    if (!id) return;
-    if (!data) return;
+    if (!id || !data) return;
     if (data.pix) return;
 
     if (pixRequestedRef.current) return;
@@ -114,36 +101,33 @@ export default function CashClient() {
       try {
         const res = await fetch("/api/payments/pix", {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            registrationId: id,
-            amount: data.valor,
-          }),
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ registrationId: id }),
         });
 
+        const json = await res.json().catch(() => ({}));
+
         if (!res.ok) {
-          pixRequestedRef.current = false; // permite retry
+          pixRequestedRef.current = false;
+          setError(json?.error ?? "Nao foi possivel gerar o PIX. Tente novamente.");
           return;
         }
-
-        const json = await res.json();
 
         setData((prev) =>
           prev
             ? {
                 ...prev,
                 pix: {
-                  pixCopyPaste: json.pixCopyPaste,
-                  qrCodeBase64: json.qrCodeBase64,
-                  status: json.status,
+                  pixCopyPaste: json.pixCopyPaste ?? null,
+                  qrCodeBase64: json.qrCodeBase64 ?? null,
+                  status: json.status ?? "pending",
                 },
               }
             : prev
         );
       } catch {
-        pixRequestedRef.current = false; // permite retry
+        pixRequestedRef.current = false;
+        setError("Nao foi possivel gerar o PIX. Verifique sua conexao e tente novamente.");
       }
     })();
   }, [id, data]);
@@ -175,15 +159,11 @@ export default function CashClient() {
       <div className="relative bg-black text-zinc-100 py-4 md:py-8">
         <div className="container mx-auto px-4">
           <div className="max-w-xl mx-auto gap-3">
-            <h1 className="text-2xl md:text-3xl font-bold mb-2">Pagamento da Inscrição</h1>
-            <p className="text-zinc-400 mb-3">
-              Finalize o pagamento para confirmar sua participação
-            </p>
+            <h1 className="text-2xl md:text-3xl font-bold mb-2">Pagamento da Inscricao</h1>
+            <p className="text-zinc-400 mb-3">Finalize o pagamento para confirmar sua participacao</p>
 
             {loading && (
-              <div className="mt-6 rounded-2xl border border-zinc-800 bg-zinc-950/70 p-6">
-                Carregando...
-              </div>
+              <div className="mt-6 rounded-2xl border border-zinc-800 bg-zinc-950/70 p-6">Carregando...</div>
             )}
 
             {error && (
@@ -199,24 +179,19 @@ export default function CashClient() {
                   <div className="text-lg font-semibold">{data.nome}</div>
                   <div className="text-sm text-zinc-400">{data.wpp}</div>
                   <div className="mt-3 text-sm text-zinc-400">
-                    Modalidades:{" "}
-                    <span className="text-zinc-200">
-                      {modalidadesLabel || "-"}
-                    </span>
+                    Modalidades: <span className="text-zinc-200">{modalidadesLabel || "-"}</span>
                   </div>
                 </div>
 
                 <div className="rounded-2xl border border-zinc-800 bg-zinc-950/70 p-6">
                   <div className="flex justify-between">
                     <span className="text-sm text-zinc-400">Valor:</span>
-                    <span className="font-semibold text-lg">
-                      {valorFormatado}
-                    </span>
+                    <span className="font-semibold text-lg">{valorFormatado}</span>
                   </div>
 
                   <div className="mt-4 border-t border-zinc-800 pt-4 space-y-4">
                     <div className="flex justify-center">
-                      {data.pix ? (
+                      {data.pix?.qrCodeBase64 ? (
                         <Image
                           src={`data:image/png;base64,${data.pix.qrCodeBase64}`}
                           alt="QR Code PIX"
@@ -232,18 +207,20 @@ export default function CashClient() {
                     </div>
 
                     <div className="flex flex-col gap-2">
-                      <span className="text-sm text-zinc-400 block mb-2">
-                        PIX Copia e Cola
-                      </span>
+                      <span className="text-sm text-zinc-400 block mb-2">PIX Copia e Cola</span>
                       <div className="flex flex-col md:flex-row gap-2">
-                        <code className="w-full min-w-0 bg-black/40 px-3 py-2 rounded-lg text-sm font-mono break-all border border-zinc-800" >
-                          <input type="text" value={data.pix?.pixCopyPaste} readOnly className="w-full"/>
+                        <code className="w-full min-w-0 bg-black/40 px-3 py-2 rounded-lg text-sm font-mono break-all border border-zinc-800">
+                          <input
+                            type="text"
+                            value={data.pix?.pixCopyPaste ?? ""}
+                            readOnly
+                            className="w-full"
+                          />
                         </code>
                         <Button
                           className="w-full md:w-auto flex justify-center items-center cursor-pointer bg-red-600 hover:bg-black"
                           onClick={() =>
-                            data.pix?.pixCopyPaste &&
-                            navigator.clipboard.writeText(data.pix?.pixCopyPaste)
+                            data.pix?.pixCopyPaste && navigator.clipboard.writeText(data.pix.pixCopyPaste)
                           }
                           disabled={!data.pix?.pixCopyPaste}
                         >
@@ -256,15 +233,16 @@ export default function CashClient() {
 
                 <div className="p-4 bg-black/40 rounded-xl border border-zinc-800">
                   <p className="text-center text-sm text-zinc-200">
-                    Após confirmação do pagamento a inscrição será concluída.
+                    Apos confirmacao do pagamento a inscricao sera concluida.
                   </p>
                 </div>
+
                 <div className="flex items-center justify-center">
                   <Link href="/">
                     <Button className="cursor-pointer inline-flex items-center gap-2 text-sm bg-red-600/10 text-white hover:text-zinc-100 mb-8 transition-colors">
-                      Voltar para o início
+                      Voltar para o inicio
                     </Button>
-                  </Link>  
+                  </Link>
                 </div>
               </div>
             )}
@@ -274,4 +252,3 @@ export default function CashClient() {
     </div>
   );
 }
-

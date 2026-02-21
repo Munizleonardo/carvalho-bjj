@@ -74,12 +74,7 @@ const formSchema = z.object({
 
   responsavel_name: z.string().optional(),
   responsavel_cpf: z.string().optional(),
-  responsavel_telefone: z
-    .string()
-    .nonempty()
-    .refine(isValidBrazilianCellPhone, {
-      message: "Informe um telefone válido do responsável",
-    }),
+  responsavel_telefone: z.string().optional(),
 
   terms: z.boolean().refine((val) => val === true, {
     message: "Você deve aceitar os termos para continuar",
@@ -179,6 +174,7 @@ const form = useForm<FormValues>({
     cpf: cpfFromQuery ?? "",
     full_name: "",
     phone: "",
+    academy: "",
     mod_gi: false,
     mod_nogi: false,
     mod_gi_extra: false,
@@ -201,10 +197,15 @@ const form = useForm<FormValues>({
       const area_code = phoneClean.slice(0, 2);
       const phone_number = phoneClean.slice(2);
 
-      const responsavelPhoneClean = values.responsavel_telefone?.replace(/\D/g, "") ?? "";
-
-      const responsavel_area_code = responsavelPhoneClean.slice(0, 2);
-      const responsavel_phone_number = responsavelPhoneClean.slice(2);
+      const responsavelPhoneClean = isFestivalAge
+        ? values.responsavel_telefone?.replace(/\D/g, "") ?? ""
+        : "";
+      const responsavel_area_code = isFestivalAge
+        ? responsavelPhoneClean.slice(0, 2)
+        : undefined;
+      const responsavel_phone_number = isFestivalAge
+        ? responsavelPhoneClean.slice(2)
+        : undefined;
 
       const id = await createParticipant({
         full_name: values.full_name.trim(),
@@ -222,8 +223,8 @@ const form = useForm<FormValues>({
         mod_gi_extra: values.mod_gi_extra,
         responsavel_name: isFestivalAge ? values.responsavel_name?.trim() : undefined,
         responsavel_cpf: isFestivalAge ? values.responsavel_cpf?.trim() : undefined,
-        responsavel_area_code,
-        responsavel_phone_number,
+        responsavel_area_code: isFestivalAge ? responsavel_area_code : undefined,
+        responsavel_phone_number: isFestivalAge ? responsavel_phone_number : undefined,
       });
 
       router.push(`/cash?id=${encodeURIComponent(id)}`);
@@ -419,6 +420,7 @@ const form = useForm<FormValues>({
                           <FormControl>
                             <Input
                               {...field}
+                              value={field.value ?? ""}
                               placeholder="Nome completo do responsável"
                               className="rounded-xl bg-black/40 w-full border-zinc-800 text-zinc-100"
                             />
@@ -440,6 +442,7 @@ const form = useForm<FormValues>({
                           <FormControl>
                             <Input
                               {...field}
+                              value={field.value ?? ""}
                               placeholder="CPF do responsável"
                               className="rounded-xl bg-black/40 border-zinc-800 text-zinc-100"
                             />
@@ -462,6 +465,7 @@ const form = useForm<FormValues>({
                             <Input
                               inputMode="numeric"
                               {...field}
+                              value={field.value ?? ""}
                               placeholder="(22) 9 9999-9999"
                               className="rounded-xl bg-black/40 border-zinc-800 text-zinc-100"
                               maxLength={15}
@@ -524,6 +528,7 @@ const form = useForm<FormValues>({
                       <FormControl>
                         <Input
                           {...field}
+                          value={field.value ?? ""}
                           className="rounded-xl bg-black/40 border-zinc-800 text-zinc-100 placeholder:text-zinc-500 focus-visible:ring-red-500/30"
                         />
                       </FormControl>

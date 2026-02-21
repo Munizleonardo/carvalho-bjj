@@ -1,4 +1,4 @@
-import crypto from "crypto";
+﻿import crypto from "crypto";
 import { MercadoPagoConfig, Payment } from "mercadopago";
 
 const client = new MercadoPagoConfig({
@@ -15,30 +15,24 @@ interface CreatePixPaymentInput {
   phoneNumber?: string;
 }
 
-export async function createPixPayment({ amount, reference, name, areaCode, phoneNumber }: CreatePixPaymentInput) {
-  if (!process.env.APP_URL) throw new Error("APP_URL não definida");
-  if (!/^https?:\/\/.+/.test(process.env.APP_URL)) throw new Error("APP_URL inválida");
+export async function createPixPayment({
+  amount,
+  reference,
+  name,
+  areaCode,
+  phoneNumber,
+}: CreatePixPaymentInput) {
+  if (!process.env.APP_URL) throw new Error("APP_URL nao definida");
+  if (!/^https?:\/\/.+/.test(process.env.APP_URL)) throw new Error("APP_URL invalida");
 
-  // Mercado Pago não aceita localhost - só envia notification_url se for URL pública
-  const isLocalhost = process.env.APP_URL.includes("localhost") || process.env.APP_URL.includes("127.0.0.1");
-  const notificationUrl = isLocalhost 
-    ? undefined 
+  const isLocalhost =
+    process.env.APP_URL.includes("localhost") || process.env.APP_URL.includes("127.0.0.1");
+  const notificationUrl = isLocalhost
+    ? undefined
     : `${process.env.APP_URL}/api/webhooks/mercadopago`;
 
-  const digitsOnly = (value?: string) => (value ?? "").replace(/\D/g, "");
-
-  const areaDigits = digitsOnly(areaCode);
-  const phoneDigitsRaw = digitsOnly(phoneNumber);
-  const phoneHasDdd = phoneDigitsRaw.length === 10 || phoneDigitsRaw.length === 11;
-
-  const payerAreaCode =
-    phoneHasDdd ? phoneDigitsRaw.slice(0, 2) : areaDigits.length === 2 ? areaDigits : "11";
-  const payerNumber =
-    phoneHasDdd
-      ? phoneDigitsRaw.slice(2)
-      : phoneDigitsRaw.length === 8 || phoneDigitsRaw.length === 9
-        ? phoneDigitsRaw
-        : "999999999";
+  void areaCode;
+  void phoneNumber;
 
   const paymentBody: {
     transaction_amount: number;
@@ -46,24 +40,21 @@ export async function createPixPayment({ amount, reference, name, areaCode, phon
     payment_method_id: string;
     external_reference: string;
     notification_url?: string;
-    payer: { 
-      email: string; 
+    payer: {
+      email: string;
       first_name: string;
-      phone: { area_code: string; number: string };
     };
   } = {
     transaction_amount: amount,
-    description: "Inscrição campeonato",
+    description: "Inscricao campeonato",
     payment_method_id: "pix",
     external_reference: reference,
-    payer: { 
-      email: "pagador@teste.com", 
+    payer: {
+      email: "pagador@teste.com",
       first_name: name,
-      phone: { area_code: payerAreaCode, number: payerNumber },
     },
   };
 
-  // Só adiciona notification_url se não for localhost
   if (notificationUrl) {
     paymentBody.notification_url = notificationUrl;
   }
@@ -75,10 +66,9 @@ export async function createPixPayment({ amount, reference, name, areaCode, phon
 
   const transactionData = payment.point_of_interaction?.transaction_data;
 
-
   if (!transactionData) {
     console.error("Resposta completa MP:", payment);
-    throw new Error(`PIX não gerado. Status: ${payment.status || "undefined"}`);
+    throw new Error(`PIX nao gerado. Status: ${payment.status || "undefined"}`);
   }
 
   return {
