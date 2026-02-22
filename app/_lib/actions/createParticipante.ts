@@ -50,8 +50,8 @@ function calcFee({
 }) {
   const modalidades = [mod_gi, mod_nogi, mod_gi_extra, festival].filter(Boolean).length;
   if (modalidades === 0) return 0;
-  if (modalidades === 1) return 100;
-  return 100 + (modalidades - 1) * 50;
+  if (modalidades === 1) return 120;
+  return 120 + (modalidades - 1) * 70;
 }
 
 function isDuplicateError(error: DbError | null | undefined) {
