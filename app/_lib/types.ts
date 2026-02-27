@@ -76,6 +76,7 @@ export type ParticipantAdmin = {
   mod_nogi: boolean; 
   mod_abs: boolean;
   festival: boolean;
+  valor_inscricao: number | null;
   created_at?: string; 
   status: string;
 };

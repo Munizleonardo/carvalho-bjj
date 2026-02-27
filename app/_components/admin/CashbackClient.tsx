@@ -249,6 +249,7 @@ export default function CashbackClient({ all }: { all: ParticipantAdmin[] }) {
                       <TableHead className="text-zinc-400">Idade</TableHead>
                       <TableHead className="text-zinc-400">Faixa</TableHead>
                       <TableHead className="text-zinc-400">Categoria</TableHead>
+                      <TableHead className="text-zinc-400">Valor Pago</TableHead>
                       <TableHead className="text-zinc-400">Telefone</TableHead>
                     </TableRow>
                   </TableHeader>
@@ -259,6 +260,11 @@ export default function CashbackClient({ all }: { all: ParticipantAdmin[] }) {
                         <TableCell className="text-zinc-100">{athlete.age}</TableCell>
                         <TableCell className="text-zinc-100">{athlete.belt_color}</TableCell>
                         <TableCell className="text-zinc-100">{normalizeCategory(athlete.category)}</TableCell>
+                        <TableCell className="text-zinc-100">
+                          {typeof athlete.valor_inscricao === "number"
+                            ? formatCurrencyBRL(athlete.valor_inscricao)
+                            : "-"}
+                        </TableCell>
                         <TableCell className="text-zinc-100">{athlete.phone_number}</TableCell>
                       </TableRow>
                     ))}

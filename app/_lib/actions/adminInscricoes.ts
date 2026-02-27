@@ -23,6 +23,7 @@ type ParticipanteRow = {
   mod_nogi: boolean;
   mod_gi_extra: boolean;
   festival: boolean;
+  valor_inscricao: number | null;
   created_at: string;
   status: string;
 };
@@ -96,6 +97,7 @@ export async function listParticipantsAdmin(): Promise<ParticipantAdmin[]> {
       mod_nogi: Boolean(r.mod_nogi),
       mod_abs: Boolean(r.mod_gi_extra), // mod_gi_extra no banco = mod_abs na aplicacao
       festival: Boolean(r.festival),
+      valor_inscricao: r.valor_inscricao,
       created_at: r.created_at,
       status: r.status,
     };

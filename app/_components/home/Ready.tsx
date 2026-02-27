@@ -182,7 +182,9 @@ export default function Ready() {
               className="cursor-pointer flex justify-center items-center mt-3 h-14 sm: w-2xlrounded-xl text-base font-medium border-zinc-700 sm:bg-black bg-green-600 text-zinc-200 hover:bg-green-600 hover:text-white"
             >
               <Link href="https://wa.me/5522999809455" target="_blank" className="cursor-pointer">
-              <MessageCircleIcon className="h-5 w-5 cursor-pointer"/>Contate a Organização</Link>
+                <MessageCircleIcon className="h-5 w-5 cursor-pointer"/>
+                  Contate a Organização
+              </Link>
             </Button>
           </div>
         </div>
