@@ -590,9 +590,6 @@ const form = useForm<FormValues>({
                                   b.value
                                 );
                               }
-                              if (typeof age === "number" && age > 8) {
-                                return !["CINZA"].includes(b.value);
-                              }
                               return true;
                             })
                             .map((b) => (
