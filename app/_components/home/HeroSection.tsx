@@ -23,6 +23,9 @@ export default function HeroSection() {
             <span className="ml-2 rounded-full bg-red-500/15 px-2 py-0.5 text-xs text-red-200">
               2026
             </span>
+            {/* <span>
+              Inscrições Encerradas!
+            </span> */}
           </div>
 
           <h1 className="mb-6 text-4xl font-bold tracking-tight md:text-6xl">
@@ -34,6 +37,9 @@ export default function HeroSection() {
             Participe do maior evento de Jiu-Jitsu da Região dos Lagos. <br/>
             Inscreva-se agora e mostre todo o seu potencial no tatame.
           </p>
+          {/* <p>
+            Aguarde novas informações para o próximo campeonato de Jiu-Jitsu.
+          </p> */}
 
           <div className="flex flex-col justify-center gap-4 sm:flex-row">
             <Button
@@ -43,6 +49,7 @@ export default function HeroSection() {
               <Link href="/inscricao/cpf">
               <SquarePen className="h-5 w-5"/>Fazer Inscrição</Link>
             </Button>
+            {/* <p>INSCRIÇÕES ENCERRADAS</p> */}
 
             <Button
               asChild
