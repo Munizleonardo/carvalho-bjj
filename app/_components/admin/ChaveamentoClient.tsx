@@ -22,57 +22,18 @@ import {
   DropdownMenuTrigger,
 } from "@/app/_components/ui/dropdown-menu";
 import { Input } from "@/app/_components/ui/input";
+import {
+  buildBracketRounds,
+  buildBracketName,
+  createEmptyWinnerSelections,
+  hydrateBrackets,
+  serializeBrackets,
+  type Athlete,
+  type Bracket,
+  type MatchSide,
+} from "@/app/_lib/chaveamento";
 
-type Athlete = {
-  id: string;
-  nome: string;
-  idade: number;
-  peso: number | null;
-  faixa: string;
-  categoria: string | null;
-  status: string;
-};
-
-type MatchSide = "top" | "bottom";
-
-type BracketSlot = {
-  athlete: Athlete | null;
-  label: string;
-};
-
-type BracketMatch = {
-  id: string;
-  number: number;
-  roundIndex: number;
-  top: BracketSlot;
-  bottom: BracketSlot;
-  winnerSide: MatchSide | null;
-  resolvedWinner: Athlete | null;
-};
-
-type BracketRound = {
-  title: string;
-  matches: BracketMatch[];
-};
-
-type Bracket = {
-  id: string;
-  name: string;
-  athleteIds: string[];
-  description: string;
-  slotAthleteIds: Array<string | null>;
-  winnerSelections: Array<Array<MatchSide | null>>;
-  rounds: BracketRound[];
-};
-
-type RoundEntrant = {
-  athlete: Athlete | null;
-  label: string;
-};
-
-type AthleteApiRow = Omit<Athlete, "id"> & {
-  id: string | number;
-};
+type BracketMatch = Bracket["rounds"][number]["matches"][number];
 
 function parseOptionalNumber(value: string): number | undefined {
   const normalized = value.trim().replace(",", ".");
@@ -92,113 +53,6 @@ function formatRangeLabel(label: string, min?: number, max?: number, unit = "") 
   if (min !== undefined && max !== undefined) return `${label}: ${min}${unit} a ${max}${unit}`;
   if (min !== undefined) return `${label}: a partir de ${min}${unit}`;
   return `${label}: ate ${max}${unit}`;
-}
-
-function getRoundTitle(matchCount: number) {
-  if (matchCount <= 1) return "Final";
-  if (matchCount === 2) return "Semifinal";
-  if (matchCount === 4) return "Quartas";
-  if (matchCount === 8) return "Oitavas";
-  return `Round ${matchCount}`;
-}
-
-function buildBracketName(athletes: Athlete[]) {
-  const categories = Array.from(new Set(athletes.map((athlete) => athlete.categoria ?? "Sem categoria")));
-  const belts = Array.from(new Set(athletes.map((athlete) => athlete.faixa)));
-  const categoryLabel = categories.length === 1 ? categories[0] : "Multicategoria";
-  const beltLabel = belts.length === 1 ? belts[0] : "Faixa mista";
-  return `${categoryLabel} - ${beltLabel}`;
-}
-
-function createEmptyWinnerSelections(athleteCount: number) {
-  const rounds: Array<Array<MatchSide | null>> = [];
-  let entrantsCount = athleteCount;
-
-  while (entrantsCount > 1) {
-    const matchCount = Math.floor(entrantsCount / 2);
-    rounds.push(Array.from({ length: matchCount }, () => null));
-    entrantsCount = matchCount + (entrantsCount % 2);
-  }
-
-  return rounds;
-}
-
-function resolveWinner(
-  topAthlete: Athlete | null,
-  bottomAthlete: Athlete | null,
-  winnerSide: MatchSide | null
-) {
-  if (winnerSide === "top" && topAthlete) return { winnerSide: "top" as const, resolvedWinner: topAthlete };
-  if (winnerSide === "bottom" && bottomAthlete) return { winnerSide: "bottom" as const, resolvedWinner: bottomAthlete };
-  if (topAthlete && !bottomAthlete) return { winnerSide: "top" as const, resolvedWinner: topAthlete };
-  if (!topAthlete && bottomAthlete) return { winnerSide: "bottom" as const, resolvedWinner: bottomAthlete };
-  return { winnerSide: null, resolvedWinner: null };
-}
-
-function buildBracketRounds(
-  slotAthleteIds: Array<string | null>,
-  athletesById: Map<string, Athlete>,
-  winnerSelections: Array<Array<MatchSide | null>>
-) {
-  if (slotAthleteIds.length === 0) return [];
-
-  const rounds: BracketRound[] = [];
-  let fightNumber = 1;
-
-  let currentEntrants: RoundEntrant[] = slotAthleteIds.map((athleteId, index) => {
-    const athlete = athleteId ? athletesById.get(athleteId) ?? null : null;
-    const isDirectAdvanceSlot = slotAthleteIds.length % 2 === 1 && index === slotAthleteIds.length - 1;
-
-    return {
-      athlete,
-      label: athlete?.nome ?? (isDirectAdvanceSlot ? "Classificado direto" : "Slot vazio"),
-    };
-  });
-
-  let roundIndex = 0;
-
-  while (currentEntrants.length > 1) {
-    const matches: BracketMatch[] = [];
-    const nextEntrants: RoundEntrant[] = [];
-    const hasCarry = currentEntrants.length % 2 === 1;
-    const matchCount = Math.floor(currentEntrants.length / 2);
-
-    for (let matchIndex = 0; matchIndex < matchCount; matchIndex += 1) {
-      const topEntry = currentEntrants[matchIndex * 2];
-      const bottomEntry = currentEntrants[matchIndex * 2 + 1];
-      const resolved = resolveWinner(
-        topEntry.athlete,
-        bottomEntry.athlete,
-        winnerSelections[roundIndex]?.[matchIndex] ?? null
-      );
-
-      const match: BracketMatch = {
-        id: crypto.randomUUID(),
-        number: fightNumber++,
-        roundIndex,
-        top: topEntry,
-        bottom: bottomEntry,
-        winnerSide: resolved.winnerSide,
-        resolvedWinner: resolved.resolvedWinner,
-      };
-
-      matches.push(match);
-      nextEntrants.push({
-        athlete: match.resolvedWinner,
-        label: match.resolvedWinner?.nome ?? `Vencedor L${match.number}`,
-      });
-    }
-
-    if (hasCarry) {
-      nextEntrants.push(currentEntrants[currentEntrants.length - 1]);
-    }
-
-    rounds.push({ title: getRoundTitle(matches.length), matches });
-    currentEntrants = nextEntrants;
-    roundIndex += 1;
-  }
-
-  return rounds;
 }
 
 function getSlotIndicesForMatch(matchIndex: number) {
@@ -322,6 +176,10 @@ export default function ChaveamentoClient() {
   const [editingBracketId, setEditingBracketId] = React.useState<string | null>(null);
   const [editingBracketName, setEditingBracketName] = React.useState("");
   const [editingAthleteIds, setEditingAthleteIds] = React.useState<string[]>([]);
+  const [saveState, setSaveState] = React.useState<"idle" | "saving" | "saved" | "error">("idle");
+  const [saveError, setSaveError] = React.useState<string | null>(null);
+  const readyToPersistRef = React.useRef(false);
+  const lastSavedPayloadRef = React.useRef("[]");
 
   React.useEffect(() => {
     (async () => {
@@ -330,17 +188,22 @@ export default function ChaveamentoClient() {
         if (!res.ok) throw new Error(`Erro ${res.status}`);
 
         const json = await res.json();
-        setAthletes(
-          Array.isArray(json)
-            ? (json as AthleteApiRow[]).map((athlete) => ({
-                ...athlete,
-                id: String(athlete.id),
-              }))
-            : []
+        const nextAthletes = Array.isArray(json?.athletes) ? (json.athletes as Athlete[]) : [];
+        const athletesMap = new Map(nextAthletes.map((athlete) => [athlete.id, athlete]));
+        const nextBrackets = Array.isArray(json?.brackets)
+          ? hydrateBrackets(json.brackets, athletesMap)
+          : [];
+
+        setAthletes(nextAthletes);
+        setBrackets(nextBrackets);
+        lastSavedPayloadRef.current = JSON.stringify(serializeBrackets(nextBrackets));
+        setFetchError(null);
+      } catch (error) {
+        setFetchError(
+          error instanceof Error ? error.message : "Nao foi possivel carregar os atletas."
         );
-      } catch {
-        setFetchError("Nao foi possivel carregar os atletas.");
       } finally {
+        readyToPersistRef.current = true;
         setLoading(false);
       }
     })();
@@ -367,12 +230,6 @@ export default function ChaveamentoClient() {
       .map((id) => athletesById.get(id))
       .filter((athlete): athlete is Athlete => Boolean(athlete));
   }, [activeBracket, athletesById]);
-
-  const availableAthletesForActiveBracket = React.useMemo(() => {
-    if (!activeBracket) return [];
-    const selectedIds = new Set(activeBracket.athleteIds);
-    return paidAthletes.filter((athlete) => !selectedIds.has(athlete.id));
-  }, [activeBracket, paidAthletes]);
 
   const editingBracket = React.useMemo(
     () => brackets.find((bracket) => bracket.id === editingBracketId) ?? null,
@@ -412,6 +269,48 @@ export default function ChaveamentoClient() {
       }))
     );
   }, [athletesById]);
+
+  React.useEffect(() => {
+    if (!readyToPersistRef.current || loading) return;
+
+    const payload = JSON.stringify(serializeBrackets(brackets));
+    if (payload === lastSavedPayloadRef.current) return;
+
+    let cancelled = false;
+    setSaveState("saving");
+    setSaveError(null);
+
+    (async () => {
+      try {
+        const res = await fetch("/api/chaveamento", {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ brackets: JSON.parse(payload) }),
+        });
+
+        const json = await res.json().catch(() => null);
+        if (!res.ok) {
+          throw new Error(
+            typeof json?.error === "string" ? json.error : `Erro ${res.status} ao salvar chaveamento.`
+          );
+        }
+
+        if (cancelled) return;
+        lastSavedPayloadRef.current = payload;
+        setSaveState("saved");
+      } catch (error) {
+        if (cancelled) return;
+        setSaveState("error");
+        setSaveError(
+          error instanceof Error ? error.message : "Nao foi possivel salvar o chaveamento."
+        );
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [brackets, loading]);
 
   const selectedAthleteIdsSet = React.useMemo(() => new Set(selectedAthleteIds), [selectedAthleteIds]);
   const totalFights = React.useMemo(
@@ -533,63 +432,6 @@ export default function ChaveamentoClient() {
     );
   }
 
-  function updateBracketAthletes(bracketId: string, nextAthleteIds: string[]) {
-    setBrackets((current) =>
-      current.map((bracket) => {
-        if (bracket.id !== bracketId) return bracket;
-
-        const allowedAthleteIds = new Set(nextAthleteIds);
-        const nextSlotAthleteIds = bracket.slotAthleteIds
-          .filter((_, index) => index < nextAthleteIds.length)
-          .map((athleteId) => (athleteId && allowedAthleteIds.has(athleteId) ? athleteId : null));
-
-        while (nextSlotAthleteIds.length < nextAthleteIds.length) {
-          nextSlotAthleteIds.push(null);
-        }
-
-        const nextWinnerSelections = createEmptyWinnerSelections(nextAthleteIds.length);
-
-        return {
-          ...bracket,
-          athleteIds: nextAthleteIds,
-          slotAthleteIds: nextSlotAthleteIds,
-          winnerSelections: nextWinnerSelections,
-          rounds: buildBracketRounds(nextSlotAthleteIds, athletesById, nextWinnerSelections),
-        };
-      })
-    );
-  }
-
-  function addAthleteToBracket(bracketId: string, athleteId: string) {
-    setBrackets((current) =>
-      current.map((bracket) => {
-        if (bracket.id !== bracketId || bracket.athleteIds.includes(athleteId)) return bracket;
-
-        const nextAthleteIds = [...bracket.athleteIds, athleteId];
-        const nextSlotAthleteIds = [...bracket.slotAthleteIds, null];
-        const nextWinnerSelections = createEmptyWinnerSelections(nextAthleteIds.length);
-
-        return {
-          ...bracket,
-          athleteIds: nextAthleteIds,
-          slotAthleteIds: nextSlotAthleteIds,
-          winnerSelections: nextWinnerSelections,
-          rounds: buildBracketRounds(nextSlotAthleteIds, athletesById, nextWinnerSelections),
-        };
-      })
-    );
-  }
-
-  function removeAthleteFromBracket(bracketId: string, athleteId: string) {
-    const bracket = brackets.find((item) => item.id === bracketId);
-    if (!bracket) return;
-
-    const nextAthleteIds = bracket.athleteIds.filter((id) => id !== athleteId);
-    if (nextAthleteIds.length === 0) return;
-
-    updateBracketAthletes(bracketId, nextAthleteIds);
-  }
-
   function updateMatchWinner(
     bracketId: string,
     roundIndex: number,
@@ -666,6 +508,13 @@ export default function ChaveamentoClient() {
               <p className="text-sm text-zinc-400">
                 Atletas pagos: {paidAthletes.length} • Chaves: {brackets.length} • Confrontos: {totalFights}
               </p>
+              <p className="mt-1 text-xs text-zinc-500">
+                Pagina publica: /chaveamento
+                {saveState === "saving" ? " • salvando..." : null}
+                {saveState === "saved" ? " • alteracoes publicadas" : null}
+                {saveState === "error" ? " • erro ao publicar" : null}
+              </p>
+              {saveError ? <p className="mt-1 text-xs text-red-400">{saveError}</p> : null}
             </div>
 
             <div className="hidden items-center gap-3 md:flex">

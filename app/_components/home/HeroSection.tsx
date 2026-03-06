@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { Button } from "../ui/button";
-import { BookOpenText, LockKeyhole, MessageCircleIcon, SquarePen, Trophy } from "lucide-react";
+import { BookOpenText, GitBranch, LockKeyhole, MessageCircleIcon, SquarePen, Trophy } from "lucide-react";
 
 export default function HeroSection() {
   return (
@@ -62,13 +62,22 @@ export default function HeroSection() {
             
           </div>
           <div className="flex justify-center mt-5 gap-4 flex-col sm:flex-row">
-            <Button
+              <Button
                 asChild
                 variant="outline"
                 className="h-14 w-full rounded-xl px-8 text-base font-medium sm:w-auto border-zinc-700 sm:bg-black bg-red-600 text-zinc-200 hover:bg-red-600 hover:text-white"
               >
                 <Link href="/edital-camp.pdf" target="_blank">
                <BookOpenText className="h-5 w-5"/>Edital do Campeonato</Link>
+              </Button>
+
+              <Button
+                asChild
+                variant="outline"
+                className="h-14 w-full rounded-xl px-8 text-base font-medium sm:w-auto border-zinc-700 sm:bg-black bg-zinc-900 text-zinc-200 hover:bg-zinc-800 hover:text-white"
+              >
+                <Link href="/chaveamento">
+                <GitBranch className="h-5 w-5"/>Ver Chaveamento</Link>
               </Button>
 
               <Button
