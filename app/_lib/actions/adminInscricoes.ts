@@ -28,6 +28,12 @@ type ParticipanteRow = {
   status: string;
 };
 
+type PaymentRow = {
+  registration_id: string | number | null;
+  status: string | null;
+  created_at?: string | null;
+};
+
 function digitsOnly(value: string | null | undefined) {
   return (value ?? "").replace(/\D/g, "");
 }
@@ -53,18 +59,50 @@ function formatPhoneBR(areaCodeRaw?: string | null, phoneRaw?: string | null) {
   return null;
 }
 
+function normalizePaymentStatus(status: string | null | undefined) {
+  const normalized = (status ?? "").trim().toLowerCase();
+  if (normalized === "approved" || normalized === "paid") return "paid";
+  if (normalized === "pending") return "pending";
+  return normalized;
+}
+
 export async function listParticipantsAdmin(): Promise<ParticipantAdmin[]> {
   const supabase = supabaseAdmin();
 
   const { data, error } = await supabase
     .from("participantes")
     .select("*")
-    .order("created_at", { ascending: false })
-    .limit(100);
+    .order("created_at", { ascending: false });
 
   if (error) throw new Error(error.message);
 
   const rows = (data ?? []) as ParticipanteRow[];
+  const participantIds = rows.map((row) => row.id);
+
+  let effectiveStatusByRegistrationId = new Map<string, string>();
+
+  if (participantIds.length > 0) {
+    const { data: payments, error: paymentsError } = await supabase
+      .from("payments")
+      .select("registration_id, status, created_at")
+      .in("registration_id", participantIds)
+      .order("created_at", { ascending: false });
+
+    if (paymentsError) throw new Error(paymentsError.message);
+
+    const paymentRows = (payments ?? []) as PaymentRow[];
+
+    effectiveStatusByRegistrationId = paymentRows.reduce((acc, payment) => {
+      const registrationId = String(payment.registration_id ?? "").trim();
+      if (!registrationId || acc.has(registrationId)) return acc;
+
+      const normalizedStatus = normalizePaymentStatus(payment.status);
+      if (normalizedStatus) {
+        acc.set(registrationId, normalizedStatus);
+      }
+      return acc;
+    }, new Map<string, string>());
+  }
 
   return rows.map((r) => {
     const athletePhone =
@@ -77,6 +115,15 @@ export async function listParticipantsAdmin(): Promise<ParticipantAdmin[]> {
       r.responsavel_area_code,
       r.responsavel_phone_number
     );
+
+    const participantStatus = normalizePaymentStatus(r.status);
+    const paymentStatus = effectiveStatusByRegistrationId.get(String(r.id));
+    const effectiveStatus =
+      paymentStatus === "paid" || participantStatus === "paid"
+        ? "paid"
+        : paymentStatus === "pending"
+          ? "pending"
+          : participantStatus || "pending";
 
     return {
       id: r.id,
@@ -99,7 +146,7 @@ export async function listParticipantsAdmin(): Promise<ParticipantAdmin[]> {
       festival: Boolean(r.festival),
       valor_inscricao: r.valor_inscricao,
       created_at: r.created_at,
-      status: r.status,
+      status: effectiveStatus,
     };
   });
 }

@@ -17,15 +17,15 @@ export default function HeroSection() {
         <div className="mx-auto max-w-3xl text-center text-zinc-100">
           <div className="mb-8 inline-flex items-center gap-2 rounded-full border border-zinc-800 bg-zinc-900/50 px-4 py-2 backdrop-blur">
             <Trophy className="h-4 w-4 text-red-500" />
-            <span className="text-sm font-medium text-zinc-200">
+            {/* <span className="text-sm font-medium text-zinc-200">
               Inscrições Abertas
             </span>
             <span className="ml-2 rounded-full bg-red-500/15 px-2 py-0.5 text-xs text-red-200">
               2026
-            </span>
-            {/* <span>
-              Inscrições Encerradas!
             </span> */}
+            <span>
+              Inscrições Encerradas!
+            </span>
           </div>
 
           <h1 className="mb-6 text-4xl font-bold tracking-tight md:text-6xl">
@@ -33,23 +33,23 @@ export default function HeroSection() {
             <span className="mt-2 block text-red-500">Jiu-Jitsu 2026</span>
           </h1>
 
-          <p className="mx-auto mb-12 max-w-2xl text-lg text-zinc-300 md:text-xl">
+          {/* <p className="mx-auto mb-12 max-w-2xl text-lg text-zinc-300 md:text-xl">
             Participe do maior evento de Jiu-Jitsu da Região dos Lagos. <br/>
             Inscreva-se agora e mostre todo o seu potencial no tatame.
-          </p>
-          {/* <p>
-            Aguarde novas informações para o próximo campeonato de Jiu-Jitsu.
           </p> */}
+          <p className="text-xl p-3 font-bold text-white">
+            Aguarde novas informações para o próximo campeonato de Jiu-Jitsu.
+          </p>
 
           <div className="flex flex-col justify-center gap-4 sm:flex-row">
-            <Button
+            {/* <Button
               asChild
               className="h-14 w-full rounded-xl px-8 text-base font-medium sm:w-auto bg-red-600 hover:bg-red-500"
             >
               <Link href="/inscricao/cpf">
               <SquarePen className="h-5 w-5"/>Fazer Inscrição</Link>
-            </Button>
-            {/* <p>INSCRIÇÕES ENCERRADAS</p> */}
+            </Button> */}
+            <p className="flex flex-center justify-center items-center text-lg text-white bg-red-500 rounded-full w-80">INSCRIÇÕES ENCERRADAS!</p>
 
             <Button
               asChild
