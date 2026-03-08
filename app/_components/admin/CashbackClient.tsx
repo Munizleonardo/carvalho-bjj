@@ -135,6 +135,14 @@ export default function CashbackClient({ all }: { all: ParticipantAdmin[] }) {
               </Button>
 
               <Button
+                asChild
+                variant="outline"
+                className="h-8 rounded-xl border-zinc-800 bg-zinc-950/40 hover:bg-white"
+              >
+                <Link href="/admin/cronometro">Cronometro</Link>
+              </Button>
+
+              <Button
                 variant="ghost"
                 className="cursor-pointer h-9 rounded-xl px-3 text-zinc-300 hover:bg-zinc-900 hover:text-red-700"
                 type="button"
@@ -171,6 +179,11 @@ export default function CashbackClient({ all }: { all: ParticipantAdmin[] }) {
                   <Link href="/admin/chaveamento">
                     <DropdownMenuItem className="cursor-pointer data-highlighted:bg-white">
                       Chaveamento
+                    </DropdownMenuItem>
+                  </Link>
+                  <Link href="/admin/cronometro">
+                    <DropdownMenuItem className="cursor-pointer data-highlighted:bg-white">
+                      Cronometro
                     </DropdownMenuItem>
                   </Link>
                   <DropdownMenuSeparator />
