@@ -527,6 +527,9 @@ export default function ChaveamentoClient() {
               <Button asChild variant="outline" className="h-8 rounded-xl border-zinc-800 bg-zinc-950/40 hover:bg-white">
                 <Link href="/admin/cashback">Cashback</Link>
               </Button>
+              <Button asChild variant="outline" className="h-8 rounded-xl border-zinc-800 bg-zinc-950/40 hover:bg-white">
+                <Link href="/admin/cronometro">Cronometro</Link>
+              </Button>
               <Button
                 variant="ghost"
                 className="h-9 cursor-pointer rounded-xl px-3 text-zinc-300 hover:bg-zinc-900 hover:text-red-700"
@@ -553,6 +556,9 @@ export default function ChaveamentoClient() {
                   </Link>
                   <Link href="/admin/cashback">
                     <DropdownMenuItem className="cursor-pointer data-highlighted:bg-white">Cashback</DropdownMenuItem>
+                  </Link>
+                  <Link href="/admin/cronometro">
+                    <DropdownMenuItem className="cursor-pointer data-highlighted:bg-white">Cronometro</DropdownMenuItem>
                   </Link>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={handleLogout} className="cursor-pointer hover:text-red-700 data-highlighted:bg-white">

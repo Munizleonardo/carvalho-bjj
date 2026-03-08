@@ -209,6 +209,15 @@ export default function CategoriesClient({ all }: { all: ParticipantAdmin[] }) {
                   </Button>
                 </Link>
 
+              <Link href="/admin/cronometro">
+                  <Button
+                    variant="outline"
+                    className="cursor-pointer h-9 rounded-xl px-3 border-zinc-800 bg-transparent text-zinc-100 hover:bg-white hover:text-black"
+                  >
+                    Cronometro
+                  </Button>
+                </Link>
+
               <Button
                 variant="ghost"
                 className="cursor-pointer h-9 rounded-xl px-3 text-zinc-300 hover:text-red-700 hover:bg-zinc-900"
@@ -234,6 +243,7 @@ export default function CategoriesClient({ all }: { all: ParticipantAdmin[] }) {
                     <Link href="/admin/painel"><DropdownMenuItem className="cursor-pointer data-highlighted:bg-white">Painel</DropdownMenuItem></Link>
                     <Link href="/admin/chaveamento"><DropdownMenuItem className="cursor-pointer data-highlighted:bg-white">Chaveamento</DropdownMenuItem></Link>
                     <Link href="/admin/cashback"><DropdownMenuItem className="cursor-pointer data-highlighted:bg-white">Cashback</DropdownMenuItem></Link>
+                    <Link href="/admin/cronometro"><DropdownMenuItem className="cursor-pointer data-highlighted:bg-white">Cronometro</DropdownMenuItem></Link>
                     <DropdownMenuSeparator />
                     <Link href="/"><DropdownMenuItem className="cursor-pointer hover:text-red-700 data-highlighted:bg-white">Sair</DropdownMenuItem></Link>
                   </DropdownMenuContent>
