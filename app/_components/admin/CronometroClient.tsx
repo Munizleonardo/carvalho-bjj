@@ -306,7 +306,7 @@ export default function CronometroClient() {
                 variant="outline"
                 className="h-8 rounded-xl border-zinc-200 bg-white text-black hover:bg-zinc-200"
               >
-                <Link href="/admin/cronometro">Cronômetro</Link>
+                <Link href="/admin/cronometro">Cronometro</Link>
               </Button>
 
               <Button
