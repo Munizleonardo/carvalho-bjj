@@ -49,7 +49,8 @@ export default function HeroSection() {
               <Link href="/inscricao/cpf">
               <SquarePen className="h-5 w-5"/>Fazer Inscrição</Link>
             </Button> */}
-            <p className="flex flex-center justify-center items-center text-lg text-white bg-red-500 rounded-full w-80">INSCRIÇÕES ENCERRADAS!</p>
+            <p className="flex flex-center items-center justify-center font-bold text-lg h-14 w-full rounded-xl px-8 text-base font-medium sm:w-auto bg-red-600 hover:bg-red-500"
+            >INSCRIÇÕES ENCERRADAS!</p>
 
             <Button
               asChild
