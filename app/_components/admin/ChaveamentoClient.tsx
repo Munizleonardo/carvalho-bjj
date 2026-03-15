@@ -110,7 +110,7 @@ function BracketVisualization({ bracket, athletesCount }: { bracket: Bracket; at
   return (
     <div className="rounded-[28px] border border-zinc-800 bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.08),_transparent_45%),linear-gradient(180deg,_rgba(24,24,27,0.94),_rgba(9,9,11,0.98))] p-5">
       <div className="mb-6 flex flex-col gap-3 border-b border-zinc-800 pb-4 text-center">
-        <div className="text-[11px] uppercase tracking-[0.35em] text-zinc-500">Black Belt Eventos</div>
+        <div className="text-[11px] uppercase tracking-[0.35em] text-zinc-500">Carvalho BJJ</div>
         <div className="text-2xl font-semibold text-zinc-50">{bracket.name}</div>
         <div className="text-sm text-zinc-400">{bracket.description}</div>
         <div className="text-xs uppercase tracking-[0.24em] text-zinc-500">

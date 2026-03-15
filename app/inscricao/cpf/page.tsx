@@ -64,7 +64,7 @@ export default function CheckCpfPage() {
   }
 
   return (
-    <div className="min-h-screen bg-black text-zinc-100 px-4 py-10 relative overflow-hidden">
+    <div className="relative min-h-screen overflow-hidden bg-black px-4 py-10 text-zinc-100">
       <div className="absolute -top-24 left-1/2 h-[520px] w-[520px] -translate-x-1/2 rounded-full bg-red-600/15 blur-3xl" />
       <div className="absolute -bottom-40 right-[-120px] h-[520px] w-[520px] rounded-full bg-red-500/10 blur-3xl" />
 
@@ -72,16 +72,16 @@ export default function CheckCpfPage() {
         <div className="rounded-2xl border border-zinc-800 bg-zinc-950/70 p-6 shadow-sm backdrop-blur">
           {!participante ? (
             <>
-              <h1 className="text-3xl font-semibold mb-2">Verificação de Inscrição</h1>
-              <p className="text-zinc-400 mb-6">
-                Informe o CPF do atleta para localizar sua inscrição.
+              <h1 className="mb-2 text-3xl font-semibold">Verificacao de inscricao</h1>
+              <p className="mb-6 text-zinc-400">
+                Informe o CPF do atleta para localizar a inscricao e seguir para a proxima etapa.
               </p>
 
               <Input
                 placeholder="CPF do atleta"
                 value={cpf}
                 onChange={(e) => setCpf(e.target.value)}
-                className="mb-4 rounded-xl bg-black/40 border-zinc-800"
+                className="mb-4 rounded-xl border-zinc-800 bg-black/40"
               />
 
               {error && (
@@ -91,7 +91,7 @@ export default function CheckCpfPage() {
               )}
 
               <Button
-                className="cursor-pointer w-full h-12 rounded-xl bg-red-600 hover:bg-red-500"
+                className="h-12 w-full cursor-pointer rounded-xl bg-red-600 hover:bg-red-500"
                 disabled={loading || normalizedCpf.length !== 11}
                 onClick={handleCheckCpf}
               >
@@ -100,7 +100,7 @@ export default function CheckCpfPage() {
             </>
           ) : (
             <>
-              <h2 className="text-2xl font-semibold mb-4">Dados da inscrição</h2>
+              <h2 className="mb-4 text-2xl font-semibold">Dados da inscricao</h2>
 
               <div className="space-y-2 text-sm text-zinc-300">
                 <p>
@@ -134,15 +134,15 @@ export default function CheckCpfPage() {
               </div>
 
               {participante.status === "paid" ? (
-                <div className="mt-5 rounded-xl bg-green-900/30 p-3 text-green-300 text-sm">
-                  Esta inscrição já foi paga e está confirmada.
+                <div className="mt-5 rounded-xl bg-green-900/30 p-3 text-sm text-green-300">
+                  Esta inscricao ja foi paga e esta confirmada. Agora e manter o foco na preparacao.
                 </div>
               ) : (
                 <Button
-                  className="cursor-pointer mt-6 w-full h-12 rounded-xl bg-red-600 hover:bg-red-500"
+                  className="mt-6 h-12 w-full cursor-pointer rounded-xl bg-red-600 hover:bg-red-500"
                   onClick={goToPayment}
                 >
-                  Pagar Inscrição
+                  Pagar Inscricao
                 </Button>
               )}
             </>
@@ -151,7 +151,7 @@ export default function CheckCpfPage() {
           <div className="mt-6 flex justify-center">
             <Link href="/">
               <Button className="cursor-pointer bg-red-600/10 text-white hover:bg-red-600/20">
-                Voltar para o início
+                Voltar para o inicio
               </Button>
             </Link>
           </div>
@@ -160,4 +160,3 @@ export default function CheckCpfPage() {
     </div>
   );
 }
-

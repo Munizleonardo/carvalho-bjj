@@ -262,13 +262,13 @@ const form = useForm<FormValues>({
 
   // -------------------- RENDER --------------------
   return (
-    <div className="min-h-screen bg-black text-zinc-100 px-4 py-10 relative overflow-hidden">
+    <div className="relative min-h-screen overflow-hidden bg-black px-4 py-8 text-zinc-100 sm:py-10">
       <div className="absolute -top-24 left-1/2 h-[520px] w-[520px] -translate-x-1/2 rounded-full bg-red-600/15 blur-3xl" />
       <div className="absolute -bottom-40 right-[-120px] h-[520px] w-[520px] rounded-full bg-red-500/10 blur-3xl" />
 
       <div className="relative mx-auto w-full max-w-xl">
         <Link
-          className="inline-flex items-center gap-2 text-xl text-zinc-400 hover:text-zinc-100 mb-8 transition-colors"
+          className="mb-6 inline-flex items-center gap-2 text-base text-zinc-400 transition-colors hover:text-zinc-100 sm:mb-8 sm:text-xl"
           href="/"
         >
           <ArrowLeft className="h-5 w-5" />
@@ -276,27 +276,27 @@ const form = useForm<FormValues>({
         </Link>
 
         <div className="mb-6">
-          <h1 className="text-3xl font-semibold text-zinc-100">Inscrição</h1>
-          <p className="mt-1 text-lg text-zinc-400">
-            Preencha os dados do atleta. <br/> 
-            Realize o pagamento para concluir a inscrição.
+          <h1 className="text-2xl font-semibold text-zinc-100 sm:text-3xl">Inscrição</h1>
+          <p className="mt-1 text-base text-zinc-400 sm:text-lg">
+            Preencha os dados do atleta com atencao. <br/>
+            Cada detalhe certo aproxima voce de uma grande atuacao no campeonato.
           </p>
         </div>
 
-        <div className="rounded-2xl border border-zinc-800 bg-zinc-950/70 p-6 flex flex-col gap-5 shadow-sm backdrop-blur">
+        <div className="flex flex-col gap-5 rounded-2xl border border-zinc-800 bg-zinc-950/70 p-4 shadow-sm backdrop-blur sm:p-6">
           <div>
-            <h2 className="text-xl font-semibold text-zinc-100">
+            <h2 className="text-lg font-semibold text-zinc-100 sm:text-xl">
               Formulário de Inscrição
             </h2>
-            <p className="mt-1 text-lg text-zinc-400 mb-2">
-              Preencha todos os campos para continuar.
+            <p className="mb-2 mt-1 text-base text-zinc-400 sm:text-lg">
+              Finalize este cadastro para seguir ao pagamento e garantir sua vaga no evento.
             </p>
           </div>
 
           <Form {...form}>
             <form
               onSubmit={form.handleSubmit(onSubmit)}
-              className="flex flex-col md:flex md:flex-col gap-8 "
+              className="flex flex-col gap-6 sm:gap-8"
             >
               {/* Nome */}
               <FormField
@@ -304,7 +304,7 @@ const form = useForm<FormValues>({
                 name="full_name"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-lg text-zinc-200">
+                    <FormLabel className="text-base text-zinc-200 sm:text-lg">
                       Nome Completo
                     </FormLabel>
                     <FormControl>
@@ -324,7 +324,7 @@ const form = useForm<FormValues>({
                 name="cpf"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-lg text-zinc-200">
+                    <FormLabel className="text-base text-zinc-200 sm:text-lg">
                       CPF
                     </FormLabel>
                     <FormControl>
@@ -345,7 +345,7 @@ const form = useForm<FormValues>({
                   name="phone"
                   render={({ field }) => (
                     <FormItem className="w-full md:col-span-2">
-                      <FormLabel className="text-lg text-zinc-200">
+                      <FormLabel className="text-base text-zinc-200 sm:text-lg">
                         Telefone (WhatsApp)
                       </FormLabel>
                       <FormControl>
@@ -366,14 +366,14 @@ const form = useForm<FormValues>({
                   )}
                 />
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8 w-full">
+              <div className="grid w-full grid-cols-1 gap-6 md:grid-cols-2 md:gap-8">
                 {/* Idade */}
                 <FormField
                   control={form.control}
                   name="age"
                   render={({ field }) => (
                     <FormItem className="w-full">
-                      <FormLabel className="text-lg w-full flex md:flex-row md:flex text-zinc-200">
+                      <FormLabel className="flex w-full text-base text-zinc-200 md:flex-row md:flex sm:text-lg">
                         Idade
                       </FormLabel>
                       <FormControl>
@@ -397,8 +397,8 @@ const form = useForm<FormValues>({
                 {isFestivalAge && (
                   <div className="flex items-center justify-center rounded-xl border border-yellow-600/50 bg-yellow-950/30 p-4 text-yellow-200">
                     <div className="text-sm">
-                      <span className="font-bold text-lg block mb-1">⚠️ Categoria Festival</span>
-                      Atletas abaixo de 8 anos participam automaticamente no Festival.
+                      <span className="mb-1 block text-base font-bold sm:text-lg">⚠️ Categoria Festival</span>
+                      Atletas abaixo de 8 anos participam automaticamente no Festival, em um formato pensado para incentivo, aprendizado e experiencia positiva.
                     </div>
                   </div>
                 )}
@@ -489,7 +489,7 @@ const form = useForm<FormValues>({
                     name="category"
                     render={({ field }) => (
                       <FormItem className="w-full">
-                        <FormLabel className="text-lg w-full flex md:flex-row md:flex text-zinc-200">Categoria</FormLabel>
+                        <FormLabel className="flex w-full text-base text-zinc-200 md:flex-row md:flex sm:text-lg">Categoria</FormLabel>
                         <Select
                           value={field.value ?? ""}
                           onValueChange={field.onChange}
@@ -515,14 +515,14 @@ const form = useForm<FormValues>({
                 )}
               </div>
 
-              <div className="flex flex-col-reverse md:flex-row gap-8">
+              <div className="flex flex-col-reverse gap-6 md:flex-row md:gap-8">
                 {/* Academia */}
                 <FormField
                   control={form.control}
                   name="academy"
                   render={({ field }) => (
                     <FormItem className="w-full">
-                      <FormLabel className="text-lg text-zinc-200">
+                      <FormLabel className="text-base text-zinc-200 sm:text-lg">
                         Academia
                       </FormLabel>
                       <FormControl>
@@ -544,7 +544,7 @@ const form = useForm<FormValues>({
                     name="weight_kg"
                     render={({ field }) => (
                       <FormItem className="w-full">
-                        <FormLabel className="text-lg text-zinc-200">Peso</FormLabel>
+                        <FormLabel className="text-base text-zinc-200 sm:text-lg">Peso</FormLabel>
                         <FormControl>
                           <Input
                             type="number"
@@ -568,13 +568,13 @@ const form = useForm<FormValues>({
               </div>
 
               {/* Faixa e Gênero */}
-              <div className="flex flex-col md:flex-row gap-8">
+              <div className="flex flex-col gap-6 md:flex-row md:gap-8">
                 <FormField
                   control={form.control}
                   name="belt_color"
                   render={({ field }) => (
                     <FormItem className="w-full">
-                      <FormLabel className="text-lg text-zinc-200">Faixa</FormLabel>
+                      <FormLabel className="text-base text-zinc-200 sm:text-lg">Faixa</FormLabel>
                       <Select value={field.value ?? ""} onValueChange={field.onChange}>
                         <FormControl>
                           <SelectTrigger className="w-full rounded-2xl border-zinc-800 bg-black/40 text-zinc-100 cursor-pointer">
@@ -613,7 +613,7 @@ const form = useForm<FormValues>({
                   name="gender"
                   render={({ field }) => (
                     <FormItem className="w-full">
-                      <FormLabel className="text-lg text-zinc-200">Gênero</FormLabel>
+                      <FormLabel className="text-base text-zinc-200 sm:text-lg">Gênero</FormLabel>
                       <Select value={field.value ?? ""} onValueChange={field.onChange}>
                         <FormControl>
                           <SelectTrigger className="w-full rounded-2xl border-zinc-800 bg-black/40 text-zinc-100 cursor-pointer">
@@ -647,9 +647,9 @@ const form = useForm<FormValues>({
               )}
 
               {/* Modalidades */}
-              <div className="flex flex-wrap gap-6 w-full">
-                <div className="rounded-2xl border border-zinc-800 bg-black/30 p-4 w-full flex flex-col">
-                  <p className="text-lg text-zinc-200 font-medium mb-3 flex justify-center">
+              <div className="flex w-full flex-wrap gap-6">
+                <div className="flex w-full flex-col rounded-2xl border border-zinc-800 bg-black/30 p-4">
+                  <p className="mb-3 flex justify-center text-base font-medium text-zinc-200 sm:text-lg">
                     Seleção de Modalidades
                   </p>
 
@@ -675,7 +675,7 @@ const form = useForm<FormValues>({
                                   Gi (com kimono)
                                 </FormLabel>
                                 <p className="text-sm text-zinc-400">
-                                  Inclui a inscrição na modalidade tradicional.
+                                  Para quem quer competir na essencia do jiu-jitsu e medir tecnica, ritmo e controle.
                                 </p>
 
                                 {/* GI EXTRA / ABSOLUTO */}
@@ -699,7 +699,7 @@ const form = useForm<FormValues>({
                                               Absoluto
                                             </FormLabel>
                                             <p className="text-sm text-zinc-400">
-                                              Inclui a inscrição no Absoluto, campeão dos campeões.
+                                              Um desafio extra para quem quer ir alem da propria categoria e buscar destaque absoluto.
                                             </p>
                                             <FormMessage />
                                           </div>
@@ -733,7 +733,7 @@ const form = useForm<FormValues>({
                                   No-Gi (sem kimono)
                                 </FormLabel>
                                 <p className="text-sm text-zinc-400">
-                                  Inclui a inscrição na modalidade sem kimono.
+                                  Ideal para atletas que querem velocidade, pressao e leitura rapida de combate.
                                 </p>
                               </div>
 
@@ -744,7 +744,7 @@ const form = useForm<FormValues>({
                       </>
                     ) : (
                       <p className="text-sm text-zinc-400 text-center">
-                        Atletas abaixo de 8 anos participarão da modalidade <strong>Festival!</strong>
+                        Atletas abaixo de 8 anos participarao da modalidade <strong>Festival</strong>, com foco em vivencia esportiva e desenvolvimento.
                       </p>
                     )}
                   </div>
@@ -778,8 +778,7 @@ const form = useForm<FormValues>({
                         </a>
                       </FormLabel>
                       <p className="flex text-sm text-zinc-400">
-                        Ao prosseguir, confirmo que as informações fornecidas são verdadeiras
-                        e estou ciente das regras do evento.
+                        Ao prosseguir, confirmo que as informacoes fornecidas sao verdadeiras e que entro neste evento com responsabilidade, respeito e ciencia das regras oficiais.
                       </p>
                       <FormMessage />
                     </div>
