@@ -234,6 +234,7 @@ export default function CashClient() {
                 <div className="p-4 bg-black/40 rounded-xl border border-zinc-800">
                   <p className="text-center text-sm text-zinc-200">
                     Após confirmação do pagamento a inscrição será concluída.
+                    
                   </p>
                 </div>
 
