@@ -1,17 +1,37 @@
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 
-import BracketVisualization from "@/app/_components/chaveamento/BracketVisualization";
-import { getPaidAthletes, getStoredBrackets } from "@/app/_lib/chaveamento-server";
+import PublicBracketAccordion from "@/app/_components/chaveamento/PublicBracketAccordion";
+import { syncStoredBracketsWithParticipants } from "@/app/_lib/chaveamento-server";
 import { hydrateBrackets } from "@/app/_lib/chaveamento";
 
 export const dynamic = "force-dynamic";
 
 export default async function PublicChaveamentoPage() {
-  const athletes = await getPaidAthletes();
-  const storedBrackets = await getStoredBrackets();
+  const { athletes, brackets: storedBrackets } = await syncStoredBracketsWithParticipants();
   const athletesById = new Map(athletes.map((athlete) => [athlete.id, athlete]));
   const brackets = hydrateBrackets(storedBrackets, athletesById);
+
+  const groups = Array.from(
+    brackets.reduce((acc, bracket) => {
+      const categoryLabel = bracket.metadata.categoryLabel || "Outras chaves";
+      const current = acc.get(categoryLabel) ?? [];
+      current.push(bracket);
+      acc.set(categoryLabel, current);
+      return acc;
+    }, new Map<string, typeof brackets>())
+  )
+    .sort(([left], [right]) => left.localeCompare(right, "pt-BR"))
+    .map(([categoryLabel, categoryBrackets]) => ({
+      categoryLabel,
+      brackets: categoryBrackets,
+      athletesCountByBracketId: Object.fromEntries(
+        categoryBrackets.map((bracket) => [
+          bracket.id,
+          bracket.athleteIds.filter((id) => athletesById.has(id)).length,
+        ])
+      ),
+    }));
 
   return (
     <div className="min-h-screen bg-black text-zinc-100">
@@ -30,7 +50,7 @@ export default async function PublicChaveamentoPage() {
           <div className="text-xs uppercase tracking-[0.35em] text-zinc-500">Consulta publica</div>
           <h1 className="mt-2 text-3xl font-semibold text-zinc-50">Chaveamento</h1>
           <p className="mt-2 max-w-2xl text-sm text-zinc-400">
-            Visualizacao somente leitura das chaves criadas no painel administrativo.
+            Visualizacao das chaves separadas por categoria, com expansao individual de cada grupo.
           </p>
         </div>
 
@@ -39,17 +59,7 @@ export default async function PublicChaveamentoPage() {
             Nenhum chaveamento publicado ate o momento.
           </section>
         ) : (
-          <div className="space-y-6">
-            {brackets.map((bracket) => {
-              const athletesCount = bracket.athleteIds.filter((id) => athletesById.has(id)).length;
-
-              return (
-                <section key={bracket.id} className="rounded-3xl border border-zinc-800 bg-zinc-950/55 p-4 md:p-6">
-                  <BracketVisualization bracket={bracket} athletesCount={athletesCount} />
-                </section>
-              );
-            })}
-          </div>
+          <PublicBracketAccordion groups={groups} />
         )}
       </main>
     </div>

@@ -1,3 +1,11 @@
+import {
+  AUTOMATIC_BRACKET_RULES,
+  FESTIVAL_BRACKET_RULE,
+  genderLabel,
+  type AutomaticBracketRule,
+} from "@/app/_lib/chaveamento-rules";
+import { getCategoryLabel } from "@/app/_lib/types";
+
 export type Athlete = {
   id: string;
   nome: string;
@@ -5,6 +13,8 @@ export type Athlete = {
   peso: number | null;
   faixa: string;
   categoria: string | null;
+  sexo: "M" | "F" | null;
+  festival: boolean;
   status: string;
 };
 
@@ -30,6 +40,17 @@ export type BracketRound = {
   matches: BracketMatch[];
 };
 
+export type BracketMetadata = {
+  categoryLabel: string;
+  autoManaged: boolean;
+  groupKey: string | null;
+  ruleId: string | null;
+  ageLabel: string | null;
+  gender: "M" | "F" | null;
+  manualAthleteIds: string[];
+  manualExcludedAthleteIds: string[];
+};
+
 export type StoredBracket = {
   id: string;
   name: string;
@@ -37,6 +58,7 @@ export type StoredBracket = {
   description: string;
   slotAthleteIds: Array<string | null>;
   winnerSelections: Array<Array<MatchSide | null>>;
+  metadata: BracketMetadata;
 };
 
 export type Bracket = StoredBracket & {
@@ -48,6 +70,22 @@ type RoundEntrant = {
   label: string;
 };
 
+type AutoGroup = {
+  key: string;
+  name: string;
+  description: string;
+  athleteIds: string[];
+  metadata: BracketMetadata;
+};
+
+type RuleMatch = {
+  rule: AutomaticBracketRule;
+  groupKey: string;
+  name: string;
+  description: string;
+  metadata: BracketMetadata;
+};
+
 function getRoundTitle(matchCount: number) {
   if (matchCount <= 1) return "Final";
   if (matchCount === 2) return "Semifinal";
@@ -56,12 +94,143 @@ function getRoundTitle(matchCount: number) {
   return `Round ${matchCount}`;
 }
 
+export function createDefaultBracketMetadata(
+  overrides: Partial<BracketMetadata> = {}
+): BracketMetadata {
+  return {
+    categoryLabel: "Sem categoria",
+    autoManaged: false,
+    groupKey: null,
+    ruleId: null,
+    ageLabel: null,
+    gender: null,
+    manualAthleteIds: [],
+    manualExcludedAthleteIds: [],
+    ...overrides,
+  };
+}
+
+function uniqueIds(values: Array<string | null | undefined>) {
+  return Array.from(new Set(values.filter((value): value is string => Boolean(value))));
+}
+
+function sortAthletes(athletes: Athlete[]) {
+  return [...athletes].sort((left, right) => left.nome.localeCompare(right.nome, "pt-BR"));
+}
+
+function formatRange(label: string, min?: number, max?: number, unit = "") {
+  if (min === undefined && max === undefined) return `${label}: livre`;
+  if (min !== undefined && max !== undefined) return `${label}: ${min}${unit} a ${max}${unit}`;
+  if (min !== undefined) return `${label}: a partir de ${min}${unit}`;
+  return `${label}: ate ${max}${unit}`;
+}
+
+function matchesAutomaticRule(athlete: Athlete, rule: AutomaticBracketRule) {
+  if (athlete.festival) return false;
+  if (athlete.categoria !== rule.category) return false;
+  if (athlete.idade < rule.minAge || athlete.idade > rule.maxAge) return false;
+  if (rule.gender && athlete.sexo !== rule.gender) return false;
+  if (rule.minWeight !== undefined && (athlete.peso === null || athlete.peso < rule.minWeight)) return false;
+  if (rule.maxWeight !== undefined && (athlete.peso === null || athlete.peso > rule.maxWeight)) return false;
+  if (rule.separateByGender && !athlete.sexo) return false;
+  return true;
+}
+
+function buildRuleMatch(athlete: Athlete): RuleMatch | null {
+  if (athlete.festival) {
+    return {
+      rule: {
+        id: FESTIVAL_BRACKET_RULE.id,
+        ageLabel: FESTIVAL_BRACKET_RULE.label,
+        category: null,
+        categoryLabel: FESTIVAL_BRACKET_RULE.label,
+        minAge: 0,
+        maxAge: 99,
+        gender: null,
+        separateByGender: false,
+      },
+      groupKey: FESTIVAL_BRACKET_RULE.id,
+      name: FESTIVAL_BRACKET_RULE.label,
+      description: "Chave unica do festival infantil.",
+      metadata: createDefaultBracketMetadata({
+        categoryLabel: FESTIVAL_BRACKET_RULE.label,
+        autoManaged: true,
+        groupKey: FESTIVAL_BRACKET_RULE.id,
+        ruleId: FESTIVAL_BRACKET_RULE.id,
+        ageLabel: FESTIVAL_BRACKET_RULE.label,
+        gender: null,
+      }),
+    };
+  }
+
+  for (const rule of AUTOMATIC_BRACKET_RULES) {
+    if (!matchesAutomaticRule(athlete, rule)) continue;
+
+    const gender = rule.separateByGender ? athlete.sexo : null;
+    const key = `${rule.id}:${gender ?? "all"}`;
+    const sexLabel = gender ? genderLabel(gender) : null;
+    const nameParts = [rule.categoryLabel, rule.ageLabel, sexLabel].filter(Boolean);
+    const descriptionParts = [
+      `Categoria: ${rule.categoryLabel}`,
+      `Idade: ${rule.ageLabel} (${rule.minAge} a ${rule.maxAge})`,
+      formatRange("Peso", rule.minWeight, rule.maxWeight, "kg"),
+      sexLabel ? `Sexo: ${sexLabel}` : null,
+    ].filter(Boolean);
+
+    return {
+      rule,
+      groupKey: key,
+      name: nameParts.join(" - "),
+      description: descriptionParts.join(" • "),
+      metadata: createDefaultBracketMetadata({
+        categoryLabel: rule.categoryLabel,
+        autoManaged: true,
+        groupKey: key,
+        ruleId: rule.id,
+        ageLabel: rule.ageLabel,
+        gender,
+      }),
+    };
+  }
+
+  return null;
+}
+
+export function buildAutomaticBracketGroups(athletes: Athlete[]) {
+  const grouped = new Map<string, AutoGroup>();
+
+  for (const athlete of sortAthletes(athletes)) {
+    const match = buildRuleMatch(athlete);
+    if (!match) continue;
+
+    const current = grouped.get(match.groupKey);
+    if (current) {
+      current.athleteIds.push(athlete.id);
+      continue;
+    }
+
+    grouped.set(match.groupKey, {
+      key: match.groupKey,
+      name: match.name,
+      description: match.description,
+      athleteIds: [athlete.id],
+      metadata: match.metadata,
+    });
+  }
+
+  return Array.from(grouped.values())
+    .map((group) => ({ ...group, athleteIds: uniqueIds(group.athleteIds) }))
+    .filter((group) => group.athleteIds.length > 1)
+    .sort((left, right) => left.name.localeCompare(right.name, "pt-BR"));
+}
+
 export function buildBracketName(athletes: Athlete[]) {
   const categories = Array.from(new Set(athletes.map((athlete) => athlete.categoria ?? "Sem categoria")));
-  const belts = Array.from(new Set(athletes.map((athlete) => athlete.faixa)));
-  const categoryLabel = categories.length === 1 ? categories[0] : "Multicategoria";
-  const beltLabel = belts.length === 1 ? belts[0] : "Faixa mista";
-  return `${categoryLabel} - ${beltLabel}`;
+  const categoryLabel =
+    categories.length === 1
+      ? getCategoryLabel((categories[0] as Athlete["categoria"]) ?? null)
+      : "Multicategoria";
+  return `${categoryLabel} - Manual`;
 }
 
 export function createEmptyWinnerSelections(athleteCount: number) {
@@ -155,9 +324,84 @@ export function buildBracketRounds(
   return rounds;
 }
 
+function rebalanceSlots(existingSlots: Array<string | null>, athleteIds: string[]) {
+  const athleteSet = new Set(athleteIds);
+  const preservedSlots = existingSlots
+    .map((athleteId) => (athleteId && athleteSet.has(athleteId) ? athleteId : null))
+    .slice(0, athleteIds.length);
+
+  const assignedIds = new Set(preservedSlots.filter((athleteId): athleteId is string => Boolean(athleteId)));
+  const missingIds = athleteIds.filter((athleteId) => !assignedIds.has(athleteId));
+
+  for (let index = 0; index < preservedSlots.length; index += 1) {
+    if (preservedSlots[index] !== null) continue;
+    preservedSlots[index] = missingIds.shift() ?? null;
+  }
+
+  while (preservedSlots.length < athleteIds.length) {
+    preservedSlots.push(missingIds.shift() ?? null);
+  }
+
+  return preservedSlots;
+}
+
+function mergeAutomaticBracket(
+  existingBracket: StoredBracket | undefined,
+  group: AutoGroup
+): StoredBracket {
+  const currentMetadata = createDefaultBracketMetadata(existingBracket?.metadata);
+  const manualIncludedIds = uniqueIds(currentMetadata.manualAthleteIds);
+  const manualExcludedIds = new Set(uniqueIds(currentMetadata.manualExcludedAthleteIds));
+  const autoIds = group.athleteIds.filter((athleteId) => !manualExcludedIds.has(athleteId));
+  const finalAthleteIds = uniqueIds([...autoIds, ...manualIncludedIds]);
+  const slotAthleteIds = rebalanceSlots(existingBracket?.slotAthleteIds ?? [], finalAthleteIds);
+  const needsWinnerReset = slotAthleteIds.length !== (existingBracket?.slotAthleteIds.length ?? 0);
+  const winnerSelections = needsWinnerReset
+    ? createEmptyWinnerSelections(finalAthleteIds.length)
+    : existingBracket?.winnerSelections ?? createEmptyWinnerSelections(finalAthleteIds.length);
+
+  return {
+    id: existingBracket?.id ?? crypto.randomUUID(),
+    name: existingBracket?.name?.trim() || group.name,
+    athleteIds: finalAthleteIds,
+    description: group.description,
+    slotAthleteIds,
+    winnerSelections,
+    metadata: createDefaultBracketMetadata({
+      ...group.metadata,
+      manualAthleteIds: manualIncludedIds,
+      manualExcludedAthleteIds: Array.from(manualExcludedIds),
+    }),
+  };
+}
+
+export function syncAutomaticBrackets(
+  existingBrackets: StoredBracket[],
+  athletes: Athlete[]
+) {
+  const automaticGroups = buildAutomaticBracketGroups(athletes);
+  const autoByGroupKey = new Map(
+    existingBrackets
+      .filter((bracket) => createDefaultBracketMetadata(bracket.metadata).autoManaged)
+      .map((bracket) => [createDefaultBracketMetadata(bracket.metadata).groupKey, bracket] as const)
+      .filter((entry): entry is [string, StoredBracket] => Boolean(entry[0]))
+  );
+
+  const nextAutomaticBrackets = automaticGroups.map((group) =>
+    mergeAutomaticBracket(autoByGroupKey.get(group.key), group)
+  );
+
+  const manualBrackets = existingBrackets.filter(
+    (bracket) => !createDefaultBracketMetadata(bracket.metadata).autoManaged
+  );
+
+  return [...manualBrackets, ...nextAutomaticBrackets];
+}
+
 export function hydrateBracket(storedBracket: StoredBracket, athletesById: Map<string, Athlete>): Bracket {
   return {
     ...storedBracket,
+    metadata: createDefaultBracketMetadata(storedBracket.metadata),
     rounds: buildBracketRounds(storedBracket.slotAthleteIds, athletesById, storedBracket.winnerSelections),
   };
 }
@@ -174,7 +418,12 @@ export function serializeBrackets(brackets: Bracket[]): StoredBracket[] {
     description: bracket.description,
     slotAthleteIds: bracket.slotAthleteIds,
     winnerSelections: bracket.winnerSelections,
+    metadata: createDefaultBracketMetadata(bracket.metadata),
   }));
+}
+
+function isBracketMetadata(value: unknown): value is Partial<BracketMetadata> {
+  return Boolean(value) && typeof value === "object";
 }
 
 export function normalizeStoredBracket(value: unknown): StoredBracket | null {
@@ -199,6 +448,43 @@ export function normalizeStoredBracket(value: unknown): StoredBracket | null {
 
   if (!athleteIds || !slotAthleteIds || !winnerSelections) return null;
 
+  const metadata = isBracketMetadata(candidate.metadata)
+    ? createDefaultBracketMetadata({
+        categoryLabel:
+          typeof candidate.metadata.categoryLabel === "string"
+            ? candidate.metadata.categoryLabel
+            : undefined,
+        autoManaged:
+          typeof candidate.metadata.autoManaged === "boolean"
+            ? candidate.metadata.autoManaged
+            : undefined,
+        groupKey:
+          typeof candidate.metadata.groupKey === "string" || candidate.metadata.groupKey === null
+            ? candidate.metadata.groupKey
+            : undefined,
+        ruleId:
+          typeof candidate.metadata.ruleId === "string" || candidate.metadata.ruleId === null
+            ? candidate.metadata.ruleId
+            : undefined,
+        ageLabel:
+          typeof candidate.metadata.ageLabel === "string" || candidate.metadata.ageLabel === null
+            ? candidate.metadata.ageLabel
+            : undefined,
+        gender:
+          candidate.metadata.gender === "M" ||
+          candidate.metadata.gender === "F" ||
+          candidate.metadata.gender === null
+            ? candidate.metadata.gender
+            : undefined,
+        manualAthleteIds: Array.isArray(candidate.metadata.manualAthleteIds)
+          ? candidate.metadata.manualAthleteIds.filter((item): item is string => typeof item === "string")
+          : undefined,
+        manualExcludedAthleteIds: Array.isArray(candidate.metadata.manualExcludedAthleteIds)
+          ? candidate.metadata.manualExcludedAthleteIds.filter((item): item is string => typeof item === "string")
+          : undefined,
+      })
+    : createDefaultBracketMetadata();
+
   return {
     id: candidate.id,
     name: candidate.name,
@@ -206,5 +492,6 @@ export function normalizeStoredBracket(value: unknown): StoredBracket | null {
     description: candidate.description,
     slotAthleteIds: candidate.slotAthleteIds,
     winnerSelections: candidate.winnerSelections as Array<Array<MatchSide | null>>,
+    metadata,
   };
 }

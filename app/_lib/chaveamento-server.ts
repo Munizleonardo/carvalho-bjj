@@ -5,6 +5,7 @@ import {
   type Athlete,
   type StoredBracket,
   normalizeStoredBracket,
+  syncAutomaticBrackets,
 } from "@/app/_lib/chaveamento";
 
 type BracketRow = {
@@ -14,6 +15,7 @@ type BracketRow = {
   athlete_ids: unknown;
   slot_athlete_ids: unknown;
   winner_selections: unknown;
+  metadata?: unknown;
 };
 
 function mapAthlete(row: Record<string, unknown>): Athlete {
@@ -24,6 +26,8 @@ function mapAthlete(row: Record<string, unknown>): Athlete {
     peso: row.peso === null || row.peso === undefined ? null : Number(row.peso),
     faixa: String(row.faixa ?? ""),
     categoria: row.categoria === null || row.categoria === undefined ? null : String(row.categoria),
+    sexo: row.sexo === "M" || row.sexo === "F" ? row.sexo : null,
+    festival: Boolean(row.festival),
     status: String(row.status ?? ""),
   };
 }
@@ -36,6 +40,7 @@ function mapBracket(row: BracketRow): StoredBracket | null {
     athleteIds: row.athlete_ids,
     slotAthleteIds: row.slot_athlete_ids,
     winnerSelections: row.winner_selections,
+    metadata: row.metadata,
   });
 }
 
@@ -45,12 +50,20 @@ function isMissingTableError(error: { code?: string; message?: string } | null) 
   return (error.message ?? "").toLowerCase().includes("could not find the table");
 }
 
-export async function getPaidAthletes() {
+function isMissingMetadataColumnError(error: { code?: string; message?: string } | null) {
+  if (!error) return false;
+  const message = (error.message ?? "").toLowerCase();
+  return (
+    message.includes("column chaveamentos.metadata does not exist") ||
+    message.includes("could not find the 'metadata' column of 'chaveamentos'")
+  );
+}
+
+export async function getChaveamentoAthletes() {
   const sb = supabaseAdmin();
   const { data, error } = await sb
     .from("participantes")
-    .select("id, nome, idade, peso, faixa, categoria, status")
-    .eq("status", "paid")
+    .select("id, nome, idade, peso, faixa, categoria, sexo, festival, status")
     .order("nome", { ascending: true });
 
   if (error) {
@@ -62,10 +75,26 @@ export async function getPaidAthletes() {
 
 export async function getStoredBrackets() {
   const sb = supabaseAdmin();
-  const { data, error } = await sb
+  let data: BracketRow[] | null = null;
+  let error: { code?: string; message?: string } | null = null;
+
+  const primaryQuery = await sb
     .from("chaveamentos")
-    .select("id, name, description, athlete_ids, slot_athlete_ids, winner_selections")
+    .select("id, name, description, athlete_ids, slot_athlete_ids, winner_selections, metadata")
     .order("updated_at", { ascending: false });
+
+  data = (primaryQuery.data ?? null) as BracketRow[] | null;
+  error = primaryQuery.error;
+
+  if (isMissingMetadataColumnError(error)) {
+    const fallback = await sb
+      .from("chaveamentos")
+      .select("id, name, description, athlete_ids, slot_athlete_ids, winner_selections")
+      .order("updated_at", { ascending: false });
+
+    data = (fallback.data ?? null) as BracketRow[] | null;
+    error = fallback.error;
+  }
 
   if (error) {
     if (isMissingTableError(error)) return [];
@@ -86,12 +115,23 @@ export async function saveStoredBrackets(brackets: StoredBracket[]) {
     athlete_ids: bracket.athleteIds,
     slot_athlete_ids: bracket.slotAthleteIds,
     winner_selections: bracket.winnerSelections,
+    metadata: bracket.metadata,
+  }));
+  const legacyRows = brackets.map((bracket) => ({
+    id: bracket.id,
+    name: bracket.name,
+    description: bracket.description,
+    athlete_ids: bracket.athleteIds,
+    slot_athlete_ids: bracket.slotAthleteIds,
+    winner_selections: bracket.winnerSelections,
   }));
 
   const { data: existingRows, error: existingError } = await sb.from("chaveamentos").select("id");
   if (existingError) {
     if (isMissingTableError(existingError)) {
-      throw new Error("Tabela 'chaveamentos' nao encontrada. Execute o arquivo Notes/chaveamentos.sql no Supabase.");
+      throw new Error(
+        "Tabela 'chaveamentos' nao encontrada. Execute o arquivo Notes/chaveamentos.sql no Supabase."
+      );
     }
     throw new Error(existingError.message);
   }
@@ -101,7 +141,13 @@ export async function saveStoredBrackets(brackets: StoredBracket[]) {
   const idsToDelete = Array.from(existingIds).filter((id) => !nextIds.has(id));
 
   if (rows.length > 0) {
-    const { error: upsertError } = await sb.from("chaveamentos").upsert(rows, { onConflict: "id" });
+    let { error: upsertError } = await sb.from("chaveamentos").upsert(rows, { onConflict: "id" });
+
+    if (isMissingMetadataColumnError(upsertError)) {
+      const legacyUpsert = await sb.from("chaveamentos").upsert(legacyRows, { onConflict: "id" });
+      upsertError = legacyUpsert.error;
+    }
+
     if (upsertError) {
       throw new Error(upsertError.message);
     }
@@ -120,4 +166,11 @@ export async function saveStoredBrackets(brackets: StoredBracket[]) {
       throw new Error(clearError.message);
     }
   }
+}
+
+export async function syncStoredBracketsWithParticipants() {
+  const [athletes, storedBrackets] = await Promise.all([getChaveamentoAthletes(), getStoredBrackets()]);
+  const syncedBrackets = syncAutomaticBrackets(storedBrackets, athletes);
+  await saveStoredBrackets(syncedBrackets);
+  return { athletes, brackets: syncedBrackets };
 }

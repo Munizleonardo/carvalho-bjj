@@ -57,6 +57,23 @@ export type Category = (typeof categoryEnum)[number];
 export type BeltColor = (typeof beltEnum)[number];
 export type Gender = (typeof genderEnum)[number];
 
+export const categoryLabel: Record<Category, string> = {
+  GALO: "Galo",
+  PLUMA: "Pluma",
+  PENA: "Pena",
+  LEVE: "Leve",
+  MEDIO: "Medio",
+  MEIO_PESADO: "Meio Pesado",
+  PESADO: "Pesado",
+  SUPER_PESADO: "Super Pesado",
+  PESADISSIMO: "Pesadissimo",
+};
+
+export function getCategoryLabel(category?: string | null) {
+  if (!category) return "Sem categoria";
+  return categoryLabel[category as Category] ?? category;
+}
+
 export type ParticipantAdmin = { 
   id: string; 
   full_name: string; 

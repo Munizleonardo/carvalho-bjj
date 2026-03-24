@@ -2,21 +2,20 @@ import { CheckCheck, ClipboardList, CreditCard } from "lucide-react";
 
 export default function HowWorks() {
   return (
-    <section className="py-20 bg-black">
+    <section className="bg-black py-20">
       <div className="container mx-auto px-4">
         <div className="mb-12 text-center">
           <h2 className="mb-4 text-3xl font-bold text-zinc-100 md:text-4xl">
-            Como Funciona a Inscrição
+            Como funciona a inscricao
           </h2>
           <p className="mx-auto max-w-xl text-lg text-zinc-400">
-            Siga os passos abaixo para garantir sua vaga no campeonato
+            Tres passos simples para confirmar sua vaga e chegar focado para competir
           </p>
         </div>
 
         <div className="mx-auto grid max-w-5xl gap-6 md:grid-cols-3">
-          {/* Card 1 */}
           <div className="group relative overflow-hidden rounded-2xl border border-zinc-800 bg-zinc-950/60 p-6 shadow-sm transition hover:border-zinc-700 hover:bg-zinc-950">
-            <div className="absolute top-0 right-0 -mr-4 -mt-4 text-8xl font-bold text-red-500/10">
+            <div className="absolute right-0 top-0 -mr-4 -mt-4 text-8xl font-bold text-red-500/10">
               1
             </div>
 
@@ -25,18 +24,15 @@ export default function HowWorks() {
                 <ClipboardList className="h-5 w-5" />
               </div>
 
-              <h3 className="mb-2 text-lg font-semibold text-zinc-100">
-                Preencha seus dados
-              </h3>
+              <h3 className="mb-2 text-lg font-semibold text-zinc-100">Preencha seus dados</h3>
               <p className="text-sm text-zinc-400">
-                Insira suas informações pessoais e selecione as modalidadaes.
+                Informe seus dados com atencao e escolha as modalidades em que deseja competir.
               </p>
             </div>
           </div>
 
-          {/* Card 2 */}
           <div className="group relative overflow-hidden rounded-2xl border border-zinc-800 bg-zinc-950/60 p-6 shadow-sm transition hover:border-zinc-700 hover:bg-zinc-950">
-            <div className="absolute top-0 right-0 -mr-4 -mt-4 text-8xl font-bold text-red-500/10">
+            <div className="absolute right-0 top-0 -mr-4 -mt-4 text-8xl font-bold text-red-500/10">
               2
             </div>
 
@@ -45,18 +41,15 @@ export default function HowWorks() {
                 <CreditCard className="h-5 w-5" />
               </div>
 
-              <h3 className="mb-2 text-lg font-semibold text-zinc-100">
-                Pague via PIX
-              </h3>
+              <h3 className="mb-2 text-lg font-semibold text-zinc-100">Pague via PIX</h3>
               <p className="text-sm text-zinc-400">
-                Realize o pagamento usando a chave PIX fornecida
+                Conclua o pagamento com rapidez e avance para a confirmacao da sua inscricao.
               </p>
             </div>
           </div>
 
-          {/* Card 3 */}
           <div className="group relative overflow-hidden rounded-2xl border border-zinc-800 bg-zinc-950/60 p-6 shadow-sm transition hover:border-zinc-700 hover:bg-zinc-950">
-            <div className="absolute top-0 right-0 -mr-4 -mt-4 text-8xl font-bold text-red-500/10">
+            <div className="absolute right-0 top-0 -mr-4 -mt-4 text-8xl font-bold text-red-500/10">
               3
             </div>
 
@@ -66,10 +59,11 @@ export default function HowWorks() {
               </div>
 
               <h3 className="mb-2 text-lg font-semibold text-zinc-100">
-                Inscrição Realizada
+                Inscricao confirmada
               </h3>
               <p className="text-sm text-zinc-400">
-                Prepare-se para o campeonato.
+                Agora e hora de treinar forte, alinhar a estrategia e chegar pronto para o
+                desafio.
               </p>
             </div>
           </div>
