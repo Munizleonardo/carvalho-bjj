@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import * as React from "react";
 import Link from "next/link";
@@ -23,8 +23,10 @@ import {
 } from "@/app/_components/ui/dropdown-menu";
 import { Input } from "@/app/_components/ui/input";
 import {
+  buildAutomaticBracketGroups,
   buildBracketRounds,
   buildBracketName,
+  createDefaultBracketMetadata,
   createEmptyWinnerSelections,
   hydrateBrackets,
   serializeBrackets,
@@ -32,6 +34,7 @@ import {
   type Bracket,
   type MatchSide,
 } from "@/app/_lib/chaveamento";
+import { getCategoryLabel } from "@/app/_lib/types";
 
 type BracketMatch = Bracket["rounds"][number]["matches"][number];
 
@@ -43,16 +46,9 @@ function parseOptionalNumber(value: string): number | undefined {
 }
 
 function formatAthleteLabel(athlete: Athlete) {
-  return `${athlete.nome} - ${athlete.faixa} - ${
+  return `${athlete.nome} - ${athlete.sexo ?? "-"} - ${athlete.idade} anos - ${
     athlete.peso !== null ? `${athlete.peso}kg` : "-"
-  } - ${athlete.categoria ?? "-"}`;
-}
-
-function formatRangeLabel(label: string, min?: number, max?: number, unit = "") {
-  if (min === undefined && max === undefined) return `${label}: todos`;
-  if (min !== undefined && max !== undefined) return `${label}: ${min}${unit} a ${max}${unit}`;
-  if (min !== undefined) return `${label}: a partir de ${min}${unit}`;
-  return `${label}: ate ${max}${unit}`;
+  } - ${getCategoryLabel((athlete.categoria as Athlete["categoria"]) ?? null)}`;
 }
 
 function getSlotIndicesForMatch(matchIndex: number) {
@@ -118,7 +114,7 @@ function BracketVisualization({ bracket, athletesCount }: { bracket: Bracket; at
         </div>
         {champion ? (
           <div className="mx-auto rounded-full border border-emerald-500/60 bg-emerald-950/40 px-4 py-1 text-sm text-emerald-300">
-            Campeão: {champion.nome}
+            CampeÃ£o: {champion.nome}
           </div>
         ) : null}
       </div>
@@ -171,10 +167,12 @@ export default function ChaveamentoClient() {
   const [filterMaxWeight, setFilterMaxWeight] = React.useState("");
   const [selectedAthleteIds, setSelectedAthleteIds] = React.useState<string[]>([]);
   const [newBracketName, setNewBracketName] = React.useState("");
+  const [newCategoryLabel, setNewCategoryLabel] = React.useState("Manual");
   const [activeBracketId, setActiveBracketId] = React.useState<string | null>(null);
   const [editOpen, setEditOpen] = React.useState(false);
   const [editingBracketId, setEditingBracketId] = React.useState<string | null>(null);
   const [editingBracketName, setEditingBracketName] = React.useState("");
+  const [editingCategoryLabel, setEditingCategoryLabel] = React.useState("");
   const [editingAthleteIds, setEditingAthleteIds] = React.useState<string[]>([]);
   const [saveState, setSaveState] = React.useState<"idle" | "saving" | "saved" | "error">("idle");
   const [saveError, setSaveError] = React.useState<string | null>(null);
@@ -209,14 +207,14 @@ export default function ChaveamentoClient() {
     })();
   }, []);
 
-  const paidAthletes = React.useMemo(
-    () => athletes.filter((athlete) => (athlete.status ?? "").toLowerCase() === "paid"),
+  const athletesById = React.useMemo(
+    () => new Map(athletes.map((athlete) => [athlete.id, athlete])),
     [athletes]
   );
 
-  const athletesById = React.useMemo(
-    () => new Map(paidAthletes.map((athlete) => [athlete.id, athlete])),
-    [paidAthletes]
+  const automaticGroupsByKey = React.useMemo(
+    () => new Map(buildAutomaticBracketGroups(athletes).map((group) => [group.key, group])),
+    [athletes]
   );
 
   const activeBracket = React.useMemo(
@@ -247,14 +245,14 @@ export default function ChaveamentoClient() {
   const maxWeight = parseOptionalNumber(filterMaxWeight);
 
   const filteredAthletesForCreation = React.useMemo(() => {
-    return paidAthletes.filter((athlete) => {
+    return athletes.filter((athlete) => {
       if (minAge !== undefined && athlete.idade < minAge) return false;
       if (maxAge !== undefined && athlete.idade > maxAge) return false;
       if (minWeight !== undefined && (athlete.peso === null || athlete.peso < minWeight)) return false;
       if (maxWeight !== undefined && (athlete.peso === null || athlete.peso > maxWeight)) return false;
       return true;
     });
-  }, [paidAthletes, minAge, maxAge, minWeight, maxWeight]);
+  }, [athletes, minAge, maxAge, minWeight, maxWeight]);
 
   React.useEffect(() => {
     const allowedIds = new Set(filteredAthletesForCreation.map((athlete) => athlete.id));
@@ -296,6 +294,9 @@ export default function ChaveamentoClient() {
         }
 
         if (cancelled) return;
+        if (Array.isArray(json?.athletes)) {
+          setAthletes(json.athletes as Athlete[]);
+        }
         lastSavedPayloadRef.current = payload;
         setSaveState("saved");
       } catch (error) {
@@ -330,6 +331,7 @@ export default function ChaveamentoClient() {
     setFilterMaxWeight("");
     setSelectedAthleteIds([]);
     setNewBracketName("");
+    setNewCategoryLabel("Manual");
   }
 
   function openCreateModal() {
@@ -348,6 +350,7 @@ export default function ChaveamentoClient() {
 
     setEditingBracketId(bracket.id);
     setEditingBracketName(bracket.name);
+    setEditingCategoryLabel(bracket.metadata.categoryLabel);
     setEditingAthleteIds(bracket.athleteIds);
     setEditOpen(true);
   }
@@ -357,6 +360,7 @@ export default function ChaveamentoClient() {
     if (!open) {
       setEditingBracketId(null);
       setEditingBracketName("");
+      setEditingCategoryLabel("");
       setEditingAthleteIds([]);
     }
   }
@@ -379,12 +383,9 @@ export default function ChaveamentoClient() {
     const selectedAthletes = selectedAthleteIds
       .map((id) => athletesById.get(id))
       .filter((athlete): athlete is Athlete => Boolean(athlete));
-    const slotAthleteIds = Array.from({ length: selectedAthletes.length }, () => null as string | null);
+    const slotAthleteIds = selectedAthletes.map((athlete) => athlete.id);
     const winnerSelections = createEmptyWinnerSelections(selectedAthletes.length);
-    const description = [
-      formatRangeLabel("Idade", minAge, maxAge),
-      formatRangeLabel("Peso", minWeight, maxWeight, "kg"),
-    ].join(" • ");
+    const description = "Chave criada manualmente pelo painel administrativo.";
 
     const nextBracket: Bracket = {
       id: crypto.randomUUID(),
@@ -393,6 +394,10 @@ export default function ChaveamentoClient() {
       description,
       slotAthleteIds,
       winnerSelections,
+      metadata: createDefaultBracketMetadata({
+        categoryLabel: newCategoryLabel.trim() || "Manual",
+        autoManaged: false,
+      }),
       rounds: buildBracketRounds(slotAthleteIds, athletesById, winnerSelections),
     };
 
@@ -483,6 +488,25 @@ export default function ChaveamentoClient() {
         }
 
         const nextWinnerSelections = createEmptyWinnerSelections(editingAthleteIds.length);
+        const metadata = createDefaultBracketMetadata(bracket.metadata);
+        const selectedSet = new Set(editingAthleteIds);
+
+        const groupKey = metadata.groupKey;
+        const nextMetadata = metadata.autoManaged && groupKey
+          ? createDefaultBracketMetadata({
+              ...metadata,
+              manualAthleteIds: editingAthleteIds.filter(
+                (athleteId) => !new Set(automaticGroupsByKey.get(groupKey)?.athleteIds ?? []).has(athleteId)
+              ),
+              manualExcludedAthleteIds: (automaticGroupsByKey.get(groupKey)?.athleteIds ?? []).filter(
+                (athleteId) => !selectedSet.has(athleteId)
+              ),
+            })
+          : createDefaultBracketMetadata({
+              ...metadata,
+              categoryLabel: editingCategoryLabel.trim() || metadata.categoryLabel,
+              autoManaged: false,
+            });
 
         return {
           ...bracket,
@@ -490,6 +514,7 @@ export default function ChaveamentoClient() {
           athleteIds: editingAthleteIds,
           slotAthleteIds: nextSlotAthleteIds,
           winnerSelections: nextWinnerSelections,
+          metadata: nextMetadata,
           rounds: buildBracketRounds(nextSlotAthleteIds, athletesById, nextWinnerSelections),
         };
       })
@@ -506,10 +531,10 @@ export default function ChaveamentoClient() {
             <div>
               <h1 className="text-xl font-semibold">Chaveamento</h1>
               <p className="text-sm text-zinc-400">
-                Atletas pagos: {paidAthletes.length} • Chaves: {brackets.length} • Confrontos: {totalFights}
+                Atletas: {athletes.length} • Chaves: {brackets.length} • Confrontos: {totalFights}
               </p>
               <p className="mt-1 text-xs text-zinc-500">
-                Pagina publica: /chaveamento
+                Regras automaticas: app/_lib/chaveamento-rules.ts
                 {saveState === "saving" ? " • salvando..." : null}
                 {saveState === "saved" ? " • alteracoes publicadas" : null}
                 {saveState === "error" ? " • erro ao publicar" : null}
@@ -793,7 +818,7 @@ export default function ChaveamentoClient() {
             <section className="rounded-2xl border border-zinc-900 bg-zinc-950/40 p-4">
               <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
                 <div className="text-sm text-zinc-400">
-                  Filtre atletas pagos por idade e peso, crie a chave com nome editavel e monte as lutas ate a final.
+                  As chaves automaticas seguem as regras do arquivo app/_lib/chaveamento-rules.ts. Use esta area para criar excecoes manuais e ajustar confrontos.
                 </div>
                 <Button onClick={openCreateModal} className="w-full cursor-pointer bg-white text-black hover:bg-zinc-200 md:w-auto">
                   Criar nova chave
@@ -859,7 +884,7 @@ export default function ChaveamentoClient() {
           <DialogHeader>
             <DialogTitle>Criar nova chave</DialogTitle>
             <DialogDescription className="text-zinc-400">
-              Filtre por idade e peso e selecione apenas atletas com status pago.
+              Filtre por idade e peso e selecione atletas para uma chave manual.
             </DialogDescription>
           </DialogHeader>
 
@@ -893,13 +918,13 @@ export default function ChaveamentoClient() {
             </div>
 
             <div className="text-sm text-zinc-300">
-              Atletas encontrados: {filteredAthletesForCreation.length} • Selecionados: {selectedAthleteIds.length}
+              Atletas encontrados: {filteredAthletesForCreation.length} â€¢ Selecionados: {selectedAthleteIds.length}
             </div>
 
             <div className="max-h-72 space-y-2 overflow-y-auto rounded-xl border border-zinc-800 bg-black/40 p-3">
               {filteredAthletesForCreation.length === 0 ? (
                 <div className="py-6 text-center text-sm text-zinc-400">
-                  Nenhum atleta pago encontrado para os filtros informados.
+                  Nenhum atleta encontrado para os filtros informados.
                 </div>
               ) : (
                 filteredAthletesForCreation.map((athlete) => (
@@ -948,12 +973,12 @@ export default function ChaveamentoClient() {
             </div>
 
             <div className="max-h-72 space-y-2 overflow-y-auto rounded-xl border border-zinc-800 bg-black/40 p-3">
-              {paidAthletes.length === 0 ? (
+              {athletes.length === 0 ? (
                 <div className="py-6 text-center text-sm text-zinc-400">
-                  Nenhum atleta pago disponivel.
+                  Nenhum atleta disponivel.
                 </div>
               ) : (
-                paidAthletes.map((athlete) => (
+                athletes.map((athlete) => (
                   <label
                     key={athlete.id}
                     className="flex cursor-pointer items-center gap-3 rounded-lg border border-zinc-800 px-3 py-2 hover:bg-zinc-900/30"
@@ -995,3 +1020,4 @@ export default function ChaveamentoClient() {
     </div>
   );
 }
+

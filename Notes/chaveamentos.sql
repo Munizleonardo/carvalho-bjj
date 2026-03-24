@@ -5,8 +5,12 @@ create table if not exists public.chaveamentos (
   athlete_ids jsonb not null default '[]'::jsonb,
   slot_athlete_ids jsonb not null default '[]'::jsonb,
   winner_selections jsonb not null default '[]'::jsonb,
+  metadata jsonb not null default '{}'::jsonb,
   updated_at timestamptz not null default now()
 );
+
+alter table public.chaveamentos
+  add column if not exists metadata jsonb not null default '{}'::jsonb;
 
 create or replace function public.set_chaveamentos_updated_at()
 returns trigger
@@ -24,3 +28,4 @@ create trigger trg_chaveamentos_updated_at
 before update on public.chaveamentos
 for each row
 execute function public.set_chaveamentos_updated_at();
+

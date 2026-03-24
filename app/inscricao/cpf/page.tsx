@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Input } from "@/app/_components/ui/input";
 import { Button } from "@/app/_components/ui/button";
+import { getCategoryLabel } from "@/app/_lib/types";
 
 type Participante = {
   id: string;
@@ -113,7 +114,7 @@ export default function CheckCpfPage() {
                   <strong>Faixa:</strong> {participante.faixa}
                 </p>
                 <p>
-                  <strong>Categoria:</strong> {participante.categoria ?? "-"}
+                  <strong>Categoria:</strong> {getCategoryLabel((participante.categoria as never) ?? null)}
                 </p>
                 <p>
                   <strong>Peso:</strong> {participante.peso ?? "-"}

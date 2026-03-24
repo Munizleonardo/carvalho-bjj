@@ -32,11 +32,12 @@ import {
   categoryEnum,
   beltEnum,
   genderEnum,
-  type Category,
+  getCategoryLabel,
 } from "@/app/_lib/types";
 
 import { phoneMask } from "@/app/_lib/utils";
 import { isValidBrazilianCellPhone } from "@/app/_lib/utils";
+import { getDivisionLabel, resolveCategoryByAgeGenderWeight } from "@/app/_lib/weight-categories";
 
 // -------------------- SCHEMA ZOD --------------------
 const formSchema = z.object({
@@ -90,6 +91,30 @@ const formSchema = z.object({
       });
     }
 
+    if (!isFestivalAge && data.weight_kg === null) {
+      ctx.addIssue({
+        path: ["weight_kg"],
+        message: "Informe o peso do atleta",
+        code: z.ZodIssueCode.custom,
+      });
+    }
+
+    if (!isFestivalAge) {
+      const resolvedCategory = resolveCategoryByAgeGenderWeight({
+        age: data.age,
+        gender: data.gender,
+        weight: data.weight_kg,
+      });
+
+      if (!resolvedCategory) {
+        ctx.addIssue({
+          path: ["weight_kg"],
+          message: "Nao foi possivel localizar a categoria com os dados informados",
+          code: z.ZodIssueCode.custom,
+        });
+      }
+    }
+
     // 👶 VALIDAÇÃO RESPONSÁVEL LEGAL
     if (isFestivalAge) {
     if (!data.responsavel_name || data.responsavel_name.trim().length < 3) {
@@ -140,18 +165,6 @@ const beltOptions = [
 const genderOptions = [
   { label: "Masculino", value: "M" },
   { label: "Feminino", value: "F" },
-];
-
-const categoryOptions: Array<{ label: string; value: Category }> = [
-  { label: "Galo", value: "GALO" },
-  { label: "Pluma", value: "PLUMA" },
-  { label: "Pena", value: "PENA" },
-  { label: "Leve", value: "LEVE" },
-  { label: "Médio", value: "MEDIO" },
-  { label: "Meio Pesado", value: "MEIO_PESADO" },
-  { label: "Pesado", value: "PESADO" },
-  { label: "Super Pesado", value: "SUPER_PESADO" },
-  { label: "Pesadíssimo", value: "PESADISSIMO" },
 ];
 
 const itemInteractiveClass =
@@ -237,7 +250,24 @@ const form = useForm<FormValues>({
   }
 
   const age = form.watch("age");
+  const gender = form.watch("gender");
+  const weight = form.watch("weight_kg");
   const isFestivalAge = typeof age === "number" && age < 8;
+  const resolvedCategory = React.useMemo(
+    () =>
+      isFestivalAge
+        ? null
+        : resolveCategoryByAgeGenderWeight({
+            age,
+            gender,
+            weight,
+          }),
+    [age, gender, isFestivalAge, weight]
+  );
+  const divisionLabel = React.useMemo(
+    () => (isFestivalAge ? "Festival Infantil" : getDivisionLabel(age, gender)),
+    [age, gender, isFestivalAge]
+  );
 
   React.useEffect(() => {
     if (isFestivalAge) {
@@ -246,8 +276,14 @@ const form = useForm<FormValues>({
       form.setValue("mod_nogi", false);
       form.setValue("mod_gi_extra", false);
       form.setValue("weight_kg", null);
+      return;
     }
-  }, [isFestivalAge, form]);
+
+    form.setValue("category", resolvedCategory, {
+      shouldDirty: true,
+      shouldValidate: false,
+    });
+  }, [isFestivalAge, form, resolvedCategory]);
 
   const giSelected = form.watch("mod_gi");
 
@@ -487,27 +523,20 @@ const form = useForm<FormValues>({
                   <FormField
                     control={form.control}
                     name="category"
-                    render={({ field }) => (
+                    render={() => (
                       <FormItem className="w-full">
                         <FormLabel className="flex w-full text-base text-zinc-200 md:flex-row md:flex sm:text-lg">Categoria</FormLabel>
-                        <Select
-                          value={field.value ?? ""}
-                          onValueChange={field.onChange}
-                        >
-                          <FormControl>
-                            <SelectTrigger className="w-full flex rounded-2xl border-zinc-800 bg-black/40 text-zinc-100 cursor-pointer">
-                              <SelectValue placeholder="Selecione" />
-                            </SelectTrigger>
-                          </FormControl>
-
-                          <SelectContent className="border-zinc-800 bg-zinc-950 text-zinc-100">
-                            {categoryOptions.map((c) => (
-                              <SelectItem key={c.value} value={c.value}>
-                                {c.label}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
+                        <FormControl>
+                          <Input
+                            readOnly
+                            value={resolvedCategory ? getCategoryLabel(resolvedCategory) : ""}
+                            placeholder="Informe idade, sexo e peso"
+                            className="rounded-xl border-zinc-800 bg-black/40 text-zinc-100 placeholder:text-zinc-500 focus-visible:ring-red-500/30"
+                          />
+                        </FormControl>
+                        <p className="text-sm text-zinc-400">
+                          Divisao aplicada: {divisionLabel ?? "aguardando dados do atleta"}
+                        </p>
                         <FormMessage />
                       </FormItem>
                     )}
