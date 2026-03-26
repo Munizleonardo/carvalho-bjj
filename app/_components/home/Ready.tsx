@@ -26,61 +26,61 @@ const faqs: Array<{
     key: "evento",
     title: "Sobre o Evento",
     answer:
-      "Este campeonato foi idealizado para oferecer uma experiencia competitiva seria, organizada e inspiradora. A cada luta, o objetivo e valorizar o preparo do atleta e o respeito pelo tatame.",
+      "Este campeonato foi idealizado para oferecer uma experiência competitiva seria, organizada e inspiradora. A cada luta, o objetivo e valorizar o preparo do atleta e o respeito pelo tatame.",
   },
   {
     key: "local",
     title: "Local do Evento",
     answer:
-      "O endereco oficial pode ser atualizado neste bloco sempre que a edicao for confirmada. A recomendacao e chegar com antecedencia para credenciamento, aquecimento e orientacoes iniciais.",
+      "O endereço oficial pode ser atualizado neste bloco sempre que a edição for confirmada. A recomendação é chegar com antecedência para credenciamento, aquecimento e orientações iniciais.",
   },
   {
     key: "valores",
-    title: "Valores de Inscricoes",
+    title: "Valores de Inscrições",
     answer:
-      "Os valores podem variar conforme as modalidades escolhidas. O sistema apresenta o total final com clareza para que o atleta conclua a inscricao com seguranca.",
+      "Os valores podem variar conforme as modalidades escolhidas. O sistema apresenta o total final com clareza para que o atleta conclua a inscrição com segurança.",
   },
   {
     key: "pagamento",
     title: "Formas de Pagamento",
     answer:
-      "O pagamento e realizado por PIX, de forma pratica e objetiva. Depois da inscricao, o atleta recebe as instrucoes para finalizar a etapa e garantir sua vaga.",
+      "O pagamento é realizado por PIX, de forma prática e objetiva. Depois da inscrição, o atleta recebe as instruções para finalizar a etapa e garantir sua vaga.",
   },
   {
     key: "premiacoes",
-    title: "Premiacoes",
+    title: "Premiações",
     answer:
-      "A premiacao reconhece desempenho, entrega e merito esportivo. Os detalhes oficiais de cada edicao podem ser ajustados aqui conforme a proposta do campeonato.",
+      "A premiação reconhece desempenho, entrega e mérito esportivo. Os detalhes oficiais de cada edição podem ser ajustados aqui conforme a proposta do campeonato.",
   },
   {
     key: "categorias",
     title: "Categorias",
     answer:
-      "As categorias seguem criterios de faixa, idade e peso para manter o chaveamento equilibrado. Isso fortalece disputas mais justas e valoriza o nivel tecnico do evento.",
+      "As categorias seguem critérios de faixa, idade e peso para manter o chaveamento equilibrado. Isso fortalece disputas mais justas e valoriza o nível técnico do evento.",
   },
   {
     key: "absoluto",
     title: "Absoluto",
     answer:
-      "Quando estiver disponivel, o Absoluto amplia o desafio para quem busca ir alem da propria categoria. As regras e condicoes podem ser personalizadas conforme a edicao.",
+      "Quando estiver disponível, o Absoluto amplia o desafio para quem busca ir além da própria categoria. As regras e condições podem ser personalizadas conforme a edição.",
   },
   {
     key: "regras",
     title: "Regras",
     answer:
-      "O regulamento define pontuacao, condutas e orientacoes do evento. A ideia e garantir competitividade com disciplina, transparencia e respeito em todas as areas da competicao.",
+      "O regulamento define pontuação, condutas e orientações do evento. A ideia é garantir competitividade com disciplina, transparência e respeito em todas as áreas da competição.",
   },
   {
     key: "imagem",
     title: "Direito de Imagem",
     answer:
-      "A participacao no evento pode envolver captacao de fotos e videos para comunicacao oficial do campeonato. Havendo alguma restricao especifica, a organizacao deve ser avisada com antecedencia.",
+      "A participação no evento pode envolver captação de fotos e vídeos para comunicação oficial do campeonato. Havendo alguma restrição específica, a organização deve ser avisada com antecedencia.",
   },
   {
     key: "inscricao",
-    title: "Confirmacao da Inscricao",
+    title: "Confirmação da Inscrição",
     answer:
-      "A inscricao so e considerada concluida apos a etapa de pagamento ser confirmada. Depois disso, o atleta segue com mais seguranca para a preparacao e acompanhamento das informacoes do evento.",
+      "A inscrição só é considerada concluída após a etapa de pagamento ser confirmada. Depois disso, o atleta segue com mais segurança para a preparação e acompanhamento das informações do evento.",
   },
 ];
 
@@ -111,9 +111,6 @@ function FAQCard({
         <div className="flex w-full items-center justify-between gap-4">
           <div className="flex flex-col">
             <span className="text-base font-semibold text-zinc-100">{title}</span>
-            <span className="mt-1 text-xs uppercase tracking-[0.16em] text-zinc-500">
-              Clique para ver
-            </span>
           </div>
           <span
             className={[
@@ -156,12 +153,8 @@ export default function Ready() {
           <div className="relative">
             <div className="mb-8 text-center">
               <h2 className="text-2xl font-bold text-zinc-100 md:text-3xl">
-                Duvidas frequentes
+                Dúvidas frequentes
               </h2>
-              <p className="mx-auto mt-3 max-w-2xl text-sm text-zinc-400 sm:text-base">
-                No celular, cada bloco abre de forma individual para facilitar a leitura sem
-                poluir a tela.
-              </p>
             </div>
 
             <div className="grid gap-4 md:grid-cols-2 md:gap-6">
@@ -203,7 +196,7 @@ export default function Ready() {
             </div>
 
             <div className="mt-10 text-center text-sm text-zinc-400">
-              Se ainda restar alguma duvida, fale com a organizacao e receba a orientacao
+              Se ainda restar alguma dúvida, fale com a organização e receba a orientação
               certa antes de entrar no tatame.
             </div>
           </div>
@@ -214,9 +207,10 @@ export default function Ready() {
               variant="outline"
               className="mt-3 flex h-12 w-full items-center justify-center rounded-xl border-zinc-700 bg-green-600 text-sm font-medium text-zinc-200 transition-colors hover:bg-green-500 hover:text-white sm:h-14 sm:w-auto sm:bg-black sm:text-base sm:hover:bg-green-600"
             >
-              <Link href="https://wa.me/5522999809455" target="_blank">
-                <MessageCircleIcon className="h-5 w-5" />
-                Contate a Organizacao
+              <Link href="https://wa.me/5522999809455" target="_blank" className="mt-3 flex h-12 w-full items-center justify-center rounded-xl border-zinc-700 bg-green-600 text-sm font-medium text-zinc-200 transition-colors hover:bg-green-500 hover:text-white sm:h-14 sm:w-auto sm:bg-black sm:text-base sm:hover:bg-green-600"
+>
+                <MessageCircleIcon className="h-5 w-5 " />
+                Contate a Organização
               </Link>
             </Button>
           </div>

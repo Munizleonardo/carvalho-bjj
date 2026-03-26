@@ -6,7 +6,7 @@ export default function HowWorks() {
       <div className="container mx-auto px-4">
         <div className="mb-12 text-center">
           <h2 className="mb-4 text-3xl font-bold text-zinc-100 md:text-4xl">
-            Como funciona a inscricao
+            Como funciona a inscrição
           </h2>
           <p className="mx-auto max-w-xl text-lg text-zinc-400">
             Tres passos simples para confirmar sua vaga e chegar focado para competir
@@ -26,7 +26,7 @@ export default function HowWorks() {
 
               <h3 className="mb-2 text-lg font-semibold text-zinc-100">Preencha seus dados</h3>
               <p className="text-sm text-zinc-400">
-                Informe seus dados com atencao e escolha as modalidades em que deseja competir.
+                Informe seus dados com atenção e escolha as modalidades em que deseja competir.
               </p>
             </div>
           </div>
@@ -43,7 +43,7 @@ export default function HowWorks() {
 
               <h3 className="mb-2 text-lg font-semibold text-zinc-100">Pague via PIX</h3>
               <p className="text-sm text-zinc-400">
-                Conclua o pagamento com rapidez e avance para a confirmacao da sua inscricao.
+                Conclua o pagamento com rapidez e avançe para a confirmação da sua inscrição.
               </p>
             </div>
           </div>
@@ -59,10 +59,10 @@ export default function HowWorks() {
               </div>
 
               <h3 className="mb-2 text-lg font-semibold text-zinc-100">
-                Inscricao confirmada
+                Inscrição confirmada
               </h3>
               <p className="text-sm text-zinc-400">
-                Agora e hora de treinar forte, alinhar a estrategia e chegar pronto para o
+                Agora e hora de treinar forte, alinhar a estratégia e chegar pronto para o
                 desafio.
               </p>
             </div>
