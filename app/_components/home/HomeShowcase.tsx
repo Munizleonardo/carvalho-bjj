@@ -40,124 +40,101 @@ const teamStats = [
 ];
 
 const galleryItems = [
-  {
-    title: "Final adulto faixa preta",
+  { 
     image:
-      "https://commons.wikimedia.org/wiki/Special:FilePath/ROBERTO%20CYBORG%20ABREU%202009%20BJJ%20Championships.jpg",
+      "/img/",
   },
   {
-    title: "Armbar em disputa",
     image:
-      "https://commons.wikimedia.org/wiki/Special:FilePath/Brazilian%20Jiu-Jitsu%20Gi%20Competition-Armbar.jpg",
+      "/img/",
   },
   {
-    title: "No gi de alto nivel",
     image:
-      "https://commons.wikimedia.org/wiki/Special:FilePath/IBJJF%20World%20No%20Gi%20Championship%202019.jpg",
+      "/img/",
   },
   {
-    title: "Pan americano em acao",
     image:
-      "https://commons.wikimedia.org/wiki/Special:FilePath/Lucas%20Leite%202009%20BJJ%20Championships.jpg",
+      "/img/",
   },
   {
-    title: "Disputa por triangulo",
     image:
-      "https://commons.wikimedia.org/wiki/Special:FilePath/GABRIEL%20VELLA%20vs%20ROMINHO%2051.jpg",
+      "/img/",
   },
   {
-    title: "Luta ouro da competicao",
     image:
-      "https://commons.wikimedia.org/wiki/Special:FilePath/Summer%20Scramble%202.jpg",
+      "/img/",
   },
   {
-    title: "Abertura com publico",
     image:
-      "https://commons.wikimedia.org/wiki/Special:FilePath/Brazilian%20Jiu-Jitsu%20at%20PSU.jpg",
+      "/img/",
   },
   {
-    title: "Atletas em transicao",
     image:
-      "https://commons.wikimedia.org/wiki/Special:FilePath/Jiu-jitsu%20tournament%20with%20local%20Australians%2C%20U.S.%20Marine%20150725-M-BX631-117.jpg",
+      "/img/",
   },
   {
-    title: "Takedown em campeonato",
     image:
-      "https://commons.wikimedia.org/wiki/Special:FilePath/Looking%20for%20the%20takedown.jpg",
+      "/img/",
   },
   {
-    title: "Luta masters",
     image:
-      "https://commons.wikimedia.org/wiki/Special:FilePath/Masters%20seniors.jpg",
+      "/img/",
   },
   {
-    title: "No gi em destaque",
     image:
-      "https://commons.wikimedia.org/wiki/Special:FilePath/Nicholas%20Moraes%20At%20the%20Pan%20Ams%20No%20Gi%20-%20Silver%20medalist%20black%20belt%20light%20weight%20division%20-%20Ibjjf%202014-06-29%2003-42.jpg",
+      "/img/",
   },
   {
-    title: "Competicao em alto ritmo",
-    image: "https://commons.wikimedia.org/wiki/Special:FilePath/XIICLD.jpg",
+    image: 
+      "/img/",
   },
   {
-    title: "Equipe em aquecimento",
     image:
-      "https://commons.wikimedia.org/wiki/Special:FilePath/Brazilian%20Jiu-Jitsu%20training%20with%20CJTF-HOA%20and%20French%20Partners%20%289406536%29.jpg",
+      "/img/",
   },
   {
-    title: "Disputa em pe",
     image:
-      "https://commons.wikimedia.org/wiki/Special:FilePath/Jiu-jitsu%20tournament%20with%20local%20Australians%2C%20U.S.%20Marine%20150725-M-BX631-152.jpg",
+      "/img/",
+  },
+  {   
+    image:
+      "/img/",
   },
   {
-    title: "Combate tecnico",
     image:
-      "https://commons.wikimedia.org/wiki/Special:FilePath/Jiu-jitsu%20tournament%20with%20local%20Australians%2C%20U.S.%20Marine%20150725-M-BX631-078.jpg",
+      "/img/",
   },
   {
-    title: "Momento decisivo",
     image:
-      "https://commons.wikimedia.org/wiki/Special:FilePath/Jiu-jitsu%20tournament%20with%20local%20Australians%2C%20U.S.%20Marine%20150725-M-BX631-085.jpg",
+      "/img/",
   },
   {
-    title: "Chamada para a luta",
     image:
-      "https://commons.wikimedia.org/wiki/Special:FilePath/ROBERTO%20CYBORG%20ABREU%202009%20BJJ%20Championships.jpg",
+      "/img/",
   },
   {
-    title: "Queda e controle",
     image:
-      "https://commons.wikimedia.org/wiki/Special:FilePath/Brazilian%20Jiu-Jitsu%20Gi%20Competition-Armbar.jpg",
+      "/img/",
   },
   {
-    title: "Equipe em destaque",
     image:
-      "https://commons.wikimedia.org/wiki/Special:FilePath/Summer%20Scramble%202.jpg",
+      "/img/",
   },
   {
-    title: "Troca intensa de pegadas",
     image:
-      "https://commons.wikimedia.org/wiki/Special:FilePath/GABRIEL%20VELLA%20vs%20ROMINHO%2051.jpg",
+      "/img/",
   },
   {
-    title: "Plateia acompanhando",
     image:
-      "https://commons.wikimedia.org/wiki/Special:FilePath/Brazilian%20Jiu-Jitsu%20at%20PSU.jpg",
+      "/img/",
   },
   {
-    title: "Faixa preta em acao",
     image:
-      "https://commons.wikimedia.org/wiki/Special:FilePath/Lucas%20Leite%202009%20BJJ%20Championships.jpg",
+      "/img/",
   },
   {
-    title: "No gi em intensidade",
     image:
-      "https://commons.wikimedia.org/wiki/Special:FilePath/IBJJF%20World%20No%20Gi%20Championship%202019.jpg",
-  },
-  {
-    title: "Finalizacao e resposta",
-    image:
-      "https://commons.wikimedia.org/wiki/Special:FilePath/Looking%20for%20the%20takedown.jpg",
+      "/img/",
   },
 ];
 
@@ -251,7 +228,7 @@ export default function HomeShowcase() {
 
     const interval = window.setInterval(() => {
       setCurrentPage((page) => (page + 1) % galleryPages.length);
-    }, 4000);
+    }, 8000);
 
     return () => window.clearInterval(interval);
   }, [galleryPages.length]);
@@ -351,21 +328,18 @@ export default function HomeShowcase() {
             <div className="grid grid-cols-2 gap-4 sm:grid-cols-2 sm:gap-5 xl:grid-cols-4">
               {(galleryPages[currentPage] ?? []).map((item) => (
                 <figure
-                  key={`${item.title}-${item.image}`}
+                  key={`${item.image}`}
                   className="group relative h-36 overflow-hidden rounded-[1.25rem] border border-zinc-800 bg-black sm:h-52 sm:rounded-[1.5rem]"
                 >
                   <Image
                     src={item.image}
-                    alt={item.title}
+                    alt=""
                     fill
                     unoptimized
                     sizes="(max-width: 640px) 100vw, (max-width: 1280px) 50vw, 25vw"
                     className="object-cover transition duration-500 group-hover:scale-105 group-hover:opacity-75"
                   />
                   <div className="absolute inset-0 bg-linear-to-t from-black via-black/20 to-transparent" />
-                  <figcaption className="absolute inset-x-0 bottom-0 p-3 text-xs font-medium text-zinc-100 sm:p-4 sm:text-sm">
-                    {item.title}
-                  </figcaption>
                 </figure>
               ))}
             </div>

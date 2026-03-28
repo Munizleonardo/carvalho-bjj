@@ -1,276 +1,73 @@
-﻿"use client";
+"use client";
 
-import { useSearchParams } from "next/navigation";
-import * as React from "react";
-import { z } from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Checkbox } from "@/app/_components/ui/checkbox";
-import { createParticipant } from "@/app/_lib/actions/createParticipante";
-import { Button } from "@/app/_components/ui/button";
-import { Input } from "@/app/_components/ui/input";
-import { useForm } from "react-hook-form";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/app/_components/ui/form";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/app/_components/ui/select";
+import { useRouter, useSearchParams } from "next/navigation";
+import * as React from "react";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { ArrowLeft } from "lucide-react";
+import { useForm } from "react-hook-form";
 
+import { AthleteDetailsSection } from "@/app/_components/inscricao/AthleteDetailsSection";
+import { AthleteInfoSection } from "@/app/_components/inscricao/AthleteInfoSection";
 import {
-  categoryEnum,
-  beltEnum,
-  genderEnum,
-  getCategoryLabel,
-} from "@/app/_lib/types";
+  isFestivalAthlete,
+  splitPhoneParts,
+} from "@/app/_components/inscricao/constants";
+import { ModalitiesSection } from "@/app/_components/inscricao/ModalitiesSection";
+import { TermsSection } from "@/app/_components/inscricao/TermsSection";
+import { Button } from "@/app/_components/ui/button";
+import { Form } from "@/app/_components/ui/form";
+import { createParticipant } from "@/app/_lib/actions/createParticipante";
+import {
+  getDefaultFormValues,
+  formSchema,
+  type FormValues,
+} from "@/app/inscricao/form-schema";
+import {
+  getDivisionLabel,
+  resolveCategoryByAgeGenderWeight,
+} from "@/app/_lib/weight-categories";
 
-import { phoneMask } from "@/app/_lib/utils";
-import { isValidBrazilianCellPhone } from "@/app/_lib/utils";
-import { getDivisionLabel, resolveCategoryByAgeGenderWeight } from "@/app/_lib/weight-categories";
-
-// -------------------- SCHEMA ZOD --------------------
-const formSchema = z.object({
-  full_name: z.string().min(3, { message: "Informe o nome completo" }),
-  cpf: z.string().min(11, { message: "Informe um CPF válido" }),
-  phone: z
-    .string()
-    .nonempty({ message: "Informe um telefone para contato" })
-    .refine(isValidBrazilianCellPhone, {
-      message: "Informe um telefone válido com DDD (ex: (11) 98765-4321)",
-    }),
-
-  age: z
-    .number({ message: "Idade inválida" })
-    .int({ message: "Idade deve ser um número inteiro" })
-    .min(4, { message: "Idade mínima é 4 anos" })
-    .max(90, { message: "Idade máxima é 90 anos" }),
-
-  academy: z.string().optional(),
-
-  mod_gi: z.boolean(),
-  mod_nogi: z.boolean(),
-  mod_gi_extra: z.boolean(),
-
-  category: z.enum(categoryEnum).nullable(),
-
-  weight_kg: z
-    .number({ message: "Peso inválido" })
-    .min(10, { message: "Peso mínimo é 10kg" })
-    .max(300, { message: "Peso máximo é 300kg" })
-    .nullable(),
-
-  belt_color: z.enum(beltEnum),
-  gender: z.enum(genderEnum),
-
-  responsavel_name: z.string().optional(),
-  responsavel_cpf: z.string().optional(),
-  responsavel_telefone: z.string().optional(),
-
-  terms: z.boolean().refine((val) => val === true, {
-    message: "Você deve aceitar os termos para continuar",
-  }),
-  }).superRefine((data, ctx) => {
-    const isFestivalAge = typeof data.age === "number" && data.age < 8;
-
-    if (!isFestivalAge && !data.mod_gi && !data.mod_nogi) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        path: ["mod_gi"],
-        message: "Selecione pelo menos uma modalidade",
-      });
-    }
-
-    if (!isFestivalAge && data.weight_kg === null) {
-      ctx.addIssue({
-        path: ["weight_kg"],
-        message: "Informe o peso do atleta",
-        code: z.ZodIssueCode.custom,
-      });
-    }
-
-    if (!isFestivalAge) {
-      const resolvedCategory = resolveCategoryByAgeGenderWeight({
-        age: data.age,
-        gender: data.gender,
-        weight: data.weight_kg,
-      });
-
-      if (!resolvedCategory) {
-        ctx.addIssue({
-          path: ["weight_kg"],
-          message: "Nao foi possivel localizar a categoria com os dados informados",
-          code: z.ZodIssueCode.custom,
-        });
-      }
-    }
-
-    // 👶 VALIDAÇÃO RESPONSÁVEL LEGAL
-    if (isFestivalAge) {
-    if (!data.responsavel_name || data.responsavel_name.trim().length < 3) {
-      ctx.addIssue({
-        path: ["responsavel_name"],
-        message: "Informe o nome do responsável legal",
-        code: z.ZodIssueCode.custom,
-      });
-    }
-
-    if (!data.responsavel_cpf || data.responsavel_cpf.trim().length < 11) {
-      ctx.addIssue({
-        path: ["responsavel_cpf"],
-        message: "Informe o CPF do responsável legal",
-        code: z.ZodIssueCode.custom,
-      });
-    }
-
-    if (
-      !data.responsavel_telefone ||
-      !isValidBrazilianCellPhone(data.responsavel_telefone)
-    ) {
-      ctx.addIssue({
-        path: ["responsavel_telefone"],
-        message:
-          "Informe um telefone válido do responsável (ex: (11) 98765-4321)",
-        code: z.ZodIssueCode.custom,
-      });
-    }
-  }
-});
-
-export type FormValues = z.infer<typeof formSchema>;
-
-// -------------------- OPTIONS --------------------
-const beltOptions = [
-  { label: "Cinza", value: "CINZA" },
-  { label: "Amarela", value: "AMARELA" },
-  { label: "Laranja", value: "LARANJA" },
-  { label: "Verde", value: "VERDE" },
-  { label: "Branca", value: "BRANCA" },
-  { label: "Azul", value: "AZUL" },
-  { label: "Roxa", value: "ROXA" },
-  { label: "Marrom", value: "MARROM" },
-  { label: "Preta", value: "PRETA" },
-];
-
-const genderOptions = [
-  { label: "Masculino", value: "M" },
-  { label: "Feminino", value: "F" },
-];
-
-const itemInteractiveClass =
-  "cursor-pointer focus:outline-none data-[highlighted]:bg-zinc-900 data-[highlighted]:text-zinc-100 hover:bg-zinc-900/60";
-
-  
-
-// -------------------- COMPONENT --------------------
 function InscricaoContent() {
   const router = useRouter();
-  const [submitting, setSubmitting] = React.useState(false);
-  const [serverError, setServerError] = React.useState<string | null>(null);
   const searchParams = useSearchParams();
   const cpfFromQuery = searchParams.get("cpf");
+  const [submitting, setSubmitting] = React.useState(false);
+  const [serverError, setServerError] = React.useState<string | null>(null);
 
-const form = useForm<FormValues>({
-  resolver: zodResolver(formSchema),
-  shouldUnregister: true,
-  defaultValues: {
-    cpf: cpfFromQuery ?? "",
-    full_name: "",
-    phone: "",
-    academy: "",
-    mod_gi: false,
-    mod_nogi: false,
-    mod_gi_extra: false,
-    terms: false,
-    category: null,
-    weight_kg: null,
-    responsavel_name: "",
-    responsavel_cpf: "",
-    responsavel_telefone: "",
-  },
-});
-
-  async function onSubmit(values: FormValues) {
-    setSubmitting(true);
-    setServerError(null);
-
-    try {
-      const isFestivalAge = values.age < 8;
-      const phoneClean = values.phone.replace(/\D/g, "");
-      const area_code = phoneClean.slice(0, 2);
-      const phone_number = phoneClean.slice(2);
-
-      const responsavelPhoneClean = isFestivalAge
-        ? values.responsavel_telefone?.replace(/\D/g, "") ?? ""
-        : "";
-      const responsavel_area_code = isFestivalAge
-        ? responsavelPhoneClean.slice(0, 2)
-        : undefined;
-      const responsavel_phone_number = isFestivalAge
-        ? responsavelPhoneClean.slice(2)
-        : undefined;
-
-      const id = await createParticipant({
-        full_name: values.full_name.trim(),
-        cpf: values.cpf.trim(),
-        phone_number,
-        area_code,
-        age: values.age,
-        academy: values.academy?.trim(),
-        category: isFestivalAge ? null : values.category,
-        weight_kg: isFestivalAge ? null : values.weight_kg,
-        belt_color: values.belt_color,
-        gender: values.gender,
-        mod_gi: values.mod_gi,
-        mod_nogi: values.mod_nogi,
-        mod_gi_extra: values.mod_gi_extra,
-        responsavel_name: isFestivalAge ? values.responsavel_name?.trim() : undefined,
-        responsavel_cpf: isFestivalAge ? values.responsavel_cpf?.trim() : undefined,
-        responsavel_area_code: isFestivalAge ? responsavel_area_code : undefined,
-        responsavel_phone_number: isFestivalAge ? responsavel_phone_number : undefined,
-      });
-
-      router.push(`/cash?id=${encodeURIComponent(id)}`);
-    } catch (e) {
-      console.error(e);
-      setServerError(e instanceof Error ? e.message : "Não foi possível concluir sua inscrição.");
-    } finally {
-      setSubmitting(false);
-    }
-  }
+  const form = useForm<FormValues>({
+    resolver: zodResolver(formSchema),
+    shouldUnregister: true,
+    defaultValues: getDefaultFormValues(cpfFromQuery),
+  });
 
   const age = form.watch("age");
   const gender = form.watch("gender");
   const weight = form.watch("weight_kg");
-  const isFestivalAge = typeof age === "number" && age < 8;
+  const termsAccepted = form.watch("terms");
+  const giSelected = form.watch("mod_gi");
+  const festivalAthlete = isFestivalAthlete(age);
+
   const resolvedCategory = React.useMemo(
     () =>
-      isFestivalAge
+      festivalAthlete
         ? null
         : resolveCategoryByAgeGenderWeight({
             age,
             gender,
             weight,
           }),
-    [age, gender, isFestivalAge, weight]
+    [age, festivalAthlete, gender, weight]
   );
+
   const divisionLabel = React.useMemo(
-    () => (isFestivalAge ? "Festival Infantil" : getDivisionLabel(age, gender)),
-    [age, gender, isFestivalAge]
+    () =>
+      festivalAthlete ? "Festival Infantil" : getDivisionLabel(age, gender),
+    [age, festivalAthlete, gender]
   );
 
   React.useEffect(() => {
-    if (isFestivalAge) {
+    if (festivalAthlete) {
       form.setValue("category", null);
       form.setValue("mod_gi", false);
       form.setValue("mod_nogi", false);
@@ -283,20 +80,69 @@ const form = useForm<FormValues>({
       shouldDirty: true,
       shouldValidate: false,
     });
-  }, [isFestivalAge, form, resolvedCategory]);
-
-  const giSelected = form.watch("mod_gi");
+  }, [festivalAthlete, form, resolvedCategory]);
 
   React.useEffect(() => {
     if (!giSelected) {
       form.setValue("mod_gi_extra", false, {
-        shouldValidate: false,
         shouldDirty: true,
+        shouldValidate: false,
       });
     }
-  }, [giSelected, form]);
+  }, [form, giSelected]);
 
-  // -------------------- RENDER --------------------
+  async function onSubmit(values: FormValues) {
+    setSubmitting(true);
+    setServerError(null);
+
+    try {
+      const athleteIsFestival = isFestivalAthlete(values.age);
+      const athletePhone = splitPhoneParts(values.phone);
+      const guardianPhone = athleteIsFestival
+        ? splitPhoneParts(values.responsavel_telefone)
+        : null;
+
+      const id = await createParticipant({
+        full_name: values.full_name.trim(),
+        cpf: values.cpf.trim(),
+        phone_number: athletePhone.phoneNumber,
+        area_code: athletePhone.areaCode,
+        age: values.age,
+        academy: values.academy?.trim(),
+        category: athleteIsFestival ? null : values.category,
+        weight_kg: athleteIsFestival ? null : values.weight_kg,
+        belt_color: values.belt_color,
+        gender: values.gender,
+        mod_gi: values.mod_gi,
+        mod_nogi: values.mod_nogi,
+        mod_gi_extra: values.mod_gi_extra,
+        responsavel_name: athleteIsFestival
+          ? values.responsavel_name?.trim()
+          : undefined,
+        responsavel_cpf: athleteIsFestival
+          ? values.responsavel_cpf?.trim()
+          : undefined,
+        responsavel_area_code: athleteIsFestival
+          ? guardianPhone?.areaCode
+          : undefined,
+        responsavel_phone_number: athleteIsFestival
+          ? guardianPhone?.phoneNumber
+          : undefined,
+      });
+
+      router.push(`/cash?id=${encodeURIComponent(id)}`);
+    } catch (error) {
+      console.error(error);
+      setServerError(
+        error instanceof Error
+          ? error.message
+          : "N�o foi poss�vel concluir sua inscri��o."
+      );
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
   return (
     <div className="relative min-h-screen overflow-hidden bg-black px-4 py-8 text-zinc-100 sm:py-10">
       <div className="absolute -top-24 left-1/2 h-[520px] w-[520px] -translate-x-1/2 rounded-full bg-red-600/15 blur-3xl" />
@@ -308,13 +154,15 @@ const form = useForm<FormValues>({
           href="/"
         >
           <ArrowLeft className="h-5 w-5" />
-          Voltar para o início
+          Voltar para o in�cio
         </Link>
 
         <div className="mb-6">
-          <h1 className="text-2xl font-semibold text-zinc-100 sm:text-3xl">Inscrição</h1>
+          <h1 className="text-2xl font-semibold text-zinc-100 sm:text-3xl">
+            Inscri��o
+          </h1>
           <p className="mt-1 text-base text-zinc-400 sm:text-lg">
-            Preencha os dados do atleta com atencao. <br/>
+            Preencha os dados do atleta com atencao. <br />
             Cada detalhe certo aproxima voce de uma grande atuacao no campeonato.
           </p>
         </div>
@@ -322,10 +170,11 @@ const form = useForm<FormValues>({
         <div className="flex flex-col gap-5 rounded-2xl border border-zinc-800 bg-zinc-950/70 p-4 shadow-sm backdrop-blur sm:p-6">
           <div>
             <h2 className="text-lg font-semibold text-zinc-100 sm:text-xl">
-              Formulário de Inscrição
+              Formul�rio de Inscri��o
             </h2>
             <p className="mb-2 mt-1 text-base text-zinc-400 sm:text-lg">
-              Finalize este cadastro para seguir ao pagamento e garantir sua vaga no evento.
+              Finalize este cadastro para seguir ao pagamento e garantir sua vaga
+              no evento.
             </p>
           </div>
 
@@ -334,507 +183,50 @@ const form = useForm<FormValues>({
               onSubmit={form.handleSubmit(onSubmit)}
               className="flex flex-col gap-6 sm:gap-8"
             >
-              {/* Nome */}
-              <FormField
-                control={form.control}
-                name="full_name"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-base text-zinc-200 sm:text-lg">
-                      Nome Completo
-                    </FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder="Nome do Atleta"
-                        {...field}
-                        className="rounded-xl bg-black/40 border-zinc-800 text-zinc-100 placeholder:text-zinc-500 focus-visible:ring-red-500/30"
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
+              <AthleteInfoSection
+                divisionLabel={divisionLabel}
+                form={form}
+                resolvedCategory={resolvedCategory}
               />
 
-              <FormField
-                control={form.control}
-                name="cpf"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-base text-zinc-200 sm:text-lg">
-                      CPF
-                    </FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder="CPF do Atleta"
-                        {...field}
-                        className="rounded-xl bg-black/40 border-zinc-800 text-zinc-100 placeholder:text-zinc-500 focus-visible:ring-red-500/30"
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+              <AthleteDetailsSection form={form} />
 
-                {/* phone_number */}
-                <FormField
-                  control={form.control}
-                  name="phone"
-                  render={({ field }) => (
-                    <FormItem className="w-full md:col-span-2">
-                      <FormLabel className="text-base text-zinc-200 sm:text-lg">
-                        Telefone (WhatsApp)
-                      </FormLabel>
-                      <FormControl>
-                        <Input
-                          inputMode="numeric"
-                          placeholder="(22) 9 9999-9999"
-                          {...field}
-                          className="rounded-xl bg-black/40 border-zinc-800 text-zinc-100 placeholder:text-zinc-500 focus-visible:ring-red-500/30"
-                          maxLength={15}
-                          onChange={(e) => {
-                            const value = phoneMask(e.target.value);
-                            field.onChange(value);
-                          }}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-              <div className="grid w-full grid-cols-1 gap-6 md:grid-cols-2 md:gap-8">
-                {/* Idade */}
-                <FormField
-                  control={form.control}
-                  name="age"
-                  render={({ field }) => (
-                    <FormItem className="w-full">
-                      <FormLabel className="flex w-full text-base text-zinc-200 md:flex-row md:flex sm:text-lg">
-                        Idade
-                      </FormLabel>
-                      <FormControl>
-                        <Input
-                          type="number"
-                          inputMode="numeric"
-                          className="w-full rounded-xl bg-black/40 border-zinc-800 text-zinc-100 flex focus-visible:ring-red-500/30"
-                          value={field.value ?? ""}
-                          onChange={(e) => {
-                            const val = e.target.value;
-                            field.onChange(val === "" ? undefined : Number(val));
-                          }}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                {/* AVISO FESTIVAL */}
-                {isFestivalAge && (
-                  <div className="flex items-center justify-center rounded-xl border border-yellow-600/50 bg-yellow-950/30 p-4 text-yellow-200">
-                    <div className="text-sm">
-                      <span className="mb-1 block text-base font-bold sm:text-lg">⚠️ Categoria Festival</span>
-                      Atletas abaixo de 8 anos participam automaticamente no Festival, em um formato pensado para incentivo, aprendizado e experiencia positiva.
-                    </div>
-                  </div>
-                )}
-                {isFestivalAge && (
-                  <div className="flex flex-col w-full gap-6 rounded-2xl border border-yellow-600/40 bg-yellow-950/20 p-4 md:col-span-2">
-                    <h3 className="text-lg font-semibold text-yellow-200">
-                      Dados do Responsável Legal
-                    </h3>
-
-                    {/* Nome do Responsável */}
-                    <FormField
-                      control={form.control}
-                      name="responsavel_name"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel className="text-zinc-200">
-                            Nome do Responsável
-                          </FormLabel>
-                          <FormControl>
-                            <Input
-                              {...field}
-                              value={field.value ?? ""}
-                              placeholder="Nome completo do responsável"
-                              className="rounded-xl bg-black/40 w-full border-zinc-800 text-zinc-100"
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    {/* CPF do Responsável */}
-                    <FormField
-                      control={form.control}
-                      name="responsavel_cpf"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel className="text-zinc-200">
-                            CPF do Responsável
-                          </FormLabel>
-                          <FormControl>
-                            <Input
-                              {...field}
-                              value={field.value ?? ""}
-                              placeholder="CPF do responsável"
-                              className="rounded-xl bg-black/40 border-zinc-800 text-zinc-100"
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    {/* Telefone do Responsável */}
-                    <FormField
-                      control={form.control}
-                      name="responsavel_telefone"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel className="text-zinc-200">
-                            Telefone do Responsável
-                          </FormLabel>
-                          <FormControl>
-                            <Input
-                              inputMode="numeric"
-                              {...field}
-                              value={field.value ?? ""}
-                              placeholder="(22) 9 9999-9999"
-                              className="rounded-xl bg-black/40 border-zinc-800 text-zinc-100"
-                              maxLength={15}
-                              onChange={(e) => {
-                                const value = phoneMask(e.target.value);
-                                field.onChange(value);
-                              }}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-                )}
-                
-                {/* Categoria */}
-                {!isFestivalAge && (
-                  <FormField
-                    control={form.control}
-                    name="category"
-                    render={() => (
-                      <FormItem className="w-full">
-                        <FormLabel className="flex w-full text-base text-zinc-200 md:flex-row md:flex sm:text-lg">Categoria</FormLabel>
-                        <FormControl>
-                          <Input
-                            readOnly
-                            value={resolvedCategory ? getCategoryLabel(resolvedCategory) : ""}
-                            placeholder="Informe idade, sexo e peso"
-                            className="rounded-xl border-zinc-800 bg-black/40 text-zinc-100 placeholder:text-zinc-500 focus-visible:ring-red-500/30"
-                          />
-                        </FormControl>
-                        <p className="text-sm text-zinc-400">
-                          Divisao aplicada: {divisionLabel ?? "aguardando dados do atleta"}
-                        </p>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                )}
-              </div>
-
-              <div className="flex flex-col-reverse gap-6 md:flex-row md:gap-8">
-                {/* Academia */}
-                <FormField
-                  control={form.control}
-                  name="academy"
-                  render={({ field }) => (
-                    <FormItem className="w-full">
-                      <FormLabel className="text-base text-zinc-200 sm:text-lg">
-                        Academia
-                      </FormLabel>
-                      <FormControl>
-                        <Input
-                          {...field}
-                          value={field.value ?? ""}
-                          className="rounded-xl bg-black/40 border-zinc-800 text-zinc-100 placeholder:text-zinc-500 focus-visible:ring-red-500/30"
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                {/* Peso */}
-                {!isFestivalAge && (
-                  <FormField
-                    control={form.control}
-                    name="weight_kg"
-                    render={({ field }) => (
-                      <FormItem className="w-full">
-                        <FormLabel className="text-base text-zinc-200 sm:text-lg">Peso</FormLabel>
-                        <FormControl>
-                          <Input
-                            type="number"
-                            step="0.1"
-                            className="rounded-xl bg-black/40 border-zinc-800 text-zinc-100 placeholder:text-zinc-500 focus-visible:ring-red-500/30"
-                            value={field.value ?? ""}
-                            onChange={(e) =>
-                              field.onChange(
-                                e.target.value === ""
-                                  ? null
-                                  : Number(e.target.value)
-                              )
-                            }
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                )}
-              </div>
-
-              {/* Faixa e Gênero */}
-              <div className="flex flex-col gap-6 md:flex-row md:gap-8">
-                <FormField
-                  control={form.control}
-                  name="belt_color"
-                  render={({ field }) => (
-                    <FormItem className="w-full">
-                      <FormLabel className="text-base text-zinc-200 sm:text-lg">Faixa</FormLabel>
-                      <Select value={field.value ?? ""} onValueChange={field.onChange}>
-                        <FormControl>
-                          <SelectTrigger className="w-full rounded-2xl border-zinc-800 bg-black/40 text-zinc-100 cursor-pointer">
-                            <SelectValue placeholder="Selecione" />
-                          </SelectTrigger>
-                        </FormControl>
-
-                        <SelectContent className="border-zinc-800 bg-zinc-950 text-zinc-100">
-                          {beltOptions
-                            .filter((b) => {
-                              if (isFestivalAge) {
-                                return ["CINZA", "AMARELA", "LARANJA", "VERDE", "BRANCA"].includes(
-                                  b.value
-                                );
-                              }
-                              return true;
-                            })
-                            .map((b) => (
-                            <SelectItem
-                              key={b.value}
-                              value={b.value}
-                              className={itemInteractiveClass}
-                            >
-                              {b.label}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="gender"
-                  render={({ field }) => (
-                    <FormItem className="w-full">
-                      <FormLabel className="text-base text-zinc-200 sm:text-lg">Gênero</FormLabel>
-                      <Select value={field.value ?? ""} onValueChange={field.onChange}>
-                        <FormControl>
-                          <SelectTrigger className="w-full rounded-2xl border-zinc-800 bg-black/40 text-zinc-100 cursor-pointer">
-                            <SelectValue placeholder="Selecione" />
-                          </SelectTrigger>
-                        </FormControl>
-
-                        <SelectContent className="border-zinc-800 bg-zinc-950 text-zinc-100">
-                          {genderOptions.map((g) => (
-                            <SelectItem
-                              key={g.value}
-                              value={g.value}
-                              className={itemInteractiveClass}
-                            >
-                              {g.label}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-
-              {/* Server Error */}
               {serverError && (
                 <div className="rounded-xl border border-red-900/50 bg-red-950/40 px-3 py-2 text-sm text-red-200">
                   {serverError}
                 </div>
               )}
 
-              {/* Modalidades */}
-              <div className="flex w-full flex-wrap gap-6">
-                <div className="flex w-full flex-col rounded-2xl border border-zinc-800 bg-black/30 p-4">
-                  <p className="mb-3 flex justify-center text-base font-medium text-zinc-200 sm:text-lg">
-                    Seleção de Modalidades
-                  </p>
+              <ModalitiesSection form={form} />
 
-                  <div className="grid gap-3">
-                    {!isFestivalAge ? (
-                      <>
-                        {/* GI */}
-                        <FormField
-                          control={form.control}
-                          name="mod_gi"
-                          render={({ field }) => (
-                            <FormItem className="flex items-start gap-3 space-y-0">
-                              <FormControl>
-                                <Checkbox
-                                  checked={field.value}
-                                  onCheckedChange={field.onChange}
-                                  className="mt-1"
-                                />
-                              </FormControl>
-
-                              <div className="grid gap-1 leading-none">
-                                <FormLabel className="text-zinc-100 cursor-pointer">
-                                  Gi (com kimono)
-                                </FormLabel>
-                                <p className="text-sm text-zinc-400">
-                                  Para quem quer competir na essencia do jiu-jitsu e medir tecnica, ritmo e controle.
-                                </p>
-
-                                {/* GI EXTRA / ABSOLUTO */}
-                                {field.value && (
-                                  <div className="mt-3 pl-1">
-                                    <FormField
-                                      control={form.control}
-                                      name="mod_gi_extra"
-                                      render={({ field: extraField }) => (
-                                        <FormItem className="flex items-start gap-3 space-y-0 rounded-xl border border-zinc-800 bg-black/30 p-3">
-                                          <FormControl>
-                                            <Checkbox
-                                              checked={extraField.value}
-                                              onCheckedChange={extraField.onChange}
-                                              className="mt-1"
-                                            />
-                                          </FormControl>
-
-                                          <div className="grid gap-1 leading-none">
-                                            <FormLabel className="text-zinc-100 cursor-pointer">
-                                              Absoluto
-                                            </FormLabel>
-                                            <p className="text-sm text-zinc-400">
-                                              Um desafio extra para quem quer ir alem da propria categoria e buscar destaque absoluto.
-                                            </p>
-                                            <FormMessage />
-                                          </div>
-                                        </FormItem>
-                                      )}
-                                    />
-                                  </div>
-                                )}
-                              </div>
-
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-
-                        {/* NOGI */}
-                        <FormField
-                          control={form.control}
-                          name="mod_nogi"
-                          render={({ field }) => (
-                            <FormItem className="flex items-start gap-3 space-y-0">
-                              <FormControl>
-                                <Checkbox
-                                  checked={field.value}
-                                  onCheckedChange={field.onChange}
-                                />
-                              </FormControl>
-
-                              <div className="grid gap-1 leading-none">
-                                <FormLabel className="cursor-pointer text-zinc-100">
-                                  No-Gi (sem kimono)
-                                </FormLabel>
-                                <p className="text-sm text-zinc-400">
-                                  Ideal para atletas que querem velocidade, pressao e leitura rapida de combate.
-                                </p>
-                              </div>
-
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                      </>
-                    ) : (
-                      <p className="text-sm text-zinc-400 text-center">
-                        Atletas abaixo de 8 anos participarao da modalidade <strong>Festival</strong>, com foco em vivencia esportiva e desenvolvimento.
-                      </p>
-                    )}
-                  </div>
-                </div>
-              </div>
-
-              {/* TERMOS */}
-              <FormField
-                control={form.control}
-                name="terms"
-                render={({ field }) => (
-                  <FormItem className="flex items-start gap-3 space-y-0 rounded-xl border border-zinc-800 bg-black/30 p-4">
-                    <FormControl>
-                      <Checkbox
-                        checked={field.value}
-                        onCheckedChange={field.onChange}
-                        className="mt-1"
-                      />
-                    </FormControl>
-
-                    <div className="flex flex-col gap-2 leading-none">
-                      <FormLabel className="flex flex-wrap  text-zinc-100 cursor-pointer">
-                        Declaro que li e aceito os {" "}
-                        <a
-                          href="/termo-de-autorização.pdf"
-                          className="flex flex-row justify-between text-white hover:text-red-600"
-                          target="_blank"
-                          rel="noopener noreferrer"
-                        >
-                          Termos de Inscrição
-                        </a>
-                      </FormLabel>
-                      <p className="flex text-sm text-zinc-400">
-                        Ao prosseguir, confirmo que as informacoes fornecidas sao verdadeiras e que entro neste evento com responsabilidade, respeito e ciencia das regras oficiais.
-                      </p>
-                      <FormMessage />
-                    </div>
-                  </FormItem>
-                )}
-              />
+              <TermsSection form={form} />
 
               <div className="flex justify-center gap-4">
                 <Button
-                  className="h-12 rounded-xl cursor-pointer px-8 bg-red-600 hover:bg-red-500"
-                  disabled={submitting || !form.watch("terms")}
+                  className="h-12 cursor-pointer rounded-xl bg-red-600 px-8 hover:bg-red-500"
+                  disabled={submitting || !termsAccepted}
                   type="submit"
                 >
-                  {submitting ? "Enviando..." : "Concluir inscrição"}
+                  {submitting ? "Enviando..." : "Concluir inscri��o"}
                 </Button>
               </div>
-                          </form>
-                        </Form>
-                      </div>
-                    </div>
-                  </div>
-                );
-              }
+            </form>
+          </Form>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export default function InscricaoPage() {
   return (
-    <React.Suspense fallback={<div className="min-h-screen bg-black text-zinc-100 flex items-center justify-center">Carregando...</div>}>
+    <React.Suspense
+      fallback={
+        <div className="flex min-h-screen items-center justify-center bg-black text-zinc-100">
+          Carregando...
+        </div>
+      }
+    >
       <InscricaoContent />
     </React.Suspense>
   );
