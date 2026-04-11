@@ -1,5 +1,6 @@
 "use client";
 
+import * as React from "react";
 import type { UseFormReturn } from "react-hook-form";
 
 import {
@@ -18,14 +19,14 @@ import {
   SelectValue,
 } from "@/app/_components/ui/select";
 import {
-  beltOptions,
-  festivalBeltOptions,
+  beltOptionsForAge,
   genderOptions,
   inputClassName,
   isFestivalAthlete,
   selectContentClassName,
   selectItemClassName,
   selectTriggerClassName,
+  YOUTH_ONLY_BELTS,
 } from "@/app/_components/inscricao/constants";
 import type { FormValues } from "@/app/inscricao/form-schema";
 
@@ -34,8 +35,17 @@ export function AthleteDetailsSection({
 }: {
   form: UseFormReturn<FormValues>;
 }) {
-  const festivalAthlete = isFestivalAthlete(form.watch("age"));
-  const availableBelts = festivalAthlete ? festivalBeltOptions : beltOptions;
+  const age = form.watch("age");
+  const festivalAthlete = isFestivalAthlete(age);
+  const availableBelts = beltOptionsForAge(age);
+
+  React.useEffect(() => {
+    if (typeof age !== "number" || !Number.isFinite(age) || age < 16) return;
+    const current = form.getValues("belt_color");
+    if (current && YOUTH_ONLY_BELTS.includes(current)) {
+      form.setValue("belt_color", "BRANCA", { shouldValidate: true });
+    }
+  }, [age, form]);
 
   return (
     <>
@@ -130,7 +140,7 @@ export function AthleteDetailsSection({
           render={({ field }) => (
             <FormItem className="w-full">
               <FormLabel className="text-base text-zinc-200 sm:text-lg">
-                Gênero
+                GÃªnero
               </FormLabel>
               <Select value={field.value ?? ""} onValueChange={field.onChange}>
                 <FormControl>

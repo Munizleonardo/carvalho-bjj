@@ -2,6 +2,9 @@ import type { BeltColor, Gender } from "@/app/_lib/types";
 
 export const FESTIVAL_AGE_LIMIT = 8;
 
+/** Cinza, amarela, laranja e verde: apenas até 15 anos (regra IBJJF infantil). */
+export const YOUTH_ONLY_BELTS: BeltColor[] = ["CINZA", "AMARELA", "LARANJA", "VERDE"];
+
 export const beltOptions: Array<{ label: string; value: BeltColor }> = [
   { label: "Cinza", value: "CINZA" },
   { label: "Amarela", value: "AMARELA" },
@@ -19,9 +22,16 @@ export const genderOptions: Array<{ label: string; value: Gender }> = [
   { label: "Feminino", value: "F" },
 ];
 
-export const festivalBeltOptions = beltOptions.filter((belt) =>
-  ["CINZA", "AMARELA", "LARANJA", "VERDE", "BRANCA"].includes(belt.value)
-);
+/** Mesmo conjunto para Festival e juvenis (até 15 anos): todas as faixas. A partir de 16, use faixas sem as infantil-only. */
+export function beltOptionsForAge(age: number | null | undefined) {
+  if (typeof age !== "number" || !Number.isFinite(age)) {
+    return beltOptions;
+  }
+  if (age < 16) {
+    return beltOptions;
+  }
+  return beltOptions.filter((b) => !YOUTH_ONLY_BELTS.includes(b.value));
+}
 
 export const inputClassName =
   "rounded-xl border-zinc-800 bg-black/40 text-zinc-100 placeholder:text-zinc-500 focus-visible:ring-red-500/30";

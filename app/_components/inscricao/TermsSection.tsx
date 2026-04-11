@@ -35,18 +35,18 @@ export function TermsSection({
             <FormLabel className="flex cursor-pointer flex-wrap text-zinc-100">
               Declaro que li e aceito os{" "}
               <a
-                href="/termo-de-autorização.pdf"
+                href="/termo-de-autorizacao.pdf"
                 className="flex flex-row justify-between text-white hover:text-red-600"
                 target="_blank"
                 rel="noopener noreferrer"
               >
-                Termos de Inscrição
+                termos de inscri??o
               </a>
             </FormLabel>
             <p className="flex text-sm text-zinc-400">
-              Ao prosseguir, confirmo que as informacoes fornecidas sao
+              Ao prosseguir, confirmo que as informa??es fornecidas s?o
               verdadeiras e que entro neste evento com responsabilidade, respeito
-              e ciencia das regras oficiais.
+              e ci?ncia das regras oficiais.
             </p>
             <FormMessage />
           </div>

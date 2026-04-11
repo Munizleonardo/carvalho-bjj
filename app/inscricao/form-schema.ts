@@ -3,7 +3,10 @@ import { z } from "zod";
 import { beltEnum, categoryEnum, genderEnum } from "@/app/_lib/types";
 import { isValidBrazilianCellPhone } from "@/app/_lib/utils";
 import { resolveCategoryByAgeGenderWeight } from "@/app/_lib/weight-categories";
-import { isFestivalAthlete } from "@/app/_components/inscricao/constants";
+import {
+  isFestivalAthlete,
+  YOUTH_ONLY_BELTS,
+} from "@/app/_components/inscricao/constants";
 
 export const formSchema = z
   .object({
@@ -74,35 +77,47 @@ export const formSchema = z
       }
     }
 
-    if (!festivalAthlete) {
-      return;
-    }
+    const needsGuardian = data.age < 18;
+    if (needsGuardian) {
+      if (!data.responsavel_name || data.responsavel_name.trim().length < 3) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ["responsavel_name"],
+          message: "Informe o nome do responsável legal",
+        });
+      }
 
-    if (!data.responsavel_name || data.responsavel_name.trim().length < 3) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        path: ["responsavel_name"],
-        message: "Informe o nome do responsável legal",
-      });
-    }
+      if (!data.responsavel_cpf || data.responsavel_cpf.trim().length < 11) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ["responsavel_cpf"],
+          message: "Informe o CPF do responsável legal",
+        });
+      }
 
-    if (!data.responsavel_cpf || data.responsavel_cpf.trim().length < 11) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        path: ["responsavel_cpf"],
-        message: "Informe o CPF do responsável legal",
-      });
+      if (
+        !data.responsavel_telefone ||
+        !isValidBrazilianCellPhone(data.responsavel_telefone)
+      ) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ["responsavel_telefone"],
+          message:
+            "Informe um telefone válido do responsável (ex: (11) 98765-4321)",
+        });
+      }
     }
 
     if (
-      !data.responsavel_telefone ||
-      !isValidBrazilianCellPhone(data.responsavel_telefone)
+      typeof data.age === "number" &&
+      data.age >= 16 &&
+      YOUTH_ONLY_BELTS.includes(data.belt_color)
     ) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
-        path: ["responsavel_telefone"],
+        path: ["belt_color"],
         message:
-          "Informe um telefone válido do responsável (ex: (11) 98765-4321)",
+          "Faixas cinza, amarela, laranja e verde são apenas para atletas com menos de 16 anos",
       });
     }
   });

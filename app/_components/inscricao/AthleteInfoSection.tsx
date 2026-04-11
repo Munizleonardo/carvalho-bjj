@@ -28,7 +28,7 @@ function GuardianFields({ form }: { form: UseFormReturn<FormValues> }) {
   return (
     <div className="flex w-full flex-col gap-6 rounded-2xl border border-yellow-600/40 bg-yellow-950/20 p-4 md:col-span-2">
       <h3 className="text-lg font-semibold text-yellow-200">
-        Dados do Respons�vel Legal
+        Dados do Responsável Legal
       </h3>
 
       <FormField
@@ -36,12 +36,12 @@ function GuardianFields({ form }: { form: UseFormReturn<FormValues> }) {
         name="responsavel_name"
         render={({ field }) => (
           <FormItem>
-            <FormLabel className="text-zinc-200">Nome do Respons�vel</FormLabel>
+            <FormLabel className="text-zinc-200">Nome do Responsável</FormLabel>
             <FormControl>
               <Input
                 {...field}
                 value={field.value ?? ""}
-                placeholder="Nome completo do respons�vel"
+                placeholder="Nome completo do responsável"
                 className={`${inputClassName} w-full`}
               />
             </FormControl>
@@ -55,12 +55,12 @@ function GuardianFields({ form }: { form: UseFormReturn<FormValues> }) {
         name="responsavel_cpf"
         render={({ field }) => (
           <FormItem>
-            <FormLabel className="text-zinc-200">CPF do Respons�vel</FormLabel>
+            <FormLabel className="text-zinc-200">CPF do Responsável</FormLabel>
             <FormControl>
               <Input
                 {...field}
                 value={field.value ?? ""}
-                placeholder="CPF do respons�vel"
+                placeholder="CPF do responsável"
                 className={inputClassName}
               />
             </FormControl>
@@ -75,7 +75,7 @@ function GuardianFields({ form }: { form: UseFormReturn<FormValues> }) {
         render={({ field }) => (
           <FormItem>
             <FormLabel className="text-zinc-200">
-              Telefone do Respons�vel
+              Telefone do Responsável
             </FormLabel>
             <FormControl>
               <Input
@@ -101,7 +101,9 @@ export function AthleteInfoSection({
   form,
   resolvedCategory,
 }: AthleteInfoSectionProps) {
-  const festivalAthlete = isFestivalAthlete(form.watch("age"));
+  const age = form.watch("age");
+  const festivalAthlete = isFestivalAthlete(age);
+  const needsGuardian = typeof age === "number" && age < 18;
 
   return (
     <>
@@ -111,11 +113,11 @@ export function AthleteInfoSection({
         render={({ field }) => (
           <FormItem>
             <FormLabel className="text-base text-zinc-200 sm:text-lg">
-              Nome Completo
+              Nome completo
             </FormLabel>
             <FormControl>
               <Input
-                placeholder="Nome do Atleta"
+                placeholder="Nome do atleta"
                 {...field}
                 className={inputClassName}
               />
@@ -135,7 +137,7 @@ export function AthleteInfoSection({
             </FormLabel>
             <FormControl>
               <Input
-                placeholder="CPF do Atleta"
+                placeholder="CPF do atleta"
                 {...field}
                 className={inputClassName}
               />
@@ -201,13 +203,13 @@ export function AthleteInfoSection({
                 Categoria Festival
               </span>
               Atletas abaixo de 8 anos participam automaticamente no Festival, em
-              um formato pensado para incentivo, aprendizado e experiencia
+              um formato pensado para incentivo, aprendizado e experiência
               positiva.
             </div>
           </div>
         )}
 
-        {festivalAthlete && <GuardianFields form={form} />}
+        {needsGuardian && <GuardianFields form={form} />}
 
         {!festivalAthlete && (
           <FormField
@@ -227,7 +229,8 @@ export function AthleteInfoSection({
                   />
                 </FormControl>
                 <p className="text-sm text-zinc-400">
-                  Divisao aplicada: {divisionLabel ?? "aguardando dados do atleta"}
+                  Divisão aplicada:{" "}
+                  {divisionLabel ?? "aguardando dados do atleta"}
                 </p>
                 <FormMessage />
               </FormItem>
@@ -238,4 +241,3 @@ export function AthleteInfoSection({
     </>
   );
 }
-

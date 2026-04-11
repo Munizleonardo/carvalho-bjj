@@ -24,7 +24,7 @@ export function ModalitiesSection({
     <div className="flex w-full flex-wrap gap-6">
       <div className="flex w-full flex-col rounded-2xl border border-zinc-800 bg-black/30 p-4">
         <p className="mb-3 flex justify-center text-base font-medium text-zinc-200 sm:text-lg">
-          Seleção de Modalidades
+          Sele??o de modalidades
         </p>
 
         <div className="grid gap-3">
@@ -48,8 +48,8 @@ export function ModalitiesSection({
                         Gi (com kimono)
                       </FormLabel>
                       <p className="text-sm text-zinc-400">
-                        Para quem quer competir na essencia do jiu-jitsu e medir
-                        tecnica, ritmo e controle.
+                        Para quem quer competir na ess?ncia do jiu-jitsu e medir
+                        t?cnica, ritmo e controle.
                       </p>
 
                       {field.value && (
@@ -72,7 +72,7 @@ export function ModalitiesSection({
                                     Absoluto
                                   </FormLabel>
                                   <p className="text-sm text-zinc-400">
-                                    Um desafio extra para quem quer ir alem da propria
+                                    Um desafio extra para quem quer ir al?m da pr?pria
                                     categoria e buscar destaque absoluto.
                                   </p>
                                   <FormMessage />
@@ -106,8 +106,8 @@ export function ModalitiesSection({
                         No-Gi (sem kimono)
                       </FormLabel>
                       <p className="text-sm text-zinc-400">
-                        Ideal para atletas que querem velocidade, pressao e leitura
-                        rapida de combate.
+                        Ideal para atletas que querem velocidade, press?o e leitura
+                        r?pida de combate.
                       </p>
                     </div>
 
@@ -118,8 +118,8 @@ export function ModalitiesSection({
             </>
           ) : (
             <p className="text-center text-sm text-zinc-400">
-              Atletas abaixo de 8 anos participarao da modalidade{" "}
-              <strong>Festival</strong>, com foco em vivencia esportiva e
+              Atletas abaixo de 8 anos participar?o da modalidade{" "}
+              <strong>Festival</strong>, com foco em viv?ncia esportiva e
               desenvolvimento.
             </p>
           )}
