@@ -1,5 +1,6 @@
-﻿"use client";
+"use client";
 
+import { CardPaymentForm } from "@/app/_components/CardPaymentForm";
 import { useSearchParams } from "next/navigation";
 import * as React from "react";
 import { z } from "zod";
@@ -32,11 +33,15 @@ import {
   categoryEnum,
   beltEnum,
   genderEnum,
+  type BeltColor,
   type Category,
 } from "@/app/_lib/types";
 
 import { phoneMask } from "@/app/_lib/utils";
 import { isValidBrazilianCellPhone } from "@/app/_lib/utils";
+
+/** Faixas exclusivas de infantil (até 15 anos); a partir de 16 não se aplicam. */
+const YOUTH_ONLY_BELTS: BeltColor[] = ["CINZA", "AMARELA", "LARANJA", "VERDE"];
 
 // -------------------- SCHEMA ZOD --------------------
 const formSchema = z.object({
@@ -90,51 +95,64 @@ const formSchema = z.object({
       });
     }
 
-    // 👶 VALIDAÇÃO RESPONSÁVEL LEGAL
-    if (isFestivalAge) {
-    if (!data.responsavel_name || data.responsavel_name.trim().length < 3) {
-      ctx.addIssue({
-        path: ["responsavel_name"],
-        message: "Informe o nome do responsável legal",
-        code: z.ZodIssueCode.custom,
-      });
-    }
+    const isMinor = typeof data.age === "number" && data.age < 18;
+    if (isMinor) {
+      if (!data.responsavel_name || data.responsavel_name.trim().length < 3) {
+        ctx.addIssue({
+          path: ["responsavel_name"],
+          message: "Informe o nome do responsável legal",
+          code: z.ZodIssueCode.custom,
+        });
+      }
 
-    if (!data.responsavel_cpf || data.responsavel_cpf.trim().length < 11) {
-      ctx.addIssue({
-        path: ["responsavel_cpf"],
-        message: "Informe o CPF do responsável legal",
-        code: z.ZodIssueCode.custom,
-      });
+      if (!data.responsavel_cpf || data.responsavel_cpf.trim().length < 11) {
+        ctx.addIssue({
+          path: ["responsavel_cpf"],
+          message: "Informe o CPF do responsável legal",
+          code: z.ZodIssueCode.custom,
+        });
+      }
+
+      if (
+        !data.responsavel_telefone ||
+        !isValidBrazilianCellPhone(data.responsavel_telefone)
+      ) {
+        ctx.addIssue({
+          path: ["responsavel_telefone"],
+          message:
+            "Informe um telefone válido do responsável (ex: (11) 98765-4321)",
+          code: z.ZodIssueCode.custom,
+        });
+      }
     }
 
     if (
-      !data.responsavel_telefone ||
-      !isValidBrazilianCellPhone(data.responsavel_telefone)
+      typeof data.age === "number" &&
+      data.age >= 16 &&
+      YOUTH_ONLY_BELTS.includes(data.belt_color)
     ) {
       ctx.addIssue({
-        path: ["responsavel_telefone"],
+        path: ["belt_color"],
         message:
-          "Informe um telefone válido do responsável (ex: (11) 98765-4321)",
+          "Faixas cinza, amarela, laranja e verde são apenas para atletas com menos de 16 anos",
         code: z.ZodIssueCode.custom,
       });
     }
-  }
-});
+  });
 
 export type FormValues = z.infer<typeof formSchema>;
 
 // -------------------- OPTIONS --------------------
 const beltOptions = [
-  { label: "Cinza", value: "CINZA" },
-  { label: "Amarela", value: "AMARELA" },
-  { label: "Laranja", value: "LARANJA" },
-  { label: "Verde", value: "VERDE" },
-  { label: "Branca", value: "BRANCA" },
-  { label: "Azul", value: "AZUL" },
-  { label: "Roxa", value: "ROXA" },
-  { label: "Marrom", value: "MARROM" },
-  { label: "Preta", value: "PRETA" },
+  { label: "Cinza", value: "CINZA" as const },
+  { label: "Amarela", value: "AMARELA" as const },
+  { label: "Laranja", value: "LARANJA" as const },
+  { label: "Verde", value: "VERDE" as const },
+  { label: "Branca", value: "BRANCA" as const },
+  { label: "Azul", value: "AZUL" as const },
+  { label: "Roxa", value: "ROXA" as const },
+  { label: "Marrom", value: "MARROM" as const },
+  { label: "Preta", value: "PRETA" as const },
 ];
 
 const genderOptions = [
@@ -166,6 +184,9 @@ function InscricaoContent() {
   const [serverError, setServerError] = React.useState<string | null>(null);
   const searchParams = useSearchParams();
   const cpfFromQuery = searchParams.get("cpf");
+  const [registrationId, setRegistrationId] = React.useState<string | null>(null);
+  const [paymentMethod, setPaymentMethod] = React.useState<"pix" | "card" | null>(null);
+  const [pixData, setPixData] = React.useState<any>(null);
 
 const form = useForm<FormValues>({
   resolver: zodResolver(formSchema),
@@ -197,13 +218,14 @@ const form = useForm<FormValues>({
       const area_code = phoneClean.slice(0, 2);
       const phone_number = phoneClean.slice(2);
 
-      const responsavelPhoneClean = isFestivalAge
+      const needsGuardian = values.age < 18;
+      const responsavelPhoneClean = needsGuardian
         ? values.responsavel_telefone?.replace(/\D/g, "") ?? ""
         : "";
-      const responsavel_area_code = isFestivalAge
+      const responsavel_area_code = needsGuardian
         ? responsavelPhoneClean.slice(0, 2)
         : undefined;
-      const responsavel_phone_number = isFestivalAge
+      const responsavel_phone_number = needsGuardian
         ? responsavelPhoneClean.slice(2)
         : undefined;
 
@@ -221,13 +243,13 @@ const form = useForm<FormValues>({
         mod_gi: values.mod_gi,
         mod_nogi: values.mod_nogi,
         mod_gi_extra: values.mod_gi_extra,
-        responsavel_name: isFestivalAge ? values.responsavel_name?.trim() : undefined,
-        responsavel_cpf: isFestivalAge ? values.responsavel_cpf?.trim() : undefined,
-        responsavel_area_code: isFestivalAge ? responsavel_area_code : undefined,
-        responsavel_phone_number: isFestivalAge ? responsavel_phone_number : undefined,
+        responsavel_name: needsGuardian ? values.responsavel_name?.trim() : undefined,
+        responsavel_cpf: needsGuardian ? values.responsavel_cpf?.trim() : undefined,
+        responsavel_area_code: needsGuardian ? responsavel_area_code : undefined,
+        responsavel_phone_number: needsGuardian ? responsavel_phone_number : undefined,
       });
 
-      router.push(`/cash?id=${encodeURIComponent(id)}`);
+      setRegistrationId(id);
     } catch (e) {
       console.error(e);
       setServerError(e instanceof Error ? e.message : "Não foi possível concluir sua inscrição.");
@@ -238,6 +260,7 @@ const form = useForm<FormValues>({
 
   const age = form.watch("age");
   const isFestivalAge = typeof age === "number" && age < 8;
+  const isMinor = typeof age === "number" && age < 18;
 
   React.useEffect(() => {
     if (isFestivalAge) {
@@ -248,6 +271,14 @@ const form = useForm<FormValues>({
       form.setValue("weight_kg", null);
     }
   }, [isFestivalAge, form]);
+
+  React.useEffect(() => {
+    if (typeof age !== "number" || age < 16) return;
+    const current = form.getValues("belt_color");
+    if (current && YOUTH_ONLY_BELTS.includes(current)) {
+      form.setValue("belt_color", "BRANCA", { shouldValidate: true });
+    }
+  }, [age, form]);
 
   const giSelected = form.watch("mod_gi");
 
@@ -260,7 +291,192 @@ const form = useForm<FormValues>({
     }
   }, [giSelected, form]);
 
+  // ---------------- PIX GENERATION ----------------
+  React.useEffect(() => {
+    if (paymentMethod !== "pix" || !registrationId) return;
+
+    async function gerarPix() {
+      try {
+        const res = await fetch("/api/payments/pix", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ registrationId }),
+        });
+
+        const data = await res.json();
+        setPixData(data);
+      } catch (err) {
+        console.error("Erro ao gerar PIX:", err);
+      }
+    }
+
+    gerarPix();
+  }, [paymentMethod, registrationId]);
+
+  const [cardPaymentLoading, setCardPaymentLoading] = React.useState(false);
+  const [registrationValor, setRegistrationValor] = React.useState(120);
+
+  React.useEffect(() => {
+    if (!registrationId || paymentMethod !== "card") return;
+    fetch(`/api/cash?id=${encodeURIComponent(registrationId)}`)
+      .then((r) => r.json())
+      .then((d) => typeof d?.valor === "number" && setRegistrationValor(d.valor))
+      .catch(() => {});
+  }, [registrationId, paymentMethod]);
+
+  const handleCardSubmit = React.useCallback(
+    async (formData: {
+      token: string;
+      paymentMethodId: string;
+      issuerId: string;
+      cardholderEmail: string;
+      installments: number;
+    }) => {
+      if (!registrationId) return;
+      setCardPaymentLoading(true);
+      try {
+        const res = await fetch("/api/payments/card", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            registrationId,
+            token: formData.token,
+            paymentMethodId: formData.paymentMethodId,
+            issuerId: formData.issuerId,
+            email: formData.cardholderEmail,
+            installments: formData.installments,
+          }),
+        });
+        const result = await res.json();
+        if (result.status === "approved") {
+          router.push(`/confirmacao?id=${registrationId}`);
+        } else {
+          alert("Erro no pagamento. Tente novamente.");
+        }
+      } catch {
+        alert("Erro no pagamento. Tente novamente.");
+      } finally {
+        setCardPaymentLoading(false);
+      }
+    },
+    [registrationId, router]
+  );
+
   // -------------------- RENDER --------------------
+
+  if (registrationId && !paymentMethod) {
+    return (
+      <div className="min-h-screen bg-black text-zinc-100 py-10 md:py-16 relative overflow-hidden">
+        <div className="absolute -top-24 left-1/2 h-[520px] w-[520px] -translate-x-1/2 rounded-full bg-red-600/15 blur-3xl" />
+        <div className="absolute -bottom-40 right-[-120px] h-[520px] w-[520px] rounded-full bg-red-500/10 blur-3xl" />
+        <div className="relative container mx-auto px-4 max-w-lg">
+          <h2 className="text-2xl md:text-3xl font-bold mb-2">Inscrição realizada!</h2>
+          <p className="text-zinc-400 mb-6">Escolha a forma de pagamento para finalizar:</p>
+          <div className="rounded-2xl border border-zinc-800 bg-zinc-950/70 p-6 space-y-3">
+            <Button
+              className="cursor-pointer w-full h-12 rounded-xl bg-red-600 hover:bg-red-500"
+              onClick={() => setPaymentMethod("pix")}
+            >
+              PIX
+            </Button>
+            <Button
+              className="cursor-pointer w-full h-12 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-white"
+              onClick={() => setPaymentMethod("card")}
+            >
+              Cartão de Crédito (até 3x)
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (paymentMethod === "card") {
+    return (
+      <div className="min-h-screen bg-black text-zinc-100 py-10 md:py-16 relative overflow-hidden">
+        <div className="absolute -top-24 left-1/2 h-[520px] w-[520px] -translate-x-1/2 rounded-full bg-red-600/15 blur-3xl" />
+        <div className="absolute -bottom-40 right-[-120px] h-[520px] w-[520px] rounded-full bg-red-500/10 blur-3xl" />
+        <div className="relative container mx-auto px-4 max-w-lg">
+          <h2 className="text-2xl md:text-3xl font-bold mb-2">Pagamento com cartão</h2>
+          <p className="text-zinc-400 mb-6">Preencha os dados do cartão para finalizar</p>
+          <div className="rounded-2xl border border-zinc-800 bg-zinc-950/70 p-6 space-y-4">
+            <button
+              type="button"
+              className="inline-flex items-center gap-2 text-sm text-zinc-500 hover:text-zinc-300"
+              onClick={() => setPaymentMethod(null)}
+            >
+              <ArrowLeft className="h-4 w-4 shrink-0" aria-hidden />
+              Trocar forma de pagamento
+            </button>
+            <CardPaymentForm
+              formId="card-form-inscricao"
+              amount={registrationValor}
+              onSubmit={handleCardSubmit}
+              isLoading={cardPaymentLoading}
+            />
+          </div>
+        </div>
+      </div>
+    );
+  }
+  if (paymentMethod === "pix") {
+    return (
+      <div className="min-h-screen bg-black text-zinc-100 py-10 md:py-16 relative overflow-hidden">
+        <div className="absolute -top-24 left-1/2 h-[520px] w-[520px] -translate-x-1/2 rounded-full bg-red-600/15 blur-3xl" />
+        <div className="absolute -bottom-40 right-[-120px] h-[520px] w-[520px] rounded-full bg-red-500/10 blur-3xl" />
+        <div className="relative container mx-auto px-4 max-w-lg">
+          <h2 className="text-2xl md:text-3xl font-bold mb-2">Pagamento com PIX</h2>
+          <p className="text-zinc-400 mb-6">Escaneie o QR Code ou copie o código para pagar</p>
+          <div className="rounded-2xl border border-zinc-800 bg-zinc-950/70 p-6 space-y-4">
+            <button
+              type="button"
+              className="inline-flex items-center gap-2 text-sm text-zinc-500 hover:text-zinc-300"
+              onClick={() => setPaymentMethod(null)}
+            >
+              <ArrowLeft className="h-4 w-4 shrink-0" aria-hidden />
+              Trocar forma de pagamento
+            </button>
+            {pixData?.qrCodeBase64 ? (
+              <>
+                <div className="flex justify-center">
+                  <img
+                    src={`data:image/png;base64,${pixData.qrCodeBase64}`}
+                    alt="QR Code PIX"
+                    className="rounded-xl bg-white p-2 w-52 h-52"
+                  />
+                </div>
+                <div>
+                  <span className="text-sm text-zinc-400 block mb-2">PIX Copia e Cola</span>
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      readOnly
+                      value={pixData.pixCopyPaste ?? ""}
+                      className="flex-1 rounded-xl border border-zinc-800 bg-black/40 px-3 py-2 text-sm text-zinc-100"
+                    />
+                    <Button
+                      className="cursor-pointer bg-red-600 hover:bg-red-500"
+                      onClick={() =>
+                        pixData?.pixCopyPaste &&
+                        navigator.clipboard.writeText(pixData.pixCopyPaste)
+                      }
+                    >
+                      Copiar
+                    </Button>
+                  </div>
+                </div>
+              </>
+            ) : (
+              <div className="py-12 text-center text-zinc-500">Gerando QR Code...</div>
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-black text-zinc-100 px-4 py-10 relative overflow-hidden">
       <div className="absolute -top-24 left-1/2 h-[520px] w-[520px] -translate-x-1/2 rounded-full bg-red-600/15 blur-3xl" />
@@ -402,11 +618,14 @@ const form = useForm<FormValues>({
                     </div>
                   </div>
                 )}
-                {isFestivalAge && (
-                  <div className="flex flex-col w-full gap-6 rounded-2xl border border-yellow-600/40 bg-yellow-950/20 p-4 md:col-span-2">
-                    <h3 className="text-lg font-semibold text-yellow-200">
+                {isMinor && (
+                  <div className="flex flex-col w-full gap-6 rounded-2xl border border-zinc-700 bg-zinc-950/50 p-4 md:col-span-2">
+                    <h3 className="text-lg font-semibold text-zinc-100">
                       Dados do Responsável Legal
                     </h3>
+                    <p className="text-sm text-zinc-400 -mt-2">
+                      Obrigatório para atletas menores de 18 anos.
+                    </p>
 
                     {/* Nome do Responsável */}
                     <FormField
@@ -586,9 +805,10 @@ const form = useForm<FormValues>({
                           {beltOptions
                             .filter((b) => {
                               if (isFestivalAge) {
-                                return ["CINZA", "AMARELA", "LARANJA", "VERDE", "BRANCA"].includes(
-                                  b.value
-                                );
+                                return [...YOUTH_ONLY_BELTS, "BRANCA"].includes(b.value);
+                              }
+                              if (typeof age === "number" && age >= 16) {
+                                return !YOUTH_ONLY_BELTS.includes(b.value);
                               }
                               return true;
                             })

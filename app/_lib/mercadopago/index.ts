@@ -1,12 +1,59 @@
-﻿import crypto from "crypto";
-import { MercadoPagoConfig, Payment } from "mercadopago";
+import crypto from "crypto";
+import { MercadoPagoConfig, Payment, Preference } from "mercadopago";
 
 const client = new MercadoPagoConfig({
   accessToken: process.env.MERCADO_PAGO_ACCESS_TOKEN!,
 });
 
 export const paymentClient = new Payment(client);
+export const preferenceClient = new Preference(client);
 
+export async function createCardPayment({
+  amount,
+  token,
+  email,
+  installments,
+  paymentMethodId,
+  issuerId,
+}: {
+  amount: number;
+  token: string;
+  email: string;
+  installments: number;
+  paymentMethodId: string;
+  issuerId?: string;
+}) {
+
+  const payment = await paymentClient.create({
+    body: {
+      transaction_amount: amount,
+      token: token,
+      installments: installments,
+      payment_method_id: paymentMethodId,
+      issuer_id: issuerId ? parseInt(issuerId) : undefined,
+      payer: {
+        email: email,
+      },
+    },
+    requestOptions: {
+      idempotencyKey: crypto.randomUUID(),
+    },
+  });
+
+  return {
+    paymentId: payment.id,
+    status: payment.status,
+  };
+}
+
+interface CreateCardPaymentInput {
+  amount: number;
+  token: string;
+  email: string;
+  installments: number;
+  paymentMethodId: string;
+  issuerId?: string;
+}
 interface CreatePixPaymentInput {
   amount: number;
   reference: string;
