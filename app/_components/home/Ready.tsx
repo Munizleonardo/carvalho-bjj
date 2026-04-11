@@ -38,7 +38,7 @@ const faqs: Array<{
     key: "valores",
     title: "Valores de Inscrições",
     answer:
-      "Os valores podem variar conforme as modalidades escolhidas. O sistema apresenta o total final com clareza para que o atleta conclua a inscrição com segurança.",
+      "A inscrição está com valor único de R$ 80,00. Depois de informar o CPF, o sistema direciona o atleta para o cadastro ou para a etapa de pagamento.",
   },
   {
     key: "pagamento",

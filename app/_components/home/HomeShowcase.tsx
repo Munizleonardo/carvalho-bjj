@@ -14,18 +14,20 @@ import {
   Sparkles,
   Trophy,
   Users,
+  Volume2,
+  X,
 } from "lucide-react";
 
 const teamStats = [
   {
     value: "10+",
-    label: "edições de aprendizado",
-    description: "Cada evento soma experiência real em organização, ritmo e cuidado com o atleta.",
+    label: "edicoes de aprendizado",
+    description: "Cada evento soma experiencia real em organizacao, ritmo e cuidado com o atleta.",
   },
   {
     value: "500+",
-    label: "histórias vividas",
-    description: "Inscrições, chamadas e lutas que transformam preparo em memória de campeonato.",
+    label: "historias vividas",
+    description: "Inscricoes, chamadas e lutas que transformam preparo em memoria de campeonato.",
   },
   {
     value: "10",
@@ -35,107 +37,47 @@ const teamStats = [
   {
     value: "98%",
     label: "energia aprovada",
-    description: "Público, professores e atletas reconhecem quando o evento respeita o tatame.",
+    description: "Publico, professores e atletas reconhecem quando o evento respeita o tatame.",
   },
 ];
 
-const galleryItems = [
-  { 
-    image:
-      "/img/",
-  },
-  {
-    image:
-      "/img/",
-  },
-  {
-    image:
-      "/img/",
-  },
-  {
-    image:
-      "/img/",
-  },
-  {
-    image:
-      "/img/",
-  },
-  {
-    image:
-      "/img/",
-  },
-  {
-    image:
-      "/img/",
-  },
-  {
-    image:
-      "/img/",
-  },
-  {
-    image:
-      "/img/",
-  },
-  {
-    image:
-      "/img/",
-  },
-  {
-    image:
-      "/img/",
-  },
-  {
-    image: 
-      "/img/",
-  },
-  {
-    image:
-      "/img/",
-  },
-  {
-    image:
-      "/img/",
-  },
-  {   
-    image:
-      "/img/",
-  },
-  {
-    image:
-      "/img/",
-  },
-  {
-    image:
-      "/img/",
-  },
-  {
-    image:
-      "/img/",
-  },
-  {
-    image:
-      "/img/",
-  },
-  {
-    image:
-      "/img/",
-  },
-  {
-    image:
-      "/img/",
-  },
-  {
-    image:
-      "/img/",
-  },
-  {
-    image:
-      "/img/",
-  },
-  {
-    image:
-      "/img/",
-  },
+type GalleryMedia = {
+  src: string;
+  type: "image" | "video";
+};
+
+const imageItems: GalleryMedia[] = [
+  { src: "/img/atle.jpeg", type: "image"},
+  { src: "/img/atletas.jpeg", type: "image"},
+  { src: "/img/atletas2.jpeg", type: "image"},
+  { src: "/img/cinturao.jpeg", type: "image"},
+  { src: "/img/luta1.jpeg", type: "image"},
+  { src: "/img/luta3.jpeg", type: "image"},
+  { src: "/img/luta8.jpeg", type: "image"},
+  { src: "/img/WhatsApp%20Image%202026-04-10%20at%2008.49.48%20(1).jpeg", type: "image" },
+  { src: "/img/WhatsApp%20Image%202026-04-10%20at%2008.49.48.jpeg", type: "image" },
+  { src: "/img/WhatsApp%20Image%202026-04-10%20at%2008.49.49.jpeg", type: "image" },
+  { src: "/img/WhatsApp%20Image%202026-04-10%20at%2008.49.55.jpeg", type: "image" },
+  { src: "/img/WhatsApp%20Image%202026-04-10%20at%2008.50.02.jpeg", type: "image" },
+  { src: "/img/WhatsApp%20Image%202026-04-10%20at%2008.50.13.jpeg", type: "image" },
+  { src: "/img/WhatsApp%20Image%202026-04-10%20at%2008.50.23.jpeg", type: "image" },
+  { src: "/img/WhatsApp%20Image%202026-04-10%20at%2008.50.31.jpeg", type: "image" },
+  { src: "/img/WhatsApp%20Image%202026-04-10%20at%2008.58.41.jpeg", type: "image" },
+  { src: "/img/WhatsApp%20Image%202026-04-10%20at%2008.58.47.jpeg", type: "image" },
+];
+
+const videoItems: GalleryMedia[] = [
+  { src: "/vid/aquecimento.mp4", type: "video"},
+  { src: "/vid/evento.mp4", type: "video"},
+  { src: "/vid/hero.mp4", type: "video"},
+  { src: "/vid/luta6.mp4", type: "video"},
+  { src: "/vid/luta7.mp4", type: "video"},
+  { src: "/vid/WhatsApp%20Video%202026-04-10%20at%2008.49.53.mp4", type: "video" },
+  { src: "/vid/WhatsApp%20Video%202026-04-10%20at%2008.49.58.mp4", type: "video" },
+  { src: "/vid/WhatsApp%20Video%202026-04-10%20at%2008.50.03.mp4", type: "video" },
+  { src: "/vid/WhatsApp%20Video%202026-04-10%20at%2008.50.10.mp4", type: "video" },
+  { src: "/vid/WhatsApp%20Video%202026-04-10%20at%2008.50.11.mp4", type: "video" },
+  { src: "/vid/WhatsApp%20Video%202026-04-10%20at%2008.50.28.mp4", type: "video" },
 ];
 
 const nextEventHighlights = [
@@ -143,18 +85,18 @@ const nextEventHighlights = [
     icon: CalendarDays,
     title: "Data oficial",
     subtitle: "07/06/2026",
-    description: "Data oficial do próximo campeonato de Jiu-Jitsu",
+    description: "Data oficial do proximo campeonato de Jiu-Jitsu",
   },
   {
     icon: MapPin,
     title: "Local",
     subtitle: "Escola Paineira",
-    description: "R. São Pedro - Balneário, São Pedro da Aldeia - RJ, 28940-000",
+    description: "R. Sao Pedro - Balneario, Sao Pedro da Aldeia - RJ, 28940-000",
   },
   {
     icon: Medal,
     title: "Categorias",
-    description: "Divisões organizadas para valorizar técnica, equilíbrio e merecimento em cada chave.",
+    description: "Divisoes organizadas para valorizar tecnica, equilibrio e merecimento em cada chave.",
   },
   {
     icon: ShieldCheck,
@@ -164,10 +106,10 @@ const nextEventHighlights = [
 ];
 
 const eventDetails = [
-  { icon: Clock3, label: "Inscrições", value: "Fácil inscrição e chaveamento automático de acordo com idade e peso." },
-  { icon: Users, label: "Ambiente", value: "Um encontro entre atletas, famílias, equipes e quem respeita o esporte." },
-  { icon: Trophy, label: "Premiação", value: "Reconhecimento para quem sobe no tatame disposto a dar o melhor." },
-  { icon: Flag, label: "Organização", value: "Uma equipe comprometida com seriedade, ritmo e boa experiência." },
+  { icon: Clock3, label: "Inscricoes", value: "Facil inscricao e chaveamento automatico de acordo com idade e peso." },
+  { icon: Users, label: "Ambiente", value: "Um encontro entre atletas, familias, equipes e quem respeita o esporte." },
+  { icon: Trophy, label: "Premiacao", value: "Reconhecimento para quem sobe no tatame disposto a dar o melhor." },
+  { icon: Flag, label: "Organizacao", value: "Uma equipe comprometida com seriedade, ritmo e boa experiencia." },
 ];
 
 const sponsors = [
@@ -177,6 +119,18 @@ const sponsors = [
   { name: "Parceiro de Performance", tag: "Suplementacao, recovery ou servico especializado", initials: "PP" },
   { name: "Estrutura do Evento", tag: "Montagem, arena, audio ou operacao local", initials: "EE" },
 ];
+
+function buildAlternatingGallery(images: GalleryMedia[], videos: GalleryMedia[]) {
+  const totalPairs = Math.max(images.length, videos.length);
+  const mixed: GalleryMedia[] = [];
+
+  for (let index = 0; index < totalPairs; index += 1) {
+    mixed.push(images[index % images.length]);
+    mixed.push(videos[index % videos.length]);
+  }
+
+  return mixed;
+}
 
 function chunkGallery<T>(items: T[], size: number) {
   const chunks: T[][] = [];
@@ -189,56 +143,64 @@ function chunkGallery<T>(items: T[], size: number) {
 }
 
 export default function HomeShowcase() {
-  const [itemsPerPage, setItemsPerPage] = React.useState(12);
-  const galleryPages = React.useMemo(
-    () => chunkGallery(galleryItems, itemsPerPage),
-    [itemsPerPage]
+  const galleryItems = React.useMemo(
+    () => buildAlternatingGallery(imageItems, videoItems),
+    []
   );
   const [currentPage, setCurrentPage] = React.useState(0);
+  const visibleGalleryItems = React.useMemo(() => {
+    if (galleryItems.length === 0) {
+      return [];
+    }
+
+    return Array.from({ length: Math.min(4, galleryItems.length) }, (_, index) => {
+      return galleryItems[(currentPage + index) % galleryItems.length];
+    });
+  }, [currentPage, galleryItems]);
+  const [selectedItem, setSelectedItem] = React.useState<GalleryMedia | null>(null);
+  const modalVideoRef = React.useRef<HTMLVideoElement>(null);
 
   React.useEffect(() => {
-    const updateItemsPerPage = () => {
-      if (window.innerWidth < 640) {
-        setItemsPerPage(4);
-        return;
-      }
-
-      if (window.innerWidth < 1280) {
-        setItemsPerPage(6);
-        return;
-      }
-
-      setItemsPerPage(12);
-    };
-
-    updateItemsPerPage();
-    window.addEventListener("resize", updateItemsPerPage);
-
-    return () => window.removeEventListener("resize", updateItemsPerPage);
-  }, []);
-
-  React.useEffect(() => {
-    setCurrentPage((page) => Math.min(page, Math.max(galleryPages.length - 1, 0)));
-  }, [galleryPages.length]);
-
-  React.useEffect(() => {
-    if (galleryPages.length <= 1) {
+    if (galleryItems.length <= 4) {
       return undefined;
     }
 
     const interval = window.setInterval(() => {
-      setCurrentPage((page) => (page + 1) % galleryPages.length);
-    }, 8000);
+      setCurrentPage((page) => (page + 1) % galleryItems.length);
+    }, 5000);
 
     return () => window.clearInterval(interval);
-  }, [galleryPages.length]);
+  }, [galleryItems.length]);
+
+  React.useEffect(() => {
+    if (!selectedItem) {
+      document.body.style.overflow = "";
+      return undefined;
+    }
+
+    document.body.style.overflow = "hidden";
+
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [selectedItem]);
+
+  React.useEffect(() => {
+    if (selectedItem?.type !== "video" || !modalVideoRef.current) {
+      return;
+    }
+
+    modalVideoRef.current.currentTime = 0;
+    modalVideoRef.current.muted = false;
+    void modalVideoRef.current.play();
+  }, [selectedItem]);
 
   const goToPrevious = () => {
-    setCurrentPage((page) => (page - 1 + galleryPages.length) % galleryPages.length);
+    setCurrentPage((page) => (page - 1 + galleryItems.length) % galleryItems.length);
   };
 
   const goToNext = () => {
-    setCurrentPage((page) => (page + 1) % galleryPages.length);
+    setCurrentPage((page) => (page + 1) % galleryItems.length);
   };
 
   return (
@@ -259,7 +221,7 @@ export default function HomeShowcase() {
               <p className="mt-4 max-w-2xl text-sm leading-7 text-zinc-300 sm:mt-5 sm:text-base">
                 A proposta desta página é apresentar o evento com presença, clareza e verdade.
                 O atleta sente isso no primeiro clique: informação objetiva, identidade forte e
-                um convite real para viver uma grande edicao dentro do tatame.
+                um convite real para viver uma grande edição dentro do tatame.
               </p>
 
               <div className="mt-6 grid gap-3 sm:mt-8 sm:grid-cols-2 sm:gap-4">
@@ -316,66 +278,64 @@ export default function HomeShowcase() {
                 Galeria
               </div>
               <h2 className="mt-3 text-2xl font-bold text-white sm:text-3xl md:text-4xl">
-                Imagens que traduzem a intensidade de quem vive o jiu-jitsu de verdade.
+                Imagens e vídeos que traduzem a intensidade de quem vive o jiu-jitsu de verdade.
               </h2>
-              <p className="mt-3 max-w-2xl text-sm text-zinc-400 sm:text-base">
-                Galeria de eventos da Black Belt BJJ.
-              </p>
             </div>
           </div>
 
-          <div className="overflow-hidden rounded-[2rem] border border-zinc-800 bg-zinc-950/70 p-4 sm:p-5 md:p-6">
-            <div className="grid grid-cols-2 gap-4 sm:grid-cols-2 sm:gap-5 xl:grid-cols-4">
-              {(galleryPages[currentPage] ?? []).map((item) => (
-                <figure
-                  key={`${item.image}`}
-                  className="group relative h-36 overflow-hidden rounded-[1.25rem] border border-zinc-800 bg-black sm:h-52 sm:rounded-[1.5rem]"
-                >
-                  <Image
-                    src={item.image}
-                    alt=""
-                    fill
-                    unoptimized
-                    sizes="(max-width: 640px) 100vw, (max-width: 1280px) 50vw, 25vw"
-                    className="object-cover transition duration-500 group-hover:scale-105 group-hover:opacity-75"
-                  />
-                  <div className="absolute inset-0 bg-linear-to-t from-black via-black/20 to-transparent" />
-                </figure>
-              ))}
-            </div>
-          </div>
-
-          <div className="mt-6 flex items-center justify-center gap-3">
+          <div className="relative">
             <button
               type="button"
               onClick={goToPrevious}
-              className="hover:text-white cursor-pointer inline-flex h-9 w-9 items-center justify-center rounded-full text-red-500 transition"
+              className="absolute -left-8 top-1/2 z-10 inline-flex h-10 w-10 -translate-y-1/2 items-center justify-center text-red-500 transition hover:text-red-400 sm:-left-12 sm:h-12 sm:w-12"
               aria-label="Pagina anterior da galeria"
             >
-              <ChevronLeft className="cursor-pointer h-4 w-4" />
+              <ChevronLeft className="h-10 w-10 cursor-pointer" />
             </button>
-
-            {galleryPages.map((_, index) => (
-              <button
-                key={index}
-                type="button"
-                onClick={() => setCurrentPage(index)}
-                className={[
-                  "h-2.5 cursor-pointer rounded-full transition-all",
-                  currentPage === index ? "w-10 bg-red-500" : "w-2.5 bg-zinc-700 hover:bg-zinc-500",
-                ].join(" ")}
-                aria-label={`Ir para a pagina ${index + 1} da galeria`}
-              />
-            ))}
 
             <button
               type="button"
               onClick={goToNext}
-              className="hover:text-white cursor-pointer inline-flex h-9 w-9 items-center justify-center rounded-full text-red-500 transition"
+              className="absolute -right-8 top-1/2 z-10 inline-flex h-10 w-10 -translate-y-1/2 items-center justify-center text-red-500 transition hover:text-red-400 sm:-right-12 sm:h-12 sm:w-12"
               aria-label="Proxima pagina da galeria"
             >
-              <ChevronRight className="cursor-pointer h-4 w-4" />
+              <ChevronRight className="h-10 w-10 cursor-pointer" />
             </button>
+
+            <div className="overflow-hidden rounded-[2rem] border border-zinc-800 bg-zinc-950/70 p-4 sm:p-5 md:p-6">
+              <div className="grid grid-cols-2 gap-4 xl:grid-cols-4">
+              {visibleGalleryItems.map((item, index) => (
+                <button
+                  key={`${item.type}-${item.src}-${index}`}
+                  type="button"
+                  onClick={() => setSelectedItem(item)}
+                  className="group relative h-52 overflow-hidden rounded-[1.25rem] border border-zinc-800 bg-black text-left sm:h-64 lg:h-72"
+                >
+                  {item.type === "image" ? (
+                    <Image
+                      src={item.src}
+                      alt="Imagem da galeria"
+                      fill
+                      unoptimized
+                      sizes="(max-width: 640px) 50vw, (max-width: 1280px) 50vw, 25vw"
+                      className="object-cover transition duration-500 group-hover:scale-105 group-hover:opacity-75"
+                    />
+                  ) : (
+                    <video
+                      src={item.src}
+                      autoPlay
+                      muted
+                      loop
+                      playsInline
+                      preload="metadata"
+                      className="h-full w-full object-cover transition duration-500 group-hover:scale-105 group-hover:opacity-75"
+                      aria-label="Video da galeria"
+                    />
+                  )}
+                </button>
+              ))}
+              </div>
+            </div>
           </div>
         </div>
       </section>
@@ -388,7 +348,7 @@ export default function HomeShowcase() {
                 Próximo campeonato
               </div>
               <h2 className="mt-3 text-2xl font-bold text-white sm:text-3xl md:text-4xl">
-                Informações principais do próximos campeonato que será realizado pela Equipe Black Belt Eventos - BJJ.
+                Informações principais do próximo campeonato que será realizado pela Equipe Black Belt Eventos - BJJ.
               </h2>
               <p className="mt-4 max-w-xl text-sm text-zinc-400 sm:text-base">
                 Campeonato de Jiu-Jitsu, dedicado a crianças e adultos, mulheres e homens, de todas as idades.
@@ -447,10 +407,7 @@ export default function HomeShowcase() {
                       Cada inscrição representa uma escolha: entrar preparado para competir em alto nível.
                     </h3>
                     <p className="mt-4 max-w-xl text-sm leading-7 text-zinc-400">
-                      Inscrições: 1º lote: até 15/05 - R$ 80,00
-                    </p>
-                    <p className="mt-4 max-w-xl text-sm leading-7 text-zinc-400">
-                      Inscrições: 2º lote: de 15/05 até 31/05 - R$ 100,00
+                      Inscrição: valor único de R$ 80,00.
                     </p>
                   </div>
 
@@ -487,7 +444,7 @@ export default function HomeShowcase() {
             </p>
           </div>
 
-          <div className="-mx-4 flex snap-x snap-mandatory gap-4 overflow-x-auto px-4 pb-2 md:mx-0 md:grid md:overflow-visible md:px-0 md:pb-0 md:grid-cols-2 xl:grid-cols-5">
+          <div className="-mx-4 flex snap-x snap-mandatory gap-4 overflow-x-auto px-4 pb-2 md:mx-0 md:grid md:grid-cols-2 md:overflow-visible md:px-0 md:pb-0 xl:grid-cols-5">
             {sponsors.map((sponsor) => (
               <article
                 key={sponsor.name}
@@ -503,6 +460,58 @@ export default function HomeShowcase() {
           </div>
         </div>
       </section>
+
+      {selectedItem ? (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 p-4 backdrop-blur-sm"
+          onClick={() => setSelectedItem(null)}
+        >
+          <button
+            type="button"
+            onClick={() => setSelectedItem(null)}
+            className="absolute right-4 top-4 inline-flex h-11 w-11 items-center justify-center rounded-full border border-white/15 bg-black/60 text-white transition hover:bg-black"
+            aria-label="Fechar visualizacao"
+          >
+            <X className="h-5 w-5" />
+          </button>
+
+          <div
+            className="relative flex max-h-[90vh] w-full max-w-5xl items-center justify-center overflow-hidden rounded-[2rem] border border-zinc-800 bg-zinc-950 shadow-2xl"
+            onClick={(event) => event.stopPropagation()}
+          >
+            {selectedItem.type === "image" ? (
+              <div className="relative h-[80vh] w-full">
+                <Image
+                  src={selectedItem.src}
+                  alt="Imagem ampliada da galeria"
+                  fill
+                  unoptimized
+                  sizes="90vw"
+                  className="object-contain"
+                />
+              </div>
+            ) : (
+              <div className="w-full">
+                <video
+                  ref={modalVideoRef}
+                  key={selectedItem.src}
+                  src={selectedItem.src}
+                  controls
+                  autoPlay
+                  playsInline
+                  preload="auto"
+                  className="max-h-[80vh] w-full bg-black object-contain"
+                  aria-label="Video ampliado da galeria"
+                />
+                <div className="flex items-center gap-2 border-t border-white/10 bg-black/70 px-4 py-3 text-sm text-zinc-200">
+                  <Volume2 className="h-4 w-4 text-red-300" />
+                  Áudio ativado ao abrir o vídeo.
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      ) : null}
     </>
   );
 }

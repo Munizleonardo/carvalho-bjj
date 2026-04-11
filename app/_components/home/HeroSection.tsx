@@ -1,16 +1,38 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
+import { useRef, useState } from "react";
 import { Button } from "../ui/button";
 import {
   BookOpenText,
   GitBranch,
   LockKeyhole,
   MessageCircleIcon,
+  PauseCircle,
   PlayCircle,
   Trophy,
 } from "lucide-react";
 
 export default function HeroSection() {
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const [isPlaying, setIsPlaying] = useState(true);
+
+  const toggleVideoPlayback = () => {
+    const video = videoRef.current;
+
+    if (!video) return;
+
+    if (video.paused) {
+      void video.play();
+      setIsPlaying(true);
+      return;
+    }
+
+    video.pause();
+    setIsPlaying(false);
+  };
+
   return (
     <section
       id="home"
@@ -66,9 +88,12 @@ export default function HeroSection() {
                 </Link>
               </Button>
 
-              <p className="flex h-11 w-full items-center justify-center rounded-xl bg-red-600 px-4 text-sm font-semibold text-white sm:hidden">
-                AGUARDE A ABERTURA DAS INSCRIÇÕES
-              </p>
+              <Button
+                asChild
+                className="h-11 w-full rounded-xl bg-red-600 px-4 text-sm font-semibold text-white hover:bg-red-500 sm:hidden"
+              >
+                <Link href="/inscricao/cpf">REALIZAR INSCRIÇÃO</Link>
+              </Button>
 
               <Button
                 asChild
@@ -96,7 +121,7 @@ export default function HeroSection() {
 
             <p className="mx-auto max-w-2xl text-sm leading-7 text-zinc-300 sm:text-lg md:text-xl lg:mx-0 lg:leading-8">
               Este campeonato foi pensado para reunir competição, respeito e superação em um
-              ambiente que valoriza o atleta do aquecimento ao pódium. 
+              ambiente que valoriza o atleta do aquecimento ao pódium.
             </p>
 
             <div className="mt-6 hidden flex-wrap justify-center gap-3 text-sm text-zinc-300 sm:flex lg:justify-start">
@@ -110,7 +135,7 @@ export default function HeroSection() {
 
             <div className="mt-6 flex items-center justify-center gap-3 rounded-[1.5rem] border border-zinc-800 bg-zinc-950/60 p-3 sm:hidden">
               <div className="flex items-center justify-center gap-3">
-                <div className=" flex flex-col items-center justify-center rounded-2xl border border-white/10 bg-black/60 p-4">
+                <div className="flex flex-col items-center justify-center rounded-2xl border border-white/10 bg-black/60 p-4">
                   <div className="text-[11px] uppercase tracking-[0.2em] text-zinc-400">Edição</div>
                   <div className="mt-2 text-lg font-bold text-white">06 - 2026</div>
                 </div>
@@ -122,9 +147,12 @@ export default function HeroSection() {
             </div>
 
             <div className="mt-6 hidden flex-col gap-3 sm:flex sm:flex-row sm:flex-wrap sm:justify-center lg:justify-start">
-              <p className="flex h-12 w-full items-center justify-center rounded-xl bg-red-600 px-6 text-sm font-semibold text-white sm:h-14 sm:w-auto sm:px-8 sm:text-base">
-                AGUARDE A ABERTURA DAS INSCRIÇÕES
-              </p>
+              <Button
+                asChild
+                className="h-12 w-full rounded-xl bg-red-600 px-6 text-sm font-semibold text-white hover:bg-red-500 sm:h-14 sm:w-auto sm:px-8 sm:text-base"
+              >
+                <Link href="/inscricao/cpf">REALIZAR INSCRIÇÃO</Link>
+              </Button>
 
               <Button
                 asChild
@@ -143,20 +171,37 @@ export default function HeroSection() {
             <div className="absolute -inset-6 rounded-[2rem] bg-red-600/10 blur-3xl" />
             <div className="relative overflow-hidden rounded-[2rem] border border-zinc-800 bg-black/60 p-4 backdrop-blur-sm">
               <div className="relative overflow-hidden rounded-[1.5rem] border border-zinc-800">
-                <Image
-                  src="https://commons.wikimedia.org/wiki/Special:FilePath/Brazilian%20Jiu-Jitsu%20Gi%20Competition-Armbar.jpg"
-                  alt="Atletas de jiu-jitsu em competicao"
-                  width={1200}
-                  height={1520}
-                  unoptimized
-                  className="h-[300px] w-full object-cover sm:h-[420px] lg:h-[520px]"
+                <video
+                  ref={videoRef}
+                  src="/vid/hero.mp4"
+                  autoPlay
+                  muted
+                  loop
+                  playsInline
+                  preload="metadata"
+                  className="h-[300px] w-full object-fill sm:h-[420px] lg:h-[520px]"
+                  aria-label="Video de apresentacao do campeonato"
                 />
-                <div className="absolute inset-0 bg-linear-to-t from-black via-black/20 to-transparent" />
-                <div className="absolute left-3 right-3 top-3 flex justify-center sm:left-5 sm:right-auto sm:justify-start">
+                <div className="pointer-events-none absolute inset-0 bg-linear-to-t from-black via-black/20 to-transparent" />
+                <div className="absolute left-3 right-3 top-3 flex items-center justify-between gap-3 sm:left-5 sm:right-5">
                   <div className="inline-flex max-w-full items-center gap-2 rounded-full border border-white/10 bg-black/55 px-3 py-2 text-center text-xs text-white backdrop-blur-sm sm:text-sm">
                     <PlayCircle className="h-4 w-4 text-red-400" />
                     O tatame chama quem se prepara.
                   </div>
+                  <button
+                    type="button"
+                    onClick={toggleVideoPlayback}
+                    className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-black/55 px-3 py-2 text-xs text-white backdrop-blur-sm transition hover:bg-black/70 sm:text-sm"
+                    aria-pressed={!isPlaying}
+                    aria-label={isPlaying ? "Pausar video" : "Reproduzir video"}
+                  >
+                    {isPlaying ? (
+                      <PauseCircle className="h-4 w-4 text-white" />
+                    ) : (
+                      <PlayCircle className="h-4 w-4 text-white" />
+                    )}
+                    {isPlaying ? "Pausar" : "Reproduzir"}
+                  </button>
                 </div>
                 <div className="flex items-center justify-center sm:absolute sm:inset-x-0 sm:bottom-0 sm:block sm:p-5">
                   <div className="flex gap-3 sm:flex-wrap sm:justify-between">
@@ -167,7 +212,6 @@ export default function HeroSection() {
                     <div className="rounded-2xl border border-white/10 bg-black/60 p-4">
                       <div className="text-xs uppercase tracking-[0.2em] text-zinc-400">Status</div>
                       <div className="mt-2 text-2xl font-bold text-white">Em Breve</div>
-                      
                     </div>
                   </div>
                 </div>
