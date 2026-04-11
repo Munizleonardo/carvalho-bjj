@@ -7,32 +7,17 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Checkbox } from "@/app/_components/ui/checkbox";
-import { createParticipant } from "@/app/_lib/actions/createParticipante";
-import { Button } from "@/app/_components/ui/button";
-import { Input } from "@/app/_components/ui/input";
-import { useForm } from "react-hook-form";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/app/_components/ui/form";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/app/_components/ui/select";
+import { useRouter, useSearchParams } from "next/navigation";
+import * as React from "react";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { ArrowLeft } from "lucide-react";
+import { useForm } from "react-hook-form";
 
+import { AthleteDetailsSection } from "@/app/_components/inscricao/AthleteDetailsSection";
+import { AthleteInfoSection } from "@/app/_components/inscricao/AthleteInfoSection";
 import {
   categoryEnum,
   beltEnum,
-  genderEnum,
   type BeltColor,
   type Category,
 } from "@/app/_lib/types";
@@ -178,35 +163,68 @@ const itemInteractiveClass =
   
 
 // -------------------- COMPONENT --------------------
-function InscricaoContent() {
-  const router = useRouter();
-  const [submitting, setSubmitting] = React.useState(false);
-  const [serverError, setServerError] = React.useState<string | null>(null);
-  const searchParams = useSearchParams();
+  isFestivalAthlete,
+  splitPhoneParts,
   const cpfFromQuery = searchParams.get("cpf");
   const [registrationId, setRegistrationId] = React.useState<string | null>(null);
   const [paymentMethod, setPaymentMethod] = React.useState<"pix" | "card" | null>(null);
   const [pixData, setPixData] = React.useState<any>(null);
 
-const form = useForm<FormValues>({
-  resolver: zodResolver(formSchema),
-  shouldUnregister: true,
-  defaultValues: {
-    cpf: cpfFromQuery ?? "",
-    full_name: "",
-    phone: "",
-    academy: "",
-    mod_gi: false,
-    mod_nogi: false,
-    mod_gi_extra: false,
-    terms: false,
-    category: null,
-    weight_kg: null,
-    responsavel_name: "",
-    responsavel_cpf: "",
-    responsavel_telefone: "",
-  },
-});
+  const form = useForm<FormValues>({
+    resolver: zodResolver(formSchema),
+    shouldUnregister: true,
+    defaultValues: getDefaultFormValues(cpfFromQuery),
+  });
+
+  const age = form.watch("age");
+  const gender = form.watch("gender");
+  const weight = form.watch("weight_kg");
+  const termsAccepted = form.watch("terms");
+  const giSelected = form.watch("mod_gi");
+  const festivalAthlete = isFestivalAthlete(age);
+
+  const resolvedCategory = React.useMemo(
+    () =>
+      festivalAthlete
+        ? null
+        : resolveCategoryByAgeGenderWeight({
+            age,
+            gender,
+            weight,
+          }),
+    [age, festivalAthlete, gender, weight]
+  );
+
+  const divisionLabel = React.useMemo(
+    () =>
+      festivalAthlete ? "Festival Infantil" : getDivisionLabel(age, gender),
+    [age, festivalAthlete, gender]
+  );
+
+  React.useEffect(() => {
+    if (festivalAthlete) {
+      form.setValue("category", null);
+      form.setValue("mod_gi", false);
+      form.setValue("mod_nogi", false);
+      form.setValue("mod_gi_extra", false);
+      form.setValue("weight_kg", null);
+      return;
+    }
+
+    form.setValue("category", resolvedCategory, {
+      shouldDirty: true,
+      shouldValidate: false,
+    });
+  }, [festivalAthlete, form, resolvedCategory]);
+
+  React.useEffect(() => {
+    if (!giSelected) {
+      form.setValue("mod_gi_extra", false, {
+        shouldDirty: true,
+        shouldValidate: false,
+      });
+    }
+  }, [form, giSelected]);
 
   async function onSubmit(values: FormValues) {
     setSubmitting(true);
@@ -232,12 +250,12 @@ const form = useForm<FormValues>({
       const id = await createParticipant({
         full_name: values.full_name.trim(),
         cpf: values.cpf.trim(),
-        phone_number,
-        area_code,
+        phone_number: athletePhone.phoneNumber,
+        area_code: athletePhone.areaCode,
         age: values.age,
         academy: values.academy?.trim(),
-        category: isFestivalAge ? null : values.category,
-        weight_kg: isFestivalAge ? null : values.weight_kg,
+        category: athleteIsFestival ? null : values.category,
+        weight_kg: athleteIsFestival ? null : values.weight_kg,
         belt_color: values.belt_color,
         gender: values.gender,
         mod_gi: values.mod_gi,
@@ -478,82 +496,52 @@ const form = useForm<FormValues>({
   }
 
   return (
-    <div className="min-h-screen bg-black text-zinc-100 px-4 py-10 relative overflow-hidden">
+    <div className="relative min-h-screen overflow-hidden bg-black px-4 py-8 text-zinc-100 sm:py-10">
       <div className="absolute -top-24 left-1/2 h-[520px] w-[520px] -translate-x-1/2 rounded-full bg-red-600/15 blur-3xl" />
       <div className="absolute -bottom-40 right-[-120px] h-[520px] w-[520px] rounded-full bg-red-500/10 blur-3xl" />
 
       <div className="relative mx-auto w-full max-w-xl">
         <Link
-          className="inline-flex items-center gap-2 text-xl text-zinc-400 hover:text-zinc-100 mb-8 transition-colors"
+          className="mb-6 inline-flex items-center gap-2 text-base text-zinc-400 transition-colors hover:text-zinc-100 sm:mb-8 sm:text-xl"
           href="/"
         >
           <ArrowLeft className="h-5 w-5" />
-          Voltar para o início
+          Voltar para o in�cio
         </Link>
 
         <div className="mb-6">
-          <h1 className="text-3xl font-semibold text-zinc-100">Inscrição</h1>
-          <p className="mt-1 text-lg text-zinc-400">
-            Preencha os dados do atleta. <br/> 
-            Realize o pagamento para concluir a inscrição.
+          <h1 className="text-2xl font-semibold text-zinc-100 sm:text-3xl">
+            Inscri��o
+          </h1>
+          <p className="mt-1 text-base text-zinc-400 sm:text-lg">
+            Preencha os dados do atleta com atencao. <br />
+            Cada detalhe certo aproxima voce de uma grande atuacao no campeonato.
           </p>
         </div>
 
-        <div className="rounded-2xl border border-zinc-800 bg-zinc-950/70 p-6 flex flex-col gap-5 shadow-sm backdrop-blur">
+        <div className="flex flex-col gap-5 rounded-2xl border border-zinc-800 bg-zinc-950/70 p-4 shadow-sm backdrop-blur sm:p-6">
           <div>
-            <h2 className="text-xl font-semibold text-zinc-100">
-              Formulário de Inscrição
+            <h2 className="text-lg font-semibold text-zinc-100 sm:text-xl">
+              Formul�rio de Inscri��o
             </h2>
-            <p className="mt-1 text-lg text-zinc-400 mb-2">
-              Preencha todos os campos para continuar.
+            <p className="mb-2 mt-1 text-base text-zinc-400 sm:text-lg">
+              Finalize este cadastro para seguir ao pagamento e garantir sua vaga
+              no evento.
             </p>
           </div>
 
           <Form {...form}>
             <form
               onSubmit={form.handleSubmit(onSubmit)}
-              className="flex flex-col md:flex md:flex-col gap-8 "
+              className="flex flex-col gap-6 sm:gap-8"
             >
-              {/* Nome */}
-              <FormField
-                control={form.control}
-                name="full_name"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-lg text-zinc-200">
-                      Nome Completo
-                    </FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder="Nome do Atleta"
-                        {...field}
-                        className="rounded-xl bg-black/40 border-zinc-800 text-zinc-100 placeholder:text-zinc-500 focus-visible:ring-red-500/30"
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
+              <AthleteInfoSection
+                divisionLabel={divisionLabel}
+                form={form}
+                resolvedCategory={resolvedCategory}
               />
 
-              <FormField
-                control={form.control}
-                name="cpf"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-lg text-zinc-200">
-                      CPF
-                    </FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder="CPF do Atleta"
-                        {...field}
-                        className="rounded-xl bg-black/40 border-zinc-800 text-zinc-100 placeholder:text-zinc-500 focus-visible:ring-red-500/30"
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+              <AthleteDetailsSection form={form} />
 
                 {/* phone_number */}
                 <FormField
@@ -866,167 +854,36 @@ const form = useForm<FormValues>({
                 </div>
               )}
 
-              {/* Modalidades */}
-              <div className="flex flex-wrap gap-6 w-full">
-                <div className="rounded-2xl border border-zinc-800 bg-black/30 p-4 w-full flex flex-col">
-                  <p className="text-lg text-zinc-200 font-medium mb-3 flex justify-center">
-                    Seleção de Modalidades
-                  </p>
+              <ModalitiesSection form={form} />
 
-                  <div className="grid gap-3">
-                    {!isFestivalAge ? (
-                      <>
-                        {/* GI */}
-                        <FormField
-                          control={form.control}
-                          name="mod_gi"
-                          render={({ field }) => (
-                            <FormItem className="flex items-start gap-3 space-y-0">
-                              <FormControl>
-                                <Checkbox
-                                  checked={field.value}
-                                  onCheckedChange={field.onChange}
-                                  className="mt-1"
-                                />
-                              </FormControl>
-
-                              <div className="grid gap-1 leading-none">
-                                <FormLabel className="text-zinc-100 cursor-pointer">
-                                  Gi (com kimono)
-                                </FormLabel>
-                                <p className="text-sm text-zinc-400">
-                                  Inclui a inscrição na modalidade tradicional.
-                                </p>
-
-                                {/* GI EXTRA / ABSOLUTO */}
-                                {field.value && (
-                                  <div className="mt-3 pl-1">
-                                    <FormField
-                                      control={form.control}
-                                      name="mod_gi_extra"
-                                      render={({ field: extraField }) => (
-                                        <FormItem className="flex items-start gap-3 space-y-0 rounded-xl border border-zinc-800 bg-black/30 p-3">
-                                          <FormControl>
-                                            <Checkbox
-                                              checked={extraField.value}
-                                              onCheckedChange={extraField.onChange}
-                                              className="mt-1"
-                                            />
-                                          </FormControl>
-
-                                          <div className="grid gap-1 leading-none">
-                                            <FormLabel className="text-zinc-100 cursor-pointer">
-                                              Absoluto
-                                            </FormLabel>
-                                            <p className="text-sm text-zinc-400">
-                                              Inclui a inscrição no Absoluto, campeão dos campeões.
-                                            </p>
-                                            <FormMessage />
-                                          </div>
-                                        </FormItem>
-                                      )}
-                                    />
-                                  </div>
-                                )}
-                              </div>
-
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-
-                        {/* NOGI */}
-                        <FormField
-                          control={form.control}
-                          name="mod_nogi"
-                          render={({ field }) => (
-                            <FormItem className="flex items-start gap-3 space-y-0">
-                              <FormControl>
-                                <Checkbox
-                                  checked={field.value}
-                                  onCheckedChange={field.onChange}
-                                />
-                              </FormControl>
-
-                              <div className="grid gap-1 leading-none">
-                                <FormLabel className="cursor-pointer text-zinc-100">
-                                  No-Gi (sem kimono)
-                                </FormLabel>
-                                <p className="text-sm text-zinc-400">
-                                  Inclui a inscrição na modalidade sem kimono.
-                                </p>
-                              </div>
-
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                      </>
-                    ) : (
-                      <p className="text-sm text-zinc-400 text-center">
-                        Atletas abaixo de 8 anos participarão da modalidade <strong>Festival!</strong>
-                      </p>
-                    )}
-                  </div>
-                </div>
-              </div>
-
-              {/* TERMOS */}
-              <FormField
-                control={form.control}
-                name="terms"
-                render={({ field }) => (
-                  <FormItem className="flex items-start gap-3 space-y-0 rounded-xl border border-zinc-800 bg-black/30 p-4">
-                    <FormControl>
-                      <Checkbox
-                        checked={field.value}
-                        onCheckedChange={field.onChange}
-                        className="mt-1"
-                      />
-                    </FormControl>
-
-                    <div className="flex flex-col gap-2 leading-none">
-                      <FormLabel className="flex flex-wrap  text-zinc-100 cursor-pointer">
-                        Declaro que li e aceito os {" "}
-                        <a
-                          href="/termo-de-autorização.pdf"
-                          className="flex flex-row justify-between text-white hover:text-red-600"
-                          target="_blank"
-                          rel="noopener noreferrer"
-                        >
-                          Termos de Inscrição
-                        </a>
-                      </FormLabel>
-                      <p className="flex text-sm text-zinc-400">
-                        Ao prosseguir, confirmo que as informações fornecidas são verdadeiras
-                        e estou ciente das regras do evento.
-                      </p>
-                      <FormMessage />
-                    </div>
-                  </FormItem>
-                )}
-              />
+              <TermsSection form={form} />
 
               <div className="flex justify-center gap-4">
                 <Button
-                  className="h-12 rounded-xl cursor-pointer px-8 bg-red-600 hover:bg-red-500"
-                  disabled={submitting || !form.watch("terms")}
+                  className="h-12 cursor-pointer rounded-xl bg-red-600 px-8 hover:bg-red-500"
+                  disabled={submitting || !termsAccepted}
                   type="submit"
                 >
-                  {submitting ? "Enviando..." : "Concluir inscrição"}
+                  {submitting ? "Enviando..." : "Concluir inscri��o"}
                 </Button>
               </div>
-                          </form>
-                        </Form>
-                      </div>
-                    </div>
-                  </div>
-                );
-              }
+            </form>
+          </Form>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export default function InscricaoPage() {
   return (
-    <React.Suspense fallback={<div className="min-h-screen bg-black text-zinc-100 flex items-center justify-center">Carregando...</div>}>
+    <React.Suspense
+      fallback={
+        <div className="flex min-h-screen items-center justify-center bg-black text-zinc-100">
+          Carregando...
+        </div>
+      }
+    >
       <InscricaoContent />
     </React.Suspense>
   );

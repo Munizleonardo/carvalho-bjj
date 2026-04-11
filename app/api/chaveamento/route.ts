@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 
-import { getPaidAthletes, getStoredBrackets, saveStoredBrackets } from "@/app/_lib/chaveamento-server";
+import {
+  getChaveamentoAthletes,
+  saveStoredBrackets,
+  syncStoredBracketsWithParticipants,
+} from "@/app/_lib/chaveamento-server";
 import { normalizeStoredBracket, type StoredBracket } from "@/app/_lib/chaveamento";
 
 function isAdmin(request: NextRequest) {
@@ -9,8 +13,8 @@ function isAdmin(request: NextRequest) {
 
 export async function GET() {
   try {
-    const [athletes, brackets] = await Promise.all([getPaidAthletes(), getStoredBrackets()]);
-    return NextResponse.json({ athletes, brackets });
+    const { athletes, brackets } = await syncStoredBracketsWithParticipants();
+    return NextResponse.json({ athletes, brackets, rulesFile: "app/_lib/chaveamento-rules.ts" });
   } catch (error) {
     const message = error instanceof Error ? error.message : "Erro ao carregar chaveamento.";
     return NextResponse.json({ error: message }, { status: 500 });
@@ -34,7 +38,8 @@ export async function PUT(request: NextRequest) {
     }
 
     await saveStoredBrackets(brackets);
-    return NextResponse.json({ success: true });
+    const athletes = await getChaveamentoAthletes();
+    return NextResponse.json({ success: true, athletes });
   } catch (error) {
     const message = error instanceof Error ? error.message : "Erro ao salvar chaveamento.";
     return NextResponse.json({ error: message }, { status: 500 });

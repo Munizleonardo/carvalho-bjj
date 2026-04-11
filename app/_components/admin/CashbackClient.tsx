@@ -22,7 +22,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/app/_components/ui/table";
-import type { ParticipantAdmin } from "@/app/_lib/types";
+import { getCategoryLabel, type ParticipantAdmin } from "@/app/_lib/types";
 
 type Group = {
   academy: string;
@@ -36,7 +36,7 @@ function normalizeAcademy(value?: string | null) {
 
 function normalizeCategory(value?: string | null) {
   const category = (value ?? "").trim();
-  return category || "Sem categoria";
+  return category ? getCategoryLabel(category as ParticipantAdmin["category"]) : "Sem categoria";
 }
 
 function buildAcademyGroups(list: ParticipantAdmin[]): Group[] {

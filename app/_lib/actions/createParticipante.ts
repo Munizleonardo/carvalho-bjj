@@ -1,7 +1,9 @@
 "use server";
 
 import { supabaseAdmin } from "@/app/_lib/supabase/admin";
+import { syncStoredBracketsWithParticipants } from "@/app/_lib/chaveamento-server";
 import type { BeltColor, Category, Gender } from "@/app/_lib/types";
+import { resolveCategoryByAgeGenderWeight } from "@/app/_lib/weight-categories";
 
 type CreateParticipantInput = {
   full_name: string;
@@ -37,6 +39,21 @@ function normalizeFullNameUppercase(value: string) {
   return value.trim().replace(/\s+/g, " ").toLocaleUpperCase("pt-BR");
 }
 
+function getSaoPauloDateCode(date = new Date()) {
+  const parts = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "America/Sao_Paulo",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).formatToParts(date);
+
+  const year = parts.find((part) => part.type === "year")?.value ?? "0000";
+  const month = parts.find((part) => part.type === "month")?.value ?? "00";
+  const day = parts.find((part) => part.type === "day")?.value ?? "00";
+
+  return Number(`${year}${month}${day}`);
+}
+
 function calcFee({
   mod_gi,
   mod_nogi,
@@ -50,8 +67,8 @@ function calcFee({
 }) {
   const modalidades = [mod_gi, mod_nogi, mod_gi_extra, festival].filter(Boolean).length;
   if (modalidades === 0) return 0;
-  if (modalidades === 1) return 120;
-  return 120 + (modalidades - 1) * 70;
+
+  return getSaoPauloDateCode() <= 20260515 ? 80 : 100;
 }
 
 function isDuplicateError(error: DbError | null | undefined) {
@@ -71,6 +88,17 @@ export async function createParticipant(input: CreateParticipantInput) {
   const sb = supabaseAdmin();
   const isFestival = input.age < 8;
   const normalizedCpf = digitsOnly(input.cpf);
+  const resolvedCategory = isFestival
+    ? null
+    : resolveCategoryByAgeGenderWeight({
+        age: input.age,
+        gender: input.gender,
+        weight: input.weight_kg,
+      });
+
+  if (!isFestival && (input.weight_kg === null || resolvedCategory === null)) {
+    throw new Error("Nao foi possivel identificar a categoria pelo peso informado.");
+  }
 
   const valor = calcFee({
     mod_gi: input.mod_gi,
@@ -87,7 +115,7 @@ export async function createParticipant(input: CreateParticipantInput) {
     area_code: input.area_code,
     idade: input.age,
     academia: input.academy ?? null,
-    ...(isFestival ? {} : { categoria: input.category, peso: input.weight_kg }),
+    ...(isFestival ? {} : { categoria: resolvedCategory, peso: input.weight_kg }),
     faixa: input.belt_color ?? null,
     sexo: input.gender ?? null,
     mod_gi: input.mod_gi,
@@ -117,9 +145,14 @@ export async function createParticipant(input: CreateParticipantInput) {
   };
 
   const existingBeforeInsert = await getExistingByCpfId();
-  if (existingBeforeInsert) return existingBeforeInsert;
+  if (existingBeforeInsert) return finalizeRegistration(existingBeforeInsert);
 
   const MAX_ATTEMPTS = 30;
+
+  async function finalizeRegistration(id: string) {
+    await syncStoredBracketsWithParticipants();
+    return id;
+  }
 
   for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
     const { data: lastRow } = await sb
@@ -138,7 +171,7 @@ export async function createParticipant(input: CreateParticipantInput) {
       .select("id")
       .single();
 
-    if (!error && data?.id) return String(data.id);
+    if (!error && data?.id) return finalizeRegistration(String(data.id));
 
     const typedError = error as DbError | null;
 
@@ -150,7 +183,7 @@ export async function createParticipant(input: CreateParticipantInput) {
         .single();
 
       if (!regularInsert.error && regularInsert.data?.id) {
-        return String(regularInsert.data.id);
+        return finalizeRegistration(String(regularInsert.data.id));
       }
 
       const regularError = regularInsert.error as DbError | null;

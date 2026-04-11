@@ -4,7 +4,7 @@ import * as React from "react";
 import Link from "next/link";
 
 import type { BeltColor, ParticipantAdmin } from "@/app/_lib/types";
-import { beltDotClasses, beltLabel } from "@/app/_lib/types";
+import { beltDotClasses, beltLabel, getCategoryLabel } from "@/app/_lib/types";
 import { useRouter } from "next/navigation";
 import { logout } from "@/app/_lib/auth";
 import { Button } from "@/app/_components/ui/button";
@@ -45,7 +45,7 @@ function round1(n: number) {
 
 function normalizeCategory(cat?: string | null) {
   const c = (cat ?? "").trim();
-  return c ? c : "Sem categoria";
+  return c ? getCategoryLabel(c as ParticipantAdmin["category"]) : "Sem categoria";
 }
 
 function buildGroupsByCategory(list: ParticipantAdmin[]): Group[] {
