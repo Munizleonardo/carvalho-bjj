@@ -407,7 +407,10 @@ export default function HomeShowcase() {
                       Cada inscrição representa uma escolha: entrar preparado para competir em alto nível.
                     </h3>
                     <p className="mt-4 max-w-xl text-sm leading-7 text-zinc-400">
-                      Inscrição: valor único de R$ 80,00.
+                      Inscrições: 1º lote até 15/05 - R$ 80,00.
+                    </p>
+                    <p className="mt-4 max-w-xl text-sm leading-7 text-zinc-400">
+                      Inscrições: 2º lote de 16/05 até 31/05 - R$ 100,00.
                     </p>
                   </div>
 

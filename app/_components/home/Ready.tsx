@@ -38,7 +38,7 @@ const faqs: Array<{
     key: "valores",
     title: "Valores de Inscrições",
     answer:
-      "A inscrição está com valor único de R$ 80,00. Depois de informar o CPF, o sistema direciona o atleta para o cadastro ou para a etapa de pagamento.",
+      "Até 15/05/2026 a inscrição custa R$ 80,00. A partir de 16/05/2026 até 31/05/2026 entra o segundo lote com valor de R$ 100,00",
   },
   {
     key: "pagamento",

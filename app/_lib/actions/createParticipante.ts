@@ -39,6 +39,21 @@ function normalizeFullNameUppercase(value: string) {
   return value.trim().replace(/\s+/g, " ").toLocaleUpperCase("pt-BR");
 }
 
+function getSaoPauloDateCode(date = new Date()) {
+  const parts = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "America/Sao_Paulo",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).formatToParts(date);
+
+  const year = parts.find((part) => part.type === "year")?.value ?? "0000";
+  const month = parts.find((part) => part.type === "month")?.value ?? "00";
+  const day = parts.find((part) => part.type === "day")?.value ?? "00";
+
+  return Number(`${year}${month}${day}`);
+}
+
 function calcFee({
   mod_gi,
   mod_nogi,
@@ -52,7 +67,8 @@ function calcFee({
 }) {
   const modalidades = [mod_gi, mod_nogi, mod_gi_extra, festival].filter(Boolean).length;
   if (modalidades === 0) return 0;
-  return 80;
+
+  return getSaoPauloDateCode() <= 20260515 ? 80 : 100;
 }
 
 function isDuplicateError(error: DbError | null | undefined) {
