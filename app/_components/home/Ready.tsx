@@ -148,7 +148,7 @@ export default function Ready() {
       <div className="container mx-auto px-4">
         <div className="relative mx-auto max-w-5xl overflow-hidden rounded-2xl border border-zinc-800 bg-zinc-950 p-4 shadow-sm sm:p-6">
           <div className="absolute -top-24 left-1/3 h-64 w-64 rounded-full bg-red-600/20 blur-3xl" />
-          <div className="absolute -bottom-24 right-1/4 h-64 w-64 rounded-full bg-red-500/15 blur-3xl" />
+          
 
           <div className="relative">
             <div className="mb-8 text-center">

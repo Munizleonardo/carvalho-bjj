@@ -13,9 +13,20 @@ type PaymentMethod = "pix" | "card" | null;
 type CashData = {
   id: string;
   nome: string;
+  cpf: string;
+  faixa: string;
+  categoria: string | null;
+  peso: number | null;
   wpp: string;
   valor: number;
   mods: { gi: boolean; nogi: boolean; abs: boolean; festival: boolean };
+  payment: {
+    status: string | null;
+    method: "pix" | "credit_card" | null;
+    amount: number | null;
+    createdAt: string | null;
+  };
+  status: "paid" | "pending";
   pix?: {
     qrCodeBase64: string | null;
     pixCopyPaste: string | null;
@@ -36,13 +47,11 @@ export default function CashClient() {
   const pixRequestedRef = React.useRef(false);
 
   React.useEffect(() => {
-    if (data?.pix?.status === "approved") {
-      const t = setTimeout(() => {
-        router.push("/");
-      }, 4000);
-      return () => clearTimeout(t);
+    if (!id) return;
+    if (data?.payment?.status === "approved" || data?.pix?.status === "approved") {
+      router.replace(`/confirmacao?id=${encodeURIComponent(id)}`);
     }
-  }, [data, router]);
+  }, [data, id, router]);
 
   React.useEffect(() => {
     if (!id || !data) return;
@@ -60,6 +69,12 @@ export default function CashClient() {
             prev && prev.pix
               ? {
                   ...prev,
+                  payment: {
+                    ...prev.payment,
+                    status: "approved",
+                    method: "pix",
+                    amount: prev.valor,
+                  },
                   pix: {
                     ...prev.pix,
                     status: "approved",
@@ -124,6 +139,12 @@ export default function CashClient() {
           prev
             ? {
                 ...prev,
+                payment: {
+                  ...prev.payment,
+                  status: json.status ?? "pending",
+                  method: "pix",
+                  amount: prev.valor,
+                },
                 pix: {
                   pixCopyPaste: json.pixCopyPaste ?? null,
                   qrCodeBase64: json.qrCodeBase64 ?? null,
@@ -166,7 +187,7 @@ export default function CashClient() {
         if (result.status === "approved") {
           router.push(`/confirmacao?id=${id}`);
         } else {
-          alert("Erro no pagamento. Tente novamente.");
+          alert(result?.error ?? "Erro no pagamento. Tente novamente.");
         }
       } catch {
         alert("Erro no pagamento. Tente novamente.");
@@ -197,18 +218,22 @@ export default function CashClient() {
   }, [data]);
 
   return (
-    <div className="min-h-screen bg-black text-zinc-100 py-10 md:py-16 relative overflow-hidden">
+    <div className="relative min-h-screen overflow-hidden bg-black py-10 text-zinc-100 md:py-16">
       <div className="absolute -top-24 left-1/2 h-[520px] w-[520px] -translate-x-1/2 rounded-full bg-red-600/15 blur-3xl" />
       <div className="absolute -bottom-40 right-[-120px] h-[520px] w-[520px] rounded-full bg-red-500/10 blur-3xl" />
 
-      <div className="relative bg-black text-zinc-100 py-4 md:py-8">
+      <div className="relative bg-black py-4 text-zinc-100 md:py-8">
         <div className="container mx-auto px-4">
-          <div className="max-w-xl mx-auto gap-3">
-            <h1 className="text-2xl md:text-3xl font-bold mb-2">Pagamento da Inscrição</h1>
-            <p className="text-zinc-400 mb-3">Finalize o pagamento para confirmar sua participação</p>
+          <div className="mx-auto max-w-xl gap-3">
+            <h1 className="mb-2 text-2xl font-bold md:text-3xl">Pagamento da Inscricao</h1>
+            <p className="mb-3 text-zinc-400">
+              Finalize o pagamento para confirmar sua participacao.
+            </p>
 
             {loading && (
-              <div className="mt-6 rounded-2xl border border-zinc-800 bg-zinc-950/70 p-6">Carregando...</div>
+              <div className="mt-6 rounded-2xl border border-zinc-800 bg-zinc-950/70 p-6">
+                Carregando...
+              </div>
             )}
 
             {error && (
@@ -231,30 +256,30 @@ export default function CashClient() {
                 <div className="rounded-2xl border border-zinc-800 bg-zinc-950/70 p-6">
                   <div className="flex justify-between">
                     <span className="text-sm text-zinc-400">Valor:</span>
-                    <span className="font-semibold text-lg">{valorFormatado}</span>
+                    <span className="text-lg font-semibold">{valorFormatado}</span>
                   </div>
 
                   {!paymentMethod ? (
-                    <div className="mt-4 border-t border-zinc-800 pt-4 space-y-3">
+                    <div className="mt-4 space-y-3 border-t border-zinc-800 pt-4">
                       <p className="text-sm text-zinc-400">Escolha a forma de pagamento:</p>
-                      <div className="flex flex-col sm:flex-row gap-3">
+                      <div className="flex flex-col gap-3 sm:flex-row">
                         <Button
-                          className="cursor-pointer flex-1 h-12 rounded-xl bg-red-600 hover:bg-red-500"
+                          className="h-12 flex-1 rounded-xl bg-red-600 hover:bg-red-500"
                           onClick={() => setPaymentMethod("pix")}
                         >
                           PIX
                         </Button>
                         <Button
-                          className="cursor-pointer flex-1 h-12 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-white"
+                          className="h-12 flex-1 rounded-xl bg-zinc-800 text-white hover:bg-zinc-700"
                           onClick={() => setPaymentMethod("card")}
                         >
-                          Cartão de Crédito
+                          Cartao de Credito
                         </Button>
                       </div>
                     </div>
                   ) : paymentMethod === "pix" ? (
-                    <div className="mt-4 border-t border-zinc-800 pt-4 space-y-4">
-                      <div className="flex justify-between items-center">
+                    <div className="mt-4 space-y-4 border-t border-zinc-800 pt-4">
+                      <div className="flex items-center justify-between">
                         <button
                           type="button"
                           className="inline-flex items-center gap-2 text-sm text-zinc-500 hover:text-zinc-300"
@@ -274,16 +299,16 @@ export default function CashClient() {
                             className="rounded-xl bg-white p-2"
                           />
                         ) : (
-                          <div className="w-52 h-52 rounded-xl bg-zinc-900 border border-zinc-800 flex items-center justify-center text-zinc-500 text-sm text-center p-4">
+                          <div className="flex h-52 w-52 items-center justify-center rounded-xl border border-zinc-800 bg-zinc-900 p-4 text-center text-sm text-zinc-500">
                             Aguardando QR Code...
                           </div>
                         )}
                       </div>
 
                       <div className="flex flex-col gap-2">
-                        <span className="text-sm text-zinc-400 block mb-2">PIX Copia e Cola</span>
-                        <div className="flex flex-col md:flex-row gap-2">
-                          <code className="w-full min-w-0 bg-black/40 px-3 py-2 rounded-lg text-sm font-mono break-all border border-zinc-800">
+                        <span className="mb-2 block text-sm text-zinc-400">PIX Copia e Cola</span>
+                        <div className="flex flex-col gap-2 md:flex-row">
+                          <code className="w-full min-w-0 break-all rounded-lg border border-zinc-800 bg-black/40 px-3 py-2 text-sm font-mono">
                             <input
                               type="text"
                               value={data.pix?.pixCopyPaste ?? ""}
@@ -292,9 +317,10 @@ export default function CashClient() {
                             />
                           </code>
                           <Button
-                            className="w-full md:w-auto flex justify-center items-center cursor-pointer bg-red-600 hover:bg-black"
+                            className="flex w-full items-center justify-center bg-red-600 hover:bg-black md:w-auto"
                             onClick={() =>
-                              data.pix?.pixCopyPaste && navigator.clipboard.writeText(data.pix.pixCopyPaste)
+                              data.pix?.pixCopyPaste &&
+                              navigator.clipboard.writeText(data.pix.pixCopyPaste)
                             }
                             disabled={!data.pix?.pixCopyPaste}
                           >
@@ -304,8 +330,8 @@ export default function CashClient() {
                       </div>
                     </div>
                   ) : (
-                    <div className="mt-4 border-t border-zinc-800 pt-4 space-y-4">
-                      <div className="flex justify-between items-center">
+                    <div className="mt-4 space-y-4 border-t border-zinc-800 pt-4">
+                      <div className="flex items-center justify-between">
                         <button
                           type="button"
                           className="inline-flex items-center gap-2 text-sm text-zinc-500 hover:text-zinc-300"
@@ -315,6 +341,9 @@ export default function CashClient() {
                           Trocar forma de pagamento
                         </button>
                       </div>
+                      <p className="text-sm text-zinc-400">
+                        Parcelamento disponivel em ate 3x no cartao de credito.
+                      </p>
                       <CardPaymentForm
                         formId="card-form-cash"
                         amount={data.valor}
@@ -325,17 +354,17 @@ export default function CashClient() {
                   )}
                 </div>
 
-                <div className="p-4 bg-black/40 rounded-xl border border-zinc-800">
+                <div className="rounded-xl border border-zinc-800 bg-black/40 p-4">
                   <p className="text-center text-sm text-zinc-200">
-                    Após confirmação do pagamento a inscrição será concluída.
-                    
+                    Apos a confirmacao do pagamento, sua inscricao sera concluida e a
+                    pagina de confirmacao sera exibida automaticamente.
                   </p>
                 </div>
 
                 <div className="flex items-center justify-center">
                   <Link href="/">
-                    <Button className="cursor-pointer inline-flex items-center gap-2 text-sm bg-red-600/10 text-white hover:text-zinc-100 mb-8 transition-colors">
-                      Voltar para o início
+                    <Button className="mb-8 inline-flex items-center gap-2 bg-red-600/10 text-sm text-white transition-colors hover:text-zinc-100">
+                      Voltar para o inicio
                     </Button>
                   </Link>
                 </div>

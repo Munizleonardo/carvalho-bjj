@@ -141,7 +141,7 @@ export default function HeroSection() {
                 </div>
                 <div className="rounded-2xl border border-white/10 bg-black/60 p-4">
                   <div className="text-[11px] uppercase tracking-[0.2em] text-zinc-400">Status</div>
-                  <div className="mt-2 text-lg font-bold text-white">Em Breve</div>
+                  <div className="mt-2 text-lg font-bold text-white">Inscrições Abertas</div>
                 </div>
               </div>
             </div>
@@ -211,7 +211,7 @@ export default function HeroSection() {
                     </div>
                     <div className="rounded-2xl border border-white/10 bg-black/60 p-4">
                       <div className="text-xs uppercase tracking-[0.2em] text-zinc-400">Status</div>
-                      <div className="mt-2 text-2xl font-bold text-white">Em Breve</div>
+                      <div className="mt-2 text-2xl font-bold text-white">Inscrições Abertas</div>
                     </div>
                   </div>
                 </div>
@@ -224,7 +224,7 @@ export default function HeroSection() {
                 </div>
                 <div className="rounded-2xl border border-white/10 bg-black/60 p-4">
                   <div className="text-xs uppercase tracking-[0.2em] text-zinc-400">Status</div>
-                  <div className="mt-2 text-xl font-bold text-white">Em Breve</div>
+                  <div className="mt-2 text-xl font-bold text-white">Inscrições Abertas</div>
                 </div>
               </div>
             </div>

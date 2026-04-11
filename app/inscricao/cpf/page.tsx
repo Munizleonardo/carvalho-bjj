@@ -12,13 +12,32 @@ type Participante = {
   nome: string;
   cpf: string;
   faixa: string;
-  categoria?: string;
-  peso?: number;
-  mod_gi: boolean;
-  mod_nogi: boolean;
-  mod_gi_extra: boolean;
+  categoria?: string | null;
+  peso?: number | null;
+  wpp: string;
+  valor: number;
+  mods: { gi: boolean; nogi: boolean; abs: boolean; festival: boolean };
+  payment: {
+    status: string | null;
+    method: "pix" | "credit_card" | null;
+    amount: number | null;
+    createdAt: string | null;
+  };
   status: "paid" | "pending";
 };
+
+function formatCurrencyBRL(value: number | null | undefined) {
+  return (value ?? 0).toLocaleString("pt-BR", {
+    style: "currency",
+    currency: "BRL",
+  });
+}
+
+function getPaymentMethodLabel(method: Participante["payment"]["method"]) {
+  if (method === "pix") return "PIX";
+  if (method === "credit_card") return "Cartao de Credito";
+  return "-";
+}
 
 export default function CheckCpfPage() {
   const router = useRouter();
@@ -92,7 +111,7 @@ export default function CheckCpfPage() {
               )}
 
               <Button
-                className="h-12 w-full cursor-pointer rounded-xl bg-red-600 hover:bg-red-500"
+                className="h-12 w-full rounded-xl bg-red-600 hover:bg-red-500"
                 disabled={loading || normalizedCpf.length !== 11}
                 onClick={handleCheckCpf}
               >
@@ -120,11 +139,15 @@ export default function CheckCpfPage() {
                   <strong>Peso:</strong> {participante.peso ?? "-"}
                 </p>
                 <p>
+                  <strong>Telefone:</strong> {participante.wpp}
+                </p>
+                <p>
                   <strong>Modalidades:</strong>{" "}
                   {[
-                    participante.mod_gi ? "Gi" : null,
-                    participante.mod_nogi ? "NoGi" : null,
-                    participante.mod_gi_extra ? "Absoluto" : null,
+                    participante.mods.gi ? "Gi" : null,
+                    participante.mods.nogi ? "NoGi" : null,
+                    participante.mods.abs ? "Absoluto" : null,
+                    participante.mods.festival ? "Festival" : null,
                   ]
                     .filter(Boolean)
                     .join(", ")}
@@ -135,12 +158,23 @@ export default function CheckCpfPage() {
               </div>
 
               {participante.status === "paid" ? (
-                <div className="mt-5 rounded-xl bg-green-900/30 p-3 text-sm text-green-300">
-                  Esta inscricao ja foi paga e esta confirmada. Agora e manter o foco na preparacao.
-                </div>
+                <>
+                  <div className="mt-5 rounded-xl bg-green-900/30 p-3 text-sm text-green-300">
+                    Esta inscricao ja foi paga e esta confirmada.
+                  </div>
+                  <div className="mt-4 space-y-2 rounded-xl border border-zinc-800 bg-black/30 p-4 text-sm text-zinc-300">
+                    <p>
+                      <strong>Valor pago:</strong> {formatCurrencyBRL(participante.payment.amount)}
+                    </p>
+                    <p>
+                      <strong>Forma de pagamento:</strong>{" "}
+                      {getPaymentMethodLabel(participante.payment.method)}
+                    </p>
+                  </div>
+                </>
               ) : (
                 <Button
-                  className="mt-6 h-12 w-full cursor-pointer rounded-xl bg-red-600 hover:bg-red-500"
+                  className="mt-6 h-12 w-full rounded-xl bg-red-600 hover:bg-red-500"
                   onClick={goToPayment}
                 >
                   Pagar Inscricao
@@ -151,7 +185,7 @@ export default function CheckCpfPage() {
 
           <div className="mt-6 flex justify-center">
             <Link href="/">
-              <Button className="cursor-pointer bg-red-600/10 text-white hover:bg-red-600/20">
+              <Button className="bg-red-600/10 text-white hover:bg-red-600/20">
                 Voltar para o inicio
               </Button>
             </Link>
