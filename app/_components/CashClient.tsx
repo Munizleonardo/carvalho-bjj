@@ -341,9 +341,6 @@ export default function CashClient() {
                           Trocar forma de pagamento
                         </button>
                       </div>
-                      <p className="text-sm text-zinc-400">
-                        Parcelamento disponivel em ate 3x no cartao de credito.
-                      </p>
                       <CardPaymentForm
                         formId="card-form-cash"
                         amount={data.valor}
