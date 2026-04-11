@@ -95,6 +95,7 @@ export async function POST(req: Request) {
     registration_id: registration.id,
     gateway: "mercadopago",
     gateway_payment_id: payment.paymentId,
+    payment_method: "pix",
     amount_cents: Math.round(registration.valor_inscricao * 100),
     status: "pending",
     pix_qr_code_base64: payment.qrCodeBase64,
@@ -105,7 +106,8 @@ export async function POST(req: Request) {
     const fallback = await sb.from("payments").insert({
       registration_id: registration.id,
       gateway: "mercadopago",
-      gateway_payment_id: payment.paymentId,
+      gateway_payment_id: payment.paymentId, 
+      payment_method: "pix",
       amount_cents: Math.round(registration.valor_inscricao * 100),
       status: "pending",
       qr_code_base64: payment.qrCodeBase64,

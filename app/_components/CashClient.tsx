@@ -4,7 +4,11 @@ import * as React from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
+import { ArrowLeft } from "lucide-react";
 import { Button } from "../_components/ui/button";
+import { CardPaymentForm } from "../_components/CardPaymentForm";
+
+type PaymentMethod = "pix" | "card" | null;
 
 type CashData = {
   id: string;
@@ -27,6 +31,8 @@ export default function CashClient() {
   const [data, setData] = React.useState<CashData | null>(null);
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState<string | null>(null);
+  const [paymentMethod, setPaymentMethod] = React.useState<PaymentMethod>(null);
+  const [cardPaymentLoading, setCardPaymentLoading] = React.useState(false);
   const pixRequestedRef = React.useRef(false);
 
   React.useEffect(() => {
@@ -41,6 +47,7 @@ export default function CashClient() {
   React.useEffect(() => {
     if (!id || !data) return;
     if (data.pix?.status === "approved") return;
+    if (paymentMethod !== "pix") return;
 
     const interval = setInterval(async () => {
       try {
@@ -67,7 +74,7 @@ export default function CashClient() {
     }, 5000);
 
     return () => clearInterval(interval);
-  }, [id, data]);
+  }, [id, data, paymentMethod]);
 
   React.useEffect(() => {
     if (!id) {
@@ -91,7 +98,7 @@ export default function CashClient() {
   }, [id]);
 
   React.useEffect(() => {
-    if (!id || !data) return;
+    if (!id || !data || paymentMethod !== "pix") return;
     if (data.pix) return;
 
     if (pixRequestedRef.current) return;
@@ -130,7 +137,45 @@ export default function CashClient() {
         setError("Nao foi possivel gerar o PIX. Verifique sua conexao e tente novamente.");
       }
     })();
-  }, [id, data]);
+  }, [id, data, paymentMethod]);
+
+  const handleCardSubmit = React.useCallback(
+    async (formData: {
+      token: string;
+      paymentMethodId: string;
+      issuerId: string;
+      cardholderEmail: string;
+      installments: number;
+    }) => {
+      if (!id) return;
+      setCardPaymentLoading(true);
+      try {
+        const res = await fetch("/api/payments/card", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            registrationId: id,
+            token: formData.token,
+            paymentMethodId: formData.paymentMethodId,
+            issuerId: formData.issuerId,
+            email: formData.cardholderEmail,
+            installments: formData.installments,
+          }),
+        });
+        const result = await res.json();
+        if (result.status === "approved") {
+          router.push(`/confirmacao?id=${id}`);
+        } else {
+          alert("Erro no pagamento. Tente novamente.");
+        }
+      } catch {
+        alert("Erro no pagamento. Tente novamente.");
+      } finally {
+        setCardPaymentLoading(false);
+      }
+    },
+    [id, router]
+  );
 
   const valorFormatado = React.useMemo(() => {
     if (!data) return "";
@@ -189,46 +234,95 @@ export default function CashClient() {
                     <span className="font-semibold text-lg">{valorFormatado}</span>
                   </div>
 
-                  <div className="mt-4 border-t border-zinc-800 pt-4 space-y-4">
-                    <div className="flex justify-center">
-                      {data.pix?.qrCodeBase64 ? (
-                        <Image
-                          src={`data:image/png;base64,${data.pix.qrCodeBase64}`}
-                          alt="QR Code PIX"
-                          width={208}
-                          height={208}
-                          className="rounded-xl bg-white p-2"
-                        />
-                      ) : (
-                        <div className="w-52 h-52 rounded-xl bg-zinc-900 border border-zinc-800 flex items-center justify-center text-zinc-500 text-sm text-center p-4">
-                          Aguardando QR Code...
-                        </div>
-                      )}
-                    </div>
-
-                    <div className="flex flex-col gap-2">
-                      <span className="text-sm text-zinc-400 block mb-2">PIX Copia e Cola</span>
-                      <div className="flex flex-col md:flex-row gap-2">
-                        <code className="w-full min-w-0 bg-black/40 px-3 py-2 rounded-lg text-sm font-mono break-all border border-zinc-800">
-                          <input
-                            type="text"
-                            value={data.pix?.pixCopyPaste ?? ""}
-                            readOnly
-                            className="w-full"
-                          />
-                        </code>
+                  {!paymentMethod ? (
+                    <div className="mt-4 border-t border-zinc-800 pt-4 space-y-3">
+                      <p className="text-sm text-zinc-400">Escolha a forma de pagamento:</p>
+                      <div className="flex flex-col sm:flex-row gap-3">
                         <Button
-                          className="w-full md:w-auto flex justify-center items-center cursor-pointer bg-red-600 hover:bg-black"
-                          onClick={() =>
-                            data.pix?.pixCopyPaste && navigator.clipboard.writeText(data.pix.pixCopyPaste)
-                          }
-                          disabled={!data.pix?.pixCopyPaste}
+                          className="cursor-pointer flex-1 h-12 rounded-xl bg-red-600 hover:bg-red-500"
+                          onClick={() => setPaymentMethod("pix")}
                         >
-                          Copiar
+                          PIX
+                        </Button>
+                        <Button
+                          className="cursor-pointer flex-1 h-12 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-white"
+                          onClick={() => setPaymentMethod("card")}
+                        >
+                          Cartão de Crédito
                         </Button>
                       </div>
                     </div>
-                  </div>
+                  ) : paymentMethod === "pix" ? (
+                    <div className="mt-4 border-t border-zinc-800 pt-4 space-y-4">
+                      <div className="flex justify-between items-center">
+                        <button
+                          type="button"
+                          className="inline-flex items-center gap-2 text-sm text-zinc-500 hover:text-zinc-300"
+                          onClick={() => setPaymentMethod(null)}
+                        >
+                          <ArrowLeft className="h-4 w-4 shrink-0" aria-hidden />
+                          Trocar forma de pagamento
+                        </button>
+                      </div>
+                      <div className="flex justify-center">
+                        {data.pix?.qrCodeBase64 ? (
+                          <Image
+                            src={`data:image/png;base64,${data.pix.qrCodeBase64}`}
+                            alt="QR Code PIX"
+                            width={208}
+                            height={208}
+                            className="rounded-xl bg-white p-2"
+                          />
+                        ) : (
+                          <div className="w-52 h-52 rounded-xl bg-zinc-900 border border-zinc-800 flex items-center justify-center text-zinc-500 text-sm text-center p-4">
+                            Aguardando QR Code...
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="flex flex-col gap-2">
+                        <span className="text-sm text-zinc-400 block mb-2">PIX Copia e Cola</span>
+                        <div className="flex flex-col md:flex-row gap-2">
+                          <code className="w-full min-w-0 bg-black/40 px-3 py-2 rounded-lg text-sm font-mono break-all border border-zinc-800">
+                            <input
+                              type="text"
+                              value={data.pix?.pixCopyPaste ?? ""}
+                              readOnly
+                              className="w-full bg-transparent"
+                            />
+                          </code>
+                          <Button
+                            className="w-full md:w-auto flex justify-center items-center cursor-pointer bg-red-600 hover:bg-black"
+                            onClick={() =>
+                              data.pix?.pixCopyPaste && navigator.clipboard.writeText(data.pix.pixCopyPaste)
+                            }
+                            disabled={!data.pix?.pixCopyPaste}
+                          >
+                            Copiar
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="mt-4 border-t border-zinc-800 pt-4 space-y-4">
+                      <div className="flex justify-between items-center">
+                        <button
+                          type="button"
+                          className="inline-flex items-center gap-2 text-sm text-zinc-500 hover:text-zinc-300"
+                          onClick={() => setPaymentMethod(null)}
+                        >
+                          <ArrowLeft className="h-4 w-4 shrink-0" aria-hidden />
+                          Trocar forma de pagamento
+                        </button>
+                      </div>
+                      <CardPaymentForm
+                        formId="card-form-cash"
+                        amount={data.valor}
+                        onSubmit={handleCardSubmit}
+                        isLoading={cardPaymentLoading}
+                      />
+                    </div>
+                  )}
                 </div>
 
                 <div className="p-4 bg-black/40 rounded-xl border border-zinc-800">

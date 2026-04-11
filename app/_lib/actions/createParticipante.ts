@@ -123,7 +123,7 @@ export async function createParticipant(input: CreateParticipantInput) {
     mod_gi_extra: input.mod_gi_extra,
     festival: isFestival,
     valor_inscricao: valor,
-    ...(isFestival
+    ...(input.age < 18
       ? {
           responsavel_name: input.responsavel_name?.trim()
             ? normalizeFullNameUppercase(input.responsavel_name)
