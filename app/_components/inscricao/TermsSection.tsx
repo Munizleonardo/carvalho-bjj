@@ -40,13 +40,13 @@ export function TermsSection({
                 target="_blank"
                 rel="noopener noreferrer"
               >
-                termos de inscri??o
+                termos de inscrição
               </a>
             </FormLabel>
             <p className="flex text-sm text-zinc-400">
-              Ao prosseguir, confirmo que as informa??es fornecidas s?o
+              Ao prosseguir, confirmo que as informações fornecidas são
               verdadeiras e que entro neste evento com responsabilidade, respeito
-              e ci?ncia das regras oficiais.
+              e ciência das regras oficiais.
             </p>
             <FormMessage />
           </div>

@@ -45,7 +45,6 @@ function InscricaoContent() {
   const gender = form.watch("gender");
   const weight = form.watch("weight_kg");
   const termsAccepted = form.watch("terms");
-  const giSelected = form.watch("mod_gi");
   const festivalAthlete = isFestivalAthlete(age);
 
   const resolvedCategory = React.useMemo(
@@ -79,16 +78,19 @@ function InscricaoContent() {
       shouldDirty: true,
       shouldValidate: false,
     });
+    form.setValue("mod_gi", true, {
+      shouldDirty: true,
+      shouldValidate: false,
+    });
+    form.setValue("mod_nogi", false, {
+      shouldDirty: true,
+      shouldValidate: false,
+    });
+    form.setValue("mod_gi_extra", false, {
+      shouldDirty: true,
+      shouldValidate: false,
+    });
   }, [festivalAthlete, form, resolvedCategory]);
-
-  React.useEffect(() => {
-    if (!giSelected) {
-      form.setValue("mod_gi_extra", false, {
-        shouldDirty: true,
-        shouldValidate: false,
-      });
-    }
-  }, [form, giSelected]);
 
   async function onSubmit(values: FormValues) {
     setSubmitting(true);

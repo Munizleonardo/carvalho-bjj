@@ -45,11 +45,11 @@ export const formSchema = z
   .superRefine((data, ctx) => {
     const festivalAthlete = isFestivalAthlete(data.age);
 
-    if (!festivalAthlete && !data.mod_gi && !data.mod_nogi) {
+    if (!festivalAthlete && !data.mod_gi) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         path: ["mod_gi"],
-        message: "Selecione pelo menos uma modalidade",
+        message: "A inscricao esta disponivel apenas para a modalidade Gi",
       });
     }
 
@@ -130,7 +130,7 @@ export function getDefaultFormValues(cpf: string | null): Partial<FormValues> {
     full_name: "",
     phone: "",
     academy: "",
-    mod_gi: false,
+    mod_gi: true,
     mod_nogi: false,
     mod_gi_extra: false,
     terms: false,

@@ -60,7 +60,7 @@ export default function HeroSection() {
                 variant="outline"
                 className="h-11 w-full rounded-xl border-zinc-700 bg-red-600 px-4 text-sm font-medium text-zinc-200 hover:bg-red-600 hover:text-white sm:w-auto sm:bg-black"
               >
-                <Link href="/edital-camp.pdf" target="_blank">
+                <Link href="" target="_blank">
                   <BookOpenText className="h-4 w-4" />
                   Edital do Campeonato
                 </Link>
