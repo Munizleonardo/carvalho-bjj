@@ -26,7 +26,7 @@ export async function POST(req: Request) {
     .single();
 
   if (!registration) {
-    return NextResponse.json({ error: "Inscricao nao encontrada" }, { status: 404 });
+    return NextResponse.json({ error: "Inscrição não encontrada" }, { status: 404 });
   }
 
   const payment = await createCardPayment({

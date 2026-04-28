@@ -49,7 +49,7 @@ export const formSchema = z
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         path: ["mod_gi"],
-        message: "A inscricao esta disponivel apenas para a modalidade Gi",
+        message: "A inscrição está disponível apenas para a modalidade Gi",
       });
     }
 
@@ -72,7 +72,7 @@ export const formSchema = z
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
           path: ["weight_kg"],
-          message: "Nao foi possivel localizar a categoria com os dados informados",
+          message: "Não foi possível localizar a categoria com os dados informados",
         });
       }
     }

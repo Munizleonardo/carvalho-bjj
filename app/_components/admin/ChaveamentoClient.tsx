@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import * as React from "react";
 import Link from "next/link";
@@ -114,7 +114,7 @@ function BracketVisualization({ bracket, athletesCount }: { bracket: Bracket; at
         </div>
         {champion ? (
           <div className="mx-auto rounded-full border border-emerald-500/60 bg-emerald-950/40 px-4 py-1 text-sm text-emerald-300">
-            CampeÃ£o: {champion.nome}
+            Campeão: {champion.nome}
           </div>
         ) : null}
       </div>
@@ -198,7 +198,7 @@ export default function ChaveamentoClient() {
         setFetchError(null);
       } catch (error) {
         setFetchError(
-          error instanceof Error ? error.message : "Nao foi possivel carregar os atletas."
+          error instanceof Error ? error.message : "Não foi possível carregar os atletas."
         );
       } finally {
         readyToPersistRef.current = true;
@@ -303,7 +303,7 @@ export default function ChaveamentoClient() {
         if (cancelled) return;
         setSaveState("error");
         setSaveError(
-          error instanceof Error ? error.message : "Nao foi possivel salvar o chaveamento."
+          error instanceof Error ? error.message : "Não foi possível salvar o chaveamento."
         );
       }
     })();
@@ -536,7 +536,7 @@ export default function ChaveamentoClient() {
               <p className="mt-1 text-xs text-zinc-500">
                 Regras automaticas: app/_lib/chaveamento-rules.ts
                 {saveState === "saving" ? " • salvando..." : null}
-                {saveState === "saved" ? " • alteracoes publicadas" : null}
+                {saveState === "saved" ? " • alterações publicadas" : null}
                 {saveState === "error" ? " • erro ao publicar" : null}
               </p>
               {saveError ? <p className="mt-1 text-xs text-red-400">{saveError}</p> : null}
@@ -918,7 +918,7 @@ export default function ChaveamentoClient() {
             </div>
 
             <div className="text-sm text-zinc-300">
-              Atletas encontrados: {filteredAthletesForCreation.length} â€¢ Selecionados: {selectedAthleteIds.length}
+              Atletas encontrados: {filteredAthletesForCreation.length} • Selecionados: {selectedAthleteIds.length}
             </div>
 
             <div className="max-h-72 space-y-2 overflow-y-auto rounded-xl border border-zinc-800 bg-black/40 p-3">
@@ -975,7 +975,7 @@ export default function ChaveamentoClient() {
             <div className="max-h-72 space-y-2 overflow-y-auto rounded-xl border border-zinc-800 bg-black/40 p-3">
               {athletes.length === 0 ? (
                 <div className="py-6 text-center text-sm text-zinc-400">
-                  Nenhum atleta disponivel.
+                  Nenhum atleta disponível.
                 </div>
               ) : (
                 athletes.map((athlete) => (
@@ -1010,7 +1010,7 @@ export default function ChaveamentoClient() {
                 disabled={!editingBracket || editingAthleteIds.length === 0}
                 className="cursor-pointer bg-white text-black hover:bg-zinc-200 disabled:cursor-not-allowed disabled:opacity-50"
               >
-                Salvar alteracoes
+                Salvar alterações
               </Button>
             </div>
           </div>

@@ -9,6 +9,7 @@ import {
   GitBranch,
   LockKeyhole,
   MessageCircleIcon,
+  Medal,
   PauseCircle,
   PlayCircle,
   Trophy,
@@ -58,9 +59,9 @@ export default function HeroSection() {
               <Button
                 asChild
                 variant="outline"
-                className="h-11 w-full rounded-xl border-zinc-700 bg-red-600 px-4 text-sm font-medium text-zinc-200 hover:bg-red-600 hover:text-white sm:w-auto sm:bg-black"
+                className="h-12 w-full rounded-xl border-red-500/60 bg-red-600 px-4 text-sm font-semibold text-white shadow-[0_14px_34px_rgba(220,38,38,0.28)] transition-all hover:-translate-y-0.5 hover:border-red-400 hover:bg-red-500 hover:text-white hover:shadow-[0_18px_42px_rgba(220,38,38,0.36)] sm:w-auto"
               >
-                <Link href="" target="_blank">
+                <Link href="/edital_junho.pdf" target="_blank">
                   <BookOpenText className="h-4 w-4" />
                   Edital do Campeonato
                 </Link>
@@ -69,7 +70,7 @@ export default function HeroSection() {
               <Button
                 asChild
                 variant="outline"
-                className="h-11 w-full rounded-xl border-zinc-700 bg-zinc-900 px-4 text-sm font-medium text-zinc-200 hover:bg-zinc-800 hover:text-white sm:w-auto sm:bg-black"
+                className="h-12 w-full rounded-xl border-zinc-700 bg-zinc-950/85 px-4 text-sm font-semibold text-zinc-100 shadow-[0_12px_30px_rgba(0,0,0,0.35)] transition-all hover:-translate-y-0.5 hover:border-red-500/70 hover:bg-zinc-900 hover:text-white sm:w-auto"
               >
                 <Link href="/chaveamento">
                   <GitBranch className="h-4 w-4" />
@@ -80,7 +81,7 @@ export default function HeroSection() {
               <Button
                 asChild
                 variant="outline"
-                className="h-11 w-full rounded-xl border-zinc-700 bg-white px-4 text-sm font-medium text-black hover:bg-white hover:text-black sm:w-auto sm:bg-transparent sm:text-zinc-200"
+                className="h-12 w-full rounded-xl border-white/30 bg-white px-4 text-sm font-semibold text-black shadow-[0_14px_34px_rgba(255,255,255,0.16)] transition-all hover:-translate-y-0.5 hover:border-white hover:bg-zinc-100 hover:text-black sm:w-auto"
               >
                 <Link href="/login">
                   <LockKeyhole className="h-4 w-4" />
@@ -90,15 +91,26 @@ export default function HeroSection() {
 
               <Button
                 asChild
-                className="h-11 w-full rounded-xl bg-red-600 px-4 text-sm font-semibold text-white hover:bg-red-500 sm:hidden"
+                variant="outline"
+                className="h-12 w-full rounded-xl border-yellow-200 bg-yellow-400 px-4 text-sm font-bold text-black shadow-[0_14px_34px_rgba(250,204,21,0.28)] transition-all hover:-translate-y-0.5 hover:border-yellow-100 hover:bg-yellow-300 hover:text-black hover:shadow-[0_18px_42px_rgba(250,204,21,0.38)] sm:w-auto"
               >
-                <Link href="/inscricao/cpf">REALIZAR INSCRIÇÃO</Link>
+                <Link href="/pontuacoes">
+                  <Medal className="h-4 w-4" />
+                  Pontuações
+                </Link>
+              </Button>
+
+              <Button
+                asChild
+                className="h-12 w-full rounded-xl bg-red-600 px-4 text-sm font-bold text-white shadow-[0_14px_34px_rgba(220,38,38,0.28)] transition-all hover:-translate-y-0.5 hover:bg-red-500 sm:hidden"
+              >
+                <Link href="/inscricao/cpf">REALIZAR INSCRIÇÃO!</Link>
               </Button>
 
               <Button
                 asChild
                 variant="outline"
-                className="h-11 w-full rounded-xl border-zinc-700 bg-green-600 px-4 text-sm font-medium text-zinc-200 hover:bg-green-600 hover:text-white sm:hidden"
+                className="h-12 w-full rounded-xl border-emerald-400/50 bg-emerald-600 px-4 text-sm font-semibold text-white shadow-[0_14px_34px_rgba(5,150,105,0.22)] transition-all hover:-translate-y-0.5 hover:border-emerald-300 hover:bg-emerald-500 hover:text-white sm:hidden"
               >
                 <Link href="https://wa.me/5522999809455" target="_blank">
                   <MessageCircleIcon className="h-4 w-4" />
@@ -149,7 +161,7 @@ export default function HeroSection() {
             <div className="mt-6 hidden flex-col gap-3 sm:flex sm:flex-row sm:flex-wrap sm:justify-center lg:justify-start">
               <Button
                 asChild
-                className="h-12 w-full rounded-xl bg-red-600 px-6 text-sm font-semibold text-white hover:bg-red-500 sm:h-14 sm:w-auto sm:px-8 sm:text-base"
+                className="h-12 w-full rounded-xl bg-red-600 px-6 text-sm font-bold text-white shadow-[0_18px_42px_rgba(220,38,38,0.34)] transition-all hover:-translate-y-0.5 hover:bg-red-500 hover:shadow-[0_22px_54px_rgba(220,38,38,0.44)] sm:h-14 sm:w-auto sm:px-8 sm:text-base"
               >
                 <Link href="/inscricao/cpf">REALIZAR INSCRIÇÃO</Link>
               </Button>
@@ -157,7 +169,7 @@ export default function HeroSection() {
               <Button
                 asChild
                 variant="outline"
-                className="h-12 w-full rounded-xl border-zinc-700 bg-green-600 px-6 text-sm font-medium text-zinc-200 hover:bg-green-600 hover:text-white sm:h-14 sm:w-auto sm:bg-black sm:px-8 sm:text-base"
+                className="h-12 w-full rounded-xl border-emerald-400/50 bg-emerald-600 px-6 text-sm font-semibold text-white shadow-[0_18px_42px_rgba(5,150,105,0.24)] transition-all hover:-translate-y-0.5 hover:border-emerald-300 hover:bg-emerald-500 hover:text-white sm:h-14 sm:w-auto sm:px-8 sm:text-base"
               >
                 <Link href="https://wa.me/5522999809455" target="_blank">
                   <MessageCircleIcon className="h-5 w-5" />
@@ -180,7 +192,7 @@ export default function HeroSection() {
                   playsInline
                   preload="metadata"
                   className="h-[300px] w-full object-fill sm:h-[420px] lg:h-[520px]"
-                  aria-label="Video de apresentacao do campeonato"
+                  aria-label="Video de apresenta??o do campeonato"
                 />
                 <div className="pointer-events-none absolute inset-0 bg-linear-to-t from-black via-black/20 to-transparent" />
                 <div className="absolute left-3 right-3 top-3 flex items-center justify-between gap-3 sm:left-5 sm:right-5">
@@ -193,7 +205,7 @@ export default function HeroSection() {
                     onClick={toggleVideoPlayback}
                     className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-black/55 px-3 py-2 text-xs text-white backdrop-blur-sm transition hover:bg-black/70 sm:text-sm"
                     aria-pressed={!isPlaying}
-                    aria-label={isPlaying ? "Pausar video" : "Reproduzir video"}
+                    aria-label={isPlaying ? "Pausar v?deo" : "Reproduzir v?deo"}
                   >
                     {isPlaying ? (
                       <PauseCircle className="h-4 w-4 text-white" />

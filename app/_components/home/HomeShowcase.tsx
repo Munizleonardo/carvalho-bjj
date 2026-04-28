@@ -21,13 +21,13 @@ import {
 const teamStats = [
   {
     value: "10+",
-    label: "edicoes de aprendizado",
-    description: "Cada evento soma experiencia real em organizacao, ritmo e cuidado com o atleta.",
+    label: "edições de aprendizado",
+    description: "Cada evento soma experiência real em organização, ritmo e cuidado com o atleta.",
   },
   {
     value: "500+",
-    label: "historias vividas",
-    description: "Inscricoes, chamadas e lutas que transformam preparo em memoria de campeonato.",
+    label: "histórias vividas",
+    description: "Inscrições, chamadas e lutas que transformam preparo em memória de campeonato.",
   },
   {
     value: "10",
@@ -37,7 +37,7 @@ const teamStats = [
   {
     value: "98%",
     label: "energia aprovada",
-    description: "Publico, professores e atletas reconhecem quando o evento respeita o tatame.",
+    description: "Público, professores e atletas reconhecem quando o evento respeita o tatame.",
   },
 ];
 
@@ -85,18 +85,18 @@ const nextEventHighlights = [
     icon: CalendarDays,
     title: "Data oficial",
     subtitle: "07/06/2026",
-    description: "Data oficial do proximo campeonato de Jiu-Jitsu",
+    description: "Data oficial do próximo campeonato de Jiu-Jitsu",
   },
   {
     icon: MapPin,
     title: "Local",
     subtitle: "Escola Paineira",
-    description: "R. Sao Pedro - Balneario, Sao Pedro da Aldeia - RJ, 28940-000",
+    description: "R. São Pedro - Balneário, São Pedro da Aldeia - RJ, 28940-000",
   },
   {
     icon: Medal,
     title: "Categorias",
-    description: "Divisoes organizadas para valorizar tecnica, equilibrio e merecimento em cada chave.",
+    description: "Divisões organizadas para valorizar técnica, equilíbrio e merecimento em cada chave.",
   },
   {
     icon: ShieldCheck,
@@ -106,18 +106,18 @@ const nextEventHighlights = [
 ];
 
 const eventDetails = [
-  { icon: Clock3, label: "Inscricoes", value: "Facil inscricao e chaveamento automatico de acordo com idade e peso." },
-  { icon: Users, label: "Ambiente", value: "Um encontro entre atletas, familias, equipes e quem respeita o esporte." },
-  { icon: Trophy, label: "Premiacao", value: "Reconhecimento para quem sobe no tatame disposto a dar o melhor." },
-  { icon: Flag, label: "Organizacao", value: "Uma equipe comprometida com seriedade, ritmo e boa experiencia." },
+  { icon: Clock3, label: "Inscrições", value: "Fácil inscrição e chaveamento automático de acordo com idade e peso." },
+  { icon: Users, label: "Ambiente", value: "Um encontro entre atletas, famílias, equipes e quem respeita o esporte." },
+  { icon: Trophy, label: "Premiação", value: "Reconhecimento para quem sobe no tatame disposto a dar o melhor." },
+  { icon: Flag, label: "Organização", value: "Uma equipe comprometida com seriedade, ritmo e boa experiência." },
 ];
 
 const sponsors = [
-  { name: "Patrocinador Master", tag: "Marca em destaque nesta edicao", initials: "PM" },
-  { name: "Apoiador Oficial", tag: "Espaco para parceiro institucional", initials: "AO" },
-  { name: "Marca Esportiva", tag: "Ideal para kimono, no-gi ou acessorios", initials: "ME" },
-  { name: "Parceiro de Performance", tag: "Suplementacao, recovery ou servico especializado", initials: "PP" },
-  { name: "Estrutura do Evento", tag: "Montagem, arena, audio ou operacao local", initials: "EE" },
+  { name: "Patrocinador Master", tag: "Marca em destaque nesta edição", initials: "PM" },
+  { name: "Apoiador Oficial", tag: "Espaço para parceiro institucional", initials: "AO" },
+  { name: "Marca Esportiva", tag: "Ideal para kimono, no-gi ou acessórios", initials: "ME" },
+  { name: "Parceiro de Performance", tag: "Suplementação, recovery ou serviço especializado", initials: "PP" },
+  { name: "Estrutura do Evento", tag: "Montagem, arena, áudio ou operação local", initials: "EE" },
 ];
 
 function buildAlternatingGallery(images: GalleryMedia[], videos: GalleryMedia[]) {
@@ -473,7 +473,7 @@ export default function HomeShowcase() {
             type="button"
             onClick={() => setSelectedItem(null)}
             className="absolute right-4 top-4 inline-flex h-11 w-11 items-center justify-center rounded-full border border-white/15 bg-black/60 text-white transition hover:bg-black"
-            aria-label="Fechar visualizacao"
+            aria-label="Fechar visualização"
           >
             <X className="h-5 w-5" />
           </button>

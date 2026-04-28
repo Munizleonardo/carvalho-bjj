@@ -9,6 +9,7 @@ import { getCategoryLabel } from "@/app/_lib/types";
 export type Athlete = {
   id: string;
   nome: string;
+  academy?: string | null;
   idade: number;
   peso: number | null;
   faixa: string;

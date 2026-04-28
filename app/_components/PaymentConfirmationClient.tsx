@@ -34,7 +34,7 @@ function formatCurrencyBRL(value: number | null | undefined) {
 
 function getPaymentMethodLabel(method: ConfirmationData["payment"]["method"]) {
   if (method === "pix") return "PIX";
-  if (method === "credit_card") return "Cartao de Credito";
+  if (method === "credit_card") return "Cartão de Crédito";
   return "-";
 }
 
@@ -47,7 +47,7 @@ export function PaymentConfirmationClient() {
 
   React.useEffect(() => {
     if (!id) {
-      setError("Inscricao nao encontrada.");
+      setError("Inscrição não encontrada.");
       setLoading(false);
       return;
     }
@@ -58,12 +58,12 @@ export function PaymentConfirmationClient() {
         const json = await res.json();
 
         if (!res.ok) {
-          throw new Error(json?.error ?? "Erro ao carregar confirmacao");
+          throw new Error(json?.error ?? "Erro ao carregar confirmação");
         }
 
         setData(json);
       } catch (err) {
-        setError(err instanceof Error ? err.message : "Erro ao carregar confirmacao");
+        setError(err instanceof Error ? err.message : "Erro ao carregar confirmação");
       } finally {
         setLoading(false);
       }
@@ -93,14 +93,14 @@ export function PaymentConfirmationClient() {
           <div className="mb-6">
             <h1 className="text-3xl font-semibold text-white">Pagamento confirmado</h1>
             <p className="mt-2 text-zinc-400">
-              Sua inscricao foi localizada com sucesso. Confira abaixo todos os dados
+              Sua inscrição foi localizada com sucesso. Confira abaixo todos os dados
               registrados.
             </p>
           </div>
 
           {loading && (
             <div className="rounded-xl border border-zinc-800 bg-black/30 p-4 text-zinc-300">
-              Carregando confirmacao...
+              Carregando confirmação...
             </div>
           )}
 
@@ -113,7 +113,7 @@ export function PaymentConfirmationClient() {
           {data && (
             <div className="space-y-6">
               <div className="rounded-2xl border border-green-700/40 bg-green-950/20 p-4 text-green-200">
-                Pagamento aprovado e inscricao confirmada.
+                Pagamento aprovado e inscrição confirmada.
               </div>
 
               <div className="grid gap-4 md:grid-cols-2">
@@ -153,7 +153,7 @@ export function PaymentConfirmationClient() {
 
               <div className="grid gap-4 md:grid-cols-3">
                 <div className="rounded-2xl border border-zinc-800 bg-black/30 p-4">
-                  <div className="text-sm text-zinc-400">Valor da inscricao</div>
+                  <div className="text-sm text-zinc-400">Valor da inscrição</div>
                   <div className="mt-1 text-lg font-semibold text-white">
                     {formatCurrencyBRL(data.valor)}
                   </div>

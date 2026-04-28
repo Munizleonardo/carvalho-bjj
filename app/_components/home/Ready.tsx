@@ -26,7 +26,7 @@ const faqs: Array<{
     key: "evento",
     title: "Sobre o Evento",
     answer:
-      "Este campeonato foi idealizado para oferecer uma experiência competitiva seria, organizada e inspiradora. A cada luta, o objetivo e valorizar o preparo do atleta e o respeito pelo tatame.",
+      "Este campeonato foi idealizado para oferecer uma experiência competitiva séria, organizada e inspiradora. A cada luta, o objetivo é valorizar o preparo do atleta e o respeito pelo tatame.",
   },
   {
     key: "local",
@@ -74,7 +74,7 @@ const faqs: Array<{
     key: "imagem",
     title: "Direito de Imagem",
     answer:
-      "A participação no evento pode envolver captação de fotos e vídeos para comunicação oficial do campeonato. Havendo alguma restrição específica, a organização deve ser avisada com antecedencia.",
+      "A participação no evento pode envolver captação de fotos e vídeos para comunicação oficial do campeonato. Havendo alguma restrição específica, a organização deve ser avisada com antecedência.",
   },
   {
     key: "inscricao",

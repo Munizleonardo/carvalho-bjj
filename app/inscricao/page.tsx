@@ -137,7 +137,7 @@ function InscricaoContent() {
       setServerError(
         error instanceof Error
           ? error.message
-          : "Nao foi possivel concluir sua inscricao."
+          : "Não foi possível concluir sua inscrição."
       );
     } finally {
       setSubmitting(false);
@@ -155,23 +155,23 @@ function InscricaoContent() {
           href="/"
         >
           <ArrowLeft className="h-5 w-5" />
-          Voltar para o inicio
+          Voltar para o início
         </Link>
 
         <div className="mb-6">
           <h1 className="text-2xl font-semibold text-zinc-100 sm:text-3xl">
-            Inscricao
+            Inscrição
           </h1>
           <p className="mt-1 text-base text-zinc-400 sm:text-lg">
-            Preencha os dados do atleta com atencao. <br />
-            Cada detalhe certo aproxima voce de uma grande atuacao no campeonato.
+            Preencha os dados do atleta com atenção. <br />
+            Cada detalhe certo aproxima você de uma grande atuação no campeonato.
           </p>
         </div>
 
         <div className="flex flex-col gap-5 rounded-2xl border border-zinc-800 bg-zinc-950/70 p-4 shadow-sm backdrop-blur sm:p-6">
           <div>
             <h2 className="text-lg font-semibold text-zinc-100 sm:text-xl">
-              Formulario de Inscricao
+              Formulário de Inscrição
             </h2>
             <p className="mb-2 mt-1 text-base text-zinc-400 sm:text-lg">
               Finalize este cadastro para seguir ao pagamento e garantir sua vaga
@@ -208,7 +208,7 @@ function InscricaoContent() {
                   disabled={submitting || !termsAccepted}
                   type="submit"
                 >
-                  {submitting ? "Enviando..." : "Concluir inscricao"}
+                  {submitting ? "Enviando..." : "Concluir inscrição"}
                 </Button>
               </div>
             </form>

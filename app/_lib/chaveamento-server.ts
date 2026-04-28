@@ -22,6 +22,7 @@ function mapAthlete(row: Record<string, unknown>): Athlete {
   return {
     id: String(row.id ?? ""),
     nome: String(row.nome ?? ""),
+    academy: row.academia === null || row.academia === undefined ? null : String(row.academia),
     idade: Number(row.idade ?? 0),
     peso: row.peso === null || row.peso === undefined ? null : Number(row.peso),
     faixa: String(row.faixa ?? ""),
@@ -63,7 +64,7 @@ export async function getChaveamentoAthletes() {
   const sb = supabaseAdmin();
   const { data, error } = await sb
     .from("participantes")
-    .select("id, nome, idade, peso, faixa, categoria, sexo, festival, status")
+    .select("id, nome, academia, idade, peso, faixa, categoria, sexo, festival, status")
     .order("nome", { ascending: true });
 
   if (error) {

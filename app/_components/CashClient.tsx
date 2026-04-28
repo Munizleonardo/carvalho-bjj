@@ -93,7 +93,7 @@ export default function CashClient() {
 
   React.useEffect(() => {
     if (!id) {
-      setError("Inscricao nao encontrada. Volte e faca a inscricao novamente.");
+      setError("Inscrição não encontrada. Volte e faça a inscrição novamente.");
       setLoading(false);
       return;
     }
@@ -131,7 +131,7 @@ export default function CashClient() {
 
         if (!res.ok) {
           pixRequestedRef.current = false;
-          setError(json?.error ?? "Nao foi possivel gerar o PIX. Tente novamente.");
+          setError(json?.error ?? "Não foi possível gerar o PIX. Tente novamente.");
           return;
         }
 
@@ -155,7 +155,7 @@ export default function CashClient() {
         );
       } catch {
         pixRequestedRef.current = false;
-        setError("Nao foi possivel gerar o PIX. Verifique sua conexao e tente novamente.");
+        setError("Não foi possível gerar o PIX. Verifique sua conexão e tente novamente.");
       }
     })();
   }, [id, data, paymentMethod]);
@@ -273,7 +273,7 @@ export default function CashClient() {
                           className="h-12 flex-1 rounded-xl bg-zinc-800 text-white hover:bg-zinc-700"
                           onClick={() => setPaymentMethod("card")}
                         >
-                          Cartao de Credito
+                          Cartão de Crédito
                         </Button>
                       </div>
                     </div>
@@ -353,15 +353,15 @@ export default function CashClient() {
 
                 <div className="rounded-xl border border-zinc-800 bg-black/40 p-4">
                   <p className="text-center text-sm text-zinc-200">
-                    Apos a confirmacao do pagamento, sua inscricao sera concluida e a
-                    pagina de confirmacao sera exibida automaticamente.
+                    Após a confirmação do pagamento, sua inscrição será concluída e a
+                    página de confirmação será exibida automaticamente.
                   </p>
                 </div>
 
                 <div className="flex items-center justify-center">
                   <Link href="/">
                     <Button className="mb-8 inline-flex items-center gap-2 bg-red-600/10 text-sm text-white transition-colors hover:text-zinc-100">
-                      Voltar para o inicio
+                      Voltar para o início
                     </Button>
                   </Link>
                 </div>

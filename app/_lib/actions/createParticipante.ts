@@ -97,7 +97,7 @@ export async function createParticipant(input: CreateParticipantInput) {
       });
 
   if (!isFestival && (input.weight_kg === null || resolvedCategory === null)) {
-    throw new Error("Nao foi possivel identificar a categoria pelo peso informado.");
+    throw new Error("Não foi possível identificar a categoria pelo peso informado.");
   }
 
   const valor = calcFee({
@@ -193,7 +193,7 @@ export async function createParticipant(input: CreateParticipantInput) {
         if (isPrimaryKeyError(regularError) && attempt < MAX_ATTEMPTS) continue;
       }
 
-      throw new Error(regularError?.message ?? "Erro ao criar inscricao");
+      throw new Error(regularError?.message ?? "Erro ao criar inscrição");
     }
 
     if (isDuplicateError(typedError)) {
@@ -210,8 +210,8 @@ export async function createParticipant(input: CreateParticipantInput) {
       nextId,
     });
 
-    throw new Error(typedError?.message ?? "Erro ao criar inscricao");
+    throw new Error(typedError?.message ?? "Erro ao criar inscrição");
   }
 
-  throw new Error("Nao foi possivel concluir a inscricao. Tente novamente.");
+  throw new Error("Não foi possível concluir a inscrição. Tente novamente.");
 }

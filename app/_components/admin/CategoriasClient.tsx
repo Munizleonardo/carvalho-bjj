@@ -351,7 +351,7 @@ export default function CategoriesClient({ all }: { all: ParticipantAdmin[] }) {
 
         {groups.length === 0 ? (
           <div className="rounded-2xl border border-zinc-900 bg-zinc-950/40 p-8 text-center text-zinc-400">
-            Nenhuma inscricao paga encontrada com os filtros atuais.
+            Nenhuma inscrição paga encontrada com os filtros atuais.
           </div>
         ) : (
           groups.map((group) => (

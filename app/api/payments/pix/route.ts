@@ -39,8 +39,8 @@ export async function POST(req: Request) {
     .single();
 
   if (error || !registration) {
-    console.error("Erro ao buscar inscricao (Supabase):", error);
-    return NextResponse.json({ error: "Inscricao nao encontrada" }, { status: 404 });
+    console.error("Erro ao buscar inscrição (Supabase):", error);
+    return NextResponse.json({ error: "Inscrição não encontrada" }, { status: 404 });
   }
 
   const { data: openPayment } = await sb
@@ -79,7 +79,7 @@ export async function POST(req: Request) {
     return NextResponse.json(
       {
         error:
-          mpError instanceof Error ? mpError.message : "Nao foi possivel gerar o PIX no momento",
+          mpError instanceof Error ? mpError.message : "Não foi possível gerar o PIX no momento",
       },
       { status: 500 }
     );

@@ -35,7 +35,7 @@ function formatCurrencyBRL(value: number | null | undefined) {
 
 function getPaymentMethodLabel(method: Participante["payment"]["method"]) {
   if (method === "pix") return "PIX";
-  if (method === "credit_card") return "Cartao de Credito";
+  if (method === "credit_card") return "Cartão de Crédito";
   return "-";
 }
 
@@ -92,9 +92,9 @@ export default function CheckCpfPage() {
         <div className="rounded-2xl border border-zinc-800 bg-zinc-950/70 p-6 shadow-sm backdrop-blur">
           {!participante ? (
             <>
-              <h1 className="mb-2 text-3xl font-semibold">Verificacao de inscricao</h1>
+              <h1 className="mb-2 text-3xl font-semibold">Verificação de inscrição</h1>
               <p className="mb-6 text-zinc-400">
-                Informe o CPF do atleta para localizar a inscricao e seguir para a proxima etapa.
+                Informe o CPF do atleta para localizar a inscrição e seguir para a próxima etapa.
               </p>
 
               <Input
@@ -120,7 +120,7 @@ export default function CheckCpfPage() {
             </>
           ) : (
             <>
-              <h2 className="mb-4 text-2xl font-semibold">Dados da inscricao</h2>
+              <h2 className="mb-4 text-2xl font-semibold">Dados da inscrição</h2>
 
               <div className="space-y-2 text-sm text-zinc-300">
                 <p>
@@ -160,7 +160,7 @@ export default function CheckCpfPage() {
               {participante.status === "paid" ? (
                 <>
                   <div className="mt-5 rounded-xl bg-green-900/30 p-3 text-sm text-green-300">
-                    Esta inscricao ja foi paga e esta confirmada.
+                    Esta inscrição já foi paga e está confirmada.
                   </div>
                   <div className="mt-4 space-y-2 rounded-xl border border-zinc-800 bg-black/30 p-4 text-sm text-zinc-300">
                     <p>
@@ -177,7 +177,7 @@ export default function CheckCpfPage() {
                   className="mt-6 h-12 w-full rounded-xl bg-red-600 hover:bg-red-500"
                   onClick={goToPayment}
                 >
-                  Pagar Inscricao
+                  Pagar Inscrição
                 </Button>
               )}
             </>
@@ -186,7 +186,7 @@ export default function CheckCpfPage() {
           <div className="mt-6 flex justify-center">
             <Link href="/">
               <Button className="bg-red-600/10 text-white hover:bg-red-600/20">
-                Voltar para o inicio
+                Voltar para o início
               </Button>
             </Link>
           </div>

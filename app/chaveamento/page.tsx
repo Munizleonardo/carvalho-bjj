@@ -47,16 +47,16 @@ export default async function PublicChaveamentoPage() {
         </Link>
 
         <div className="mb-8 rounded-3xl border border-zinc-800 bg-zinc-950/70 p-6 backdrop-blur">
-          <div className="text-xs uppercase tracking-[0.35em] text-zinc-500">Consulta publica</div>
+          <div className="text-xs uppercase tracking-[0.35em] text-zinc-500">Consulta pública</div>
           <h1 className="mt-2 text-3xl font-semibold text-zinc-50">Chaveamento</h1>
           <p className="mt-2 max-w-2xl text-sm text-zinc-400">
-            Visualizacao das chaves separadas por categoria, com expansao individual de cada grupo.
+            Visualização das chaves separadas por categoria, com expansão individual de cada grupo.
           </p>
         </div>
 
         {brackets.length === 0 ? (
           <section className="rounded-3xl border border-zinc-800 bg-zinc-950/70 p-10 text-center text-zinc-400">
-            Nenhum chaveamento publicado ate o momento.
+            Nenhum chaveamento publicado até o momento.
           </section>
         ) : (
           <PublicBracketAccordion groups={groups} />
