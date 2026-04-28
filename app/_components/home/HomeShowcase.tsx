@@ -113,11 +113,11 @@ const eventDetails = [
 ];
 
 const sponsors = [
-  { name: "Patrocinador Master", tag: "Marca em destaque nesta edição", initials: "PM" },
-  { name: "Apoiador Oficial", tag: "Espaço para parceiro institucional", initials: "AO" },
-  { name: "Marca Esportiva", tag: "Ideal para kimono, no-gi ou acessórios", initials: "ME" },
-  { name: "Parceiro de Performance", tag: "Suplementação, recovery ou serviço especializado", initials: "PP" },
-  { name: "Estrutura do Evento", tag: "Montagem, arena, áudio ou operação local", initials: "EE" },
+  { name: "Vereador Zezinho", tag: "Apoio Cultural", image: "/pat/patrocinador_01.jpg" },
+  // { name: "Apoiador Oficial", tag: "Espaço para parceiro institucional", initials: "AO" },
+  // { name: "Marca Esportiva", tag: "Ideal para kimono, no-gi ou acessórios", initials: "ME" },
+  // { name: "Parceiro de Performance", tag: "Suplementação, recovery ou serviço especializado", initials: "PP" },
+  // { name: "Estrutura do Evento", tag: "Montagem, arena, áudio ou operação local", initials: "EE" },
 ];
 
 function buildAlternatingGallery(images: GalleryMedia[], videos: GalleryMedia[]) {
@@ -447,16 +447,22 @@ export default function HomeShowcase() {
             </p>
           </div>
 
-          <div className="-mx-4 flex snap-x snap-mandatory gap-4 overflow-x-auto px-4 pb-2 md:mx-0 md:grid md:grid-cols-2 md:overflow-visible md:px-0 md:pb-0 xl:grid-cols-5">
+          <div className="mx-auto flex max-w-2xl justify-center px-0 pb-2">
             {sponsors.map((sponsor) => (
               <article
                 key={sponsor.name}
-                className="min-w-[240px] snap-center rounded-[1.75rem] border border-zinc-800 bg-zinc-950/75 p-6 text-center transition-colors hover:border-red-500/40 hover:bg-red-500/5 md:min-w-0"
+                className="w-full max-w-xl rounded-[1.75rem] border border-zinc-800 bg-zinc-950/75 p-5 text-center transition-colors hover:border-red-500/40 hover:bg-red-500/5 sm:p-8"
               >
-                <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-[1.5rem] border border-red-500/20 bg-red-500/10 text-2xl font-bold text-red-200">
-                  {sponsor.initials}
+                <div className="mx-auto flex aspect-[16/9] w-full max-w-sm items-center justify-center overflow-hidden rounded-[1.5rem] border border-red-500/20 bg-white p-3 sm:max-w-md sm:p-4">
+                  <Image
+                    src={sponsor.image}
+                    alt={`Logo ${sponsor.name}`}
+                    width={640}
+                    height={360}
+                    className="h-full w-full object-contain"
+                  />
                 </div>
-                <h3 className="mt-5 text-lg font-semibold text-white">{sponsor.name}</h3>
+                <h3 className="mt-5 text-xl font-semibold text-white sm:text-2xl">{sponsor.name}</h3>
                 <p className="mt-2 text-sm text-zinc-400">{sponsor.tag}</p>
               </article>
             ))}
