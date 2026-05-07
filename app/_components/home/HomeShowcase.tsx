@@ -114,9 +114,9 @@ const eventDetails = [
 
 const sponsors = [
   { name: "Vereador Zezinho", tag: "Apoio Cultural", image: "/pat/patrocinador_01.jpg" },
-  // { name: "Apoiador Oficial", tag: "Espaço para parceiro institucional", initials: "AO" },
-  // { name: "Marca Esportiva", tag: "Ideal para kimono, no-gi ou acessórios", initials: "ME" },
-  // { name: "Parceiro de Performance", tag: "Suplementação, recovery ou serviço especializado", initials: "PP" },
+  { name: "LanchesBar", tag: "Lanches - Petiscos - Bebidas", image: "/pat/patrocinador_02.jpeg" },
+  { name: "RR Variedades", tag: "Bazar e Papelaria", image: "/pat/patrocinador_03.jpeg" },
+  { name: "Studio - Andreza Bronze", tag: "Studio de Beleza", image: "/pat/patrocinador_04.png" },
   // { name: "Estrutura do Evento", tag: "Montagem, arena, áudio ou operação local", initials: "EE" },
 ];
 
@@ -447,13 +447,13 @@ export default function HomeShowcase() {
             </p>
           </div>
 
-          <div className="mx-auto flex max-w-2xl justify-center px-0 pb-2">
+          <div className="mx-auto grid max-w-6xl grid-cols-1 gap-5 px-0 pb-2 sm:grid-cols-2 sm:gap-6 lg:grid-cols-4">
             {sponsors.map((sponsor) => (
               <article
                 key={sponsor.name}
-                className="w-full max-w-xl rounded-[1.75rem] border border-zinc-800 bg-zinc-950/75 p-5 text-center transition-colors hover:border-red-500/40 hover:bg-red-500/5 sm:p-8"
+                className="flex min-h-[320px] w-full flex-col items-center justify-start rounded-[1.75rem] border border-zinc-800 bg-zinc-950/75 p-6 text-center transition-colors hover:border-red-500/40 hover:bg-red-500/5 sm:p-7 lg:min-h-[360px]"
               >
-                <div className="mx-auto flex aspect-[16/9] w-full max-w-sm items-center justify-center overflow-hidden rounded-[1.5rem] border border-red-500/20 bg-white p-3 sm:max-w-md sm:p-4">
+                <div className="mx-auto flex h-32 w-full items-center justify-center overflow-hidden rounded-[1.5rem] border border-red-500/20 bg-white p-4 sm:h-36 lg:h-40">
                   <Image
                     src={sponsor.image}
                     alt={`Logo ${sponsor.name}`}
@@ -462,8 +462,10 @@ export default function HomeShowcase() {
                     className="h-full w-full object-contain"
                   />
                 </div>
-                <h3 className="mt-5 text-xl font-semibold text-white sm:text-2xl">{sponsor.name}</h3>
-                <p className="mt-2 text-sm text-zinc-400">{sponsor.tag}</p>
+                <h3 className="mt-6 text-2xl font-semibold leading-tight text-white sm:text-[1.7rem]">
+                  {sponsor.name}
+                </h3>
+                <p className="mt-3 text-base leading-6 text-zinc-400">{sponsor.tag}</p>
               </article>
             ))}
           </div>
