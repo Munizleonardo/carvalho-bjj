@@ -38,7 +38,7 @@ const faqs: Array<{
     key: "valores",
     title: "Valores de Inscrições",
     answer:
-      "Até 15/05/2026 a inscrição custa R$ 80,00. A partir de 16/05/2026 até 31/05/2026 entra o segundo lote com valor de R$ 100,00",
+      "Até 30/05/2026 a inscrição custa R$ 80,00. A partir de 31/05/2026 até 20/06/2026 entra o segundo lote com valor de R$ 100,00",
   },
   {
     key: "pagamento",
