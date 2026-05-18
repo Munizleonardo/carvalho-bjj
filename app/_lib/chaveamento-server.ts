@@ -65,6 +65,7 @@ export async function getChaveamentoAthletes() {
   const { data, error } = await sb
     .from("participantes")
     .select("id, nome, academia, idade, peso, faixa, categoria, sexo, festival, status")
+    .eq("status", "paid")
     .order("nome", { ascending: true });
 
   if (error) {

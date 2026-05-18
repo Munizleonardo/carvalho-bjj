@@ -84,7 +84,7 @@ const nextEventHighlights = [
   {
     icon: CalendarDays,
     title: "Data oficial",
-    subtitle: "07/06/2026",
+    subtitle: "21/06/2026",
     description: "Data oficial do próximo campeonato de Jiu-Jitsu",
   },
   {

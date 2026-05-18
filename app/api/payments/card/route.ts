@@ -3,6 +3,7 @@ export const runtime = "nodejs";
 import { NextResponse } from "next/server";
 import { createCardPayment } from "@/app/_lib/mercadopago";
 import { supabaseAdmin } from "@/app/_lib/supabase/admin";
+import { syncStoredBracketsWithParticipants } from "@/app/_lib/chaveamento-server";
 
 export async function POST(req: Request) {
 
@@ -44,11 +45,21 @@ export async function POST(req: Request) {
     gateway_payment_id: payment.paymentId,
     payment_method: "credit_card",
     amount_cents: Math.round(registration.valor_inscricao * 100),
-    status: payment.status
+    status: payment.status,
   });
 
+  if (payment.status === "approved") {
+    await sb.from("participantes").update({ status: "paid" }).eq("id", registration.id);
+
+    try {
+      await syncStoredBracketsWithParticipants();
+    } catch (syncError) {
+      console.error("Erro ao sincronizar chaveamento:", syncError);
+    }
+  }
+
   return NextResponse.json({
-    status: payment.status
+    status: payment.status,
   });
 
 }

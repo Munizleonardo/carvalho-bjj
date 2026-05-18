@@ -6,6 +6,7 @@ function MatchNode({ match, isFinalRound }: { match: Bracket["rounds"][number]["
       <div className="relative space-y-3">
         {([match.top, match.bottom] as const).map((slot, index) => {
           const isWinner = match.winnerSide === (index === 0 ? "top" : "bottom");
+          const isEmpty = slot.athlete === null;
 
           return (
             <div key={`${match.id}-${index}`} className="relative">
@@ -13,10 +14,14 @@ function MatchNode({ match, isFinalRound }: { match: Bracket["rounds"][number]["
                 className={`rounded-2xl border px-4 py-3 shadow-[0_10px_35px_rgba(0,0,0,0.35)] ${
                   isWinner
                     ? "border-emerald-500 bg-emerald-950/40"
+                    : isEmpty
+                    ? "border-zinc-800 border-dashed bg-zinc-950/40"
                     : "border-zinc-700 bg-zinc-950/90"
                 }`}
               >
-                <div className="truncate text-sm font-medium text-zinc-100">{slot.label}</div>
+                <div className={`truncate text-sm font-medium ${isEmpty ? "italic text-zinc-600" : "text-zinc-100"}`}>
+                  {slot.label}
+                </div>
               </div>
 
               {!isFinalRound ? (
@@ -45,7 +50,7 @@ export default function BracketVisualization({ bracket, athletesCount }: { brack
   const champion = bracket.rounds.at(-1)?.matches[0]?.resolvedWinner ?? null;
 
   return (
-    <div className="rounded-[28px] border border-zinc-800 bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.08),_transparent_45%),linear-gradient(180deg,_rgba(24,24,27,0.94),_rgba(9,9,11,0.98))] p-5">
+    <div className="rounded-[28px] border border-zinc-800 bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.08),transparent_45%),linear-gradient(180deg,rgba(24,24,27,0.94),rgba(9,9,11,0.98))] p-5">
       <div className="mb-6 flex flex-col gap-3 border-b border-zinc-800 pb-4 text-center">
         <div className="text-[11px] uppercase tracking-[0.35em] text-zinc-500">Carvalho BJJ</div>
         <div className="text-2xl font-semibold text-zinc-50">{bracket.name}</div>

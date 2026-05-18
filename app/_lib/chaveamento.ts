@@ -198,9 +198,10 @@ function buildRuleMatch(athlete: Athlete): RuleMatch | null {
 }
 
 export function buildAutomaticBracketGroups(athletes: Athlete[]) {
+  const paidAthletes = athletes.filter((a) => a.status === "paid");
   const grouped = new Map<string, AutoGroup>();
 
-  for (const athlete of sortAthletes(athletes)) {
+  for (const athlete of sortAthletes(paidAthletes)) {
     const match = buildRuleMatch(athlete);
     if (!match) continue;
 
@@ -221,7 +222,7 @@ export function buildAutomaticBracketGroups(athletes: Athlete[]) {
 
   return Array.from(grouped.values())
     .map((group) => ({ ...group, athleteIds: uniqueIds(group.athleteIds) }))
-    .filter((group) => group.athleteIds.length > 1)
+    .filter((group) => group.athleteIds.length >= 1)
     .sort((left, right) => left.name.localeCompare(right.name, "pt-BR"));
 }
 
@@ -275,9 +276,27 @@ export function buildBracketRounds(
 
     return {
       athlete,
-      label: athlete?.nome ?? (isDirectAdvanceSlot ? "Classificado direto" : "Slot vazio"),
+      label: athlete?.nome ?? (isDirectAdvanceSlot ? "Classificado direto" : "Aguardando atleta"),
     };
   });
+
+  if (currentEntrants.length === 1) {
+    rounds.push({
+      title: "Final",
+      matches: [
+        {
+          id: crypto.randomUUID(),
+          number: fightNumber,
+          roundIndex: 0,
+          top: currentEntrants[0],
+          bottom: { athlete: null, label: "Aguardando atleta" },
+          winnerSide: null,
+          resolvedWinner: null,
+        },
+      ],
+    });
+    return rounds;
+  }
 
   let roundIndex = 0;
 
