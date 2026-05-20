@@ -68,7 +68,7 @@ function calcFee({
   const modalidades = [mod_gi, mod_nogi, mod_gi_extra, festival].filter(Boolean).length;
   if (modalidades === 0) return 0;
 
-  return getSaoPauloDateCode() <= 20260515 ? 80 : 100;
+  return getSaoPauloDateCode() <= 20260530 ? 80 : 100;
 }
 
 function isDuplicateError(error: DbError | null | undefined) {
