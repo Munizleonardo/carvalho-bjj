@@ -1,247 +1,195 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
-import { useRef, useState } from "react";
+import { useCallback, useState } from "react";
 import { Button } from "../ui/button";
 import {
   BookOpenText,
+  ChevronDown,
   GitBranch,
   LockKeyhole,
-  MessageCircleIcon,
   Medal,
-  PauseCircle,
-  PlayCircle,
+  MessageCircleIcon,
   Trophy,
 } from "lucide-react";
 
+const VIDEOS = [
+  "/vid/hero.mp4",
+  "/vid/aquecimento.mp4",
+  "/vid/evento.mp4",
+  "/vid/luta6.mp4",
+  "/vid/luta7.mp4",
+];
+
 export default function HeroSection() {
-  const videoRef = useRef<HTMLVideoElement>(null);
-  const [isPlaying, setIsPlaying] = useState(true);
+  const [currentIndex, setCurrentIndex] = useState(0);
 
-  const toggleVideoPlayback = () => {
-    const video = videoRef.current;
-
-    if (!video) return;
-
-    if (video.paused) {
-      void video.play();
-      setIsPlaying(true);
-      return;
-    }
-
-    video.pause();
-    setIsPlaying(false);
-  };
+  const handleEnded = useCallback(() => {
+    setCurrentIndex((prev) => (prev + 1) % VIDEOS.length);
+  }, []);
 
   return (
     <section
       id="home"
-      className="relative flex min-h-[100svh] items-start justify-center overflow-hidden bg-transparent lg:items-center"
+      className="relative flex h-svh w-full items-center justify-center overflow-hidden"
     >
-      <Image
-        src="https://commons.wikimedia.org/wiki/Special:FilePath/ROBERTO%20CYBORG%20ABREU%202009%20BJJ%20Championships.jpg"
-        alt="Luta de jiu-jitsu em campeonato"
-        fill
-        unoptimized
-        priority
-        sizes="100vw"
-        className="absolute inset-0 object-cover opacity-35"
+      {/* Vídeo de fundo */}
+      <video
+        key={currentIndex}
+        src={VIDEOS[currentIndex]}
+        autoPlay
+        muted
+        playsInline
+        preload="auto"
+        onEnded={handleEnded}
+        className="absolute inset-0 h-full w-full object-cover"
+        aria-hidden="true"
       />
-      <div className="absolute inset-0 bg-linear-to-b from-zinc-950/70 via-black/80 to-black" />
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(220,38,38,0.22),transparent_34%),radial-gradient(circle_at_bottom_right,rgba(220,38,38,0.18),transparent_28%)]" />
-      <div className="absolute inset-0 opacity-[0.06] [background-image:radial-gradient(circle_at_1px_1px,white_1px,transparent_1px)] [background-size:24px_24px]" />
 
-      <div className="relative container mx-auto px-4 py-10 sm:py-16 md:py-24">
-        <div className="grid items-start gap-6 lg:grid-cols-[1.05fr_0.95fr] lg:items-center lg:gap-10">
-          <div className="max-w-3xl text-center text-zinc-100 lg:text-left">
-            <div className="mb-5 grid grid-cols-1 gap-3 sm:flex sm:flex-row sm:flex-wrap sm:justify-center lg:justify-start">
-              <Button
-                asChild
-                variant="outline"
-                className="h-12 w-full rounded-xl border-red-500/60 bg-red-600 px-4 text-sm font-semibold text-white shadow-[0_14px_34px_rgba(220,38,38,0.28)] transition-all hover:-translate-y-0.5 hover:border-red-400 hover:bg-red-500 hover:text-white hover:shadow-[0_18px_42px_rgba(220,38,38,0.36)] sm:w-auto"
-              >
-                <Link href="/edital_junho.pdf" target="_blank">
-                  <BookOpenText className="h-4 w-4" />
-                  Edital do Campeonato
-                </Link>
-              </Button>
+      {/* Camadas de sobreposição */}
+      <div className="absolute inset-0 bg-black/55" />
+      <div className="absolute inset-0 bg-gradient-to-b from-black/10 via-black/50 to-black" />
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(220,38,38,0.22),transparent_55%)]" />
+      <div className="absolute inset-0 opacity-[0.05] [background-image:radial-gradient(circle_at_1px_1px,white_1px,transparent_1px)] [background-size:24px_24px]" />
 
-              <Button
-                asChild
-                variant="outline"
-                className="h-12 w-full rounded-xl border-zinc-700 bg-zinc-950/85 px-4 text-sm font-semibold text-zinc-100 shadow-[0_12px_30px_rgba(0,0,0,0.35)] transition-all hover:-translate-y-0.5 hover:border-red-500/70 hover:bg-zinc-900 hover:text-white sm:w-auto"
-              >
-                <Link href="/chaveamento">
-                  <GitBranch className="h-4 w-4" />
-                  Ver Chaveamento
-                </Link>
-              </Button>
+      {/* Conteúdo — centralizado e limitado à altura da tela */}
+      <div className="relative z-10 mx-auto flex h-full w-full max-w-5xl flex-col items-center justify-center px-4 py-8 text-center text-zinc-100 sm:py-12">
 
-              <Button
-                asChild
-                variant="outline"
-                className="h-12 w-full rounded-xl border-white/30 bg-white px-4 text-sm font-semibold text-black shadow-[0_14px_34px_rgba(255,255,255,0.16)] transition-all hover:-translate-y-0.5 hover:border-white hover:bg-zinc-100 hover:text-black sm:w-auto"
-              >
-                <Link href="/login">
-                  <LockKeyhole className="h-4 w-4" />
-                  Área Administrativa
-                </Link>
-              </Button>
+        {/* Badge */}
+        <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-zinc-700/80 bg-zinc-900/60 px-3 py-1.5 backdrop-blur sm:mb-5 sm:px-4 sm:py-2">
+          <Trophy className="h-3.5 w-3.5 text-red-500 sm:h-4 sm:w-4" />
+          <span className="text-xs font-medium text-zinc-200 sm:text-sm">
+            Campeonato · Black Belt BJJ
+          </span>
+          <span className="rounded-full bg-red-500/20 px-2 py-0.5 text-[10px] font-semibold text-red-300 sm:text-xs">
+            2026
+          </span>
+        </div>
 
-              <Button
-                asChild
-                variant="outline"
-                className="h-12 w-full rounded-xl border-yellow-200 bg-yellow-400 px-4 text-sm font-bold text-black shadow-[0_14px_34px_rgba(250,204,21,0.28)] transition-all hover:-translate-y-0.5 hover:border-yellow-100 hover:bg-yellow-300 hover:text-black hover:shadow-[0_18px_42px_rgba(250,204,21,0.38)] sm:w-auto"
-              >
-                <Link href="/pontuacoes">
-                  <Medal className="h-4 w-4" />
-                  Pontuações
-                </Link>
-              </Button>
+        {/* Título */}
+        <h1 className="mb-3 text-[1.65rem] font-extrabold leading-tight tracking-tight drop-shadow-2xl sm:mb-5 sm:text-5xl md:text-6xl lg:text-7xl">
+          Onde a disciplina encontra{" "}<br/>
+          <span className="text-red-500">o desafio</span>
+          <br className="hidden sm:block" />
+          {" "}e cada atleta entra para{" "}
+          <span className="text-red-400">marcar seu nome.</span>
+        </h1>
 
-              <Button
-                asChild
-                className="h-12 w-full rounded-xl bg-red-600 px-4 text-sm font-bold text-white shadow-[0_14px_34px_rgba(220,38,38,0.28)] transition-all hover:-translate-y-0.5 hover:bg-red-500 sm:hidden"
-              >
-                <Link href="/inscricao/cpf">REALIZAR INSCRIÇÃO!</Link>
-              </Button>
+        {/* Subtítulo — oculto no mobile para economizar espaço */}
+        <p className="mx-auto mb-6 hidden max-w-2xl leading-7 text-zinc-300 drop-shadow sm:block sm:text-base md:text-lg lg:text-xl">
+          Este campeonato foi pensado para reunir competição, respeito e superação em um
+          ambiente que valoriza o atleta do aquecimento ao pódium.
+        </p>
 
-              <Button
-                asChild
-                variant="outline"
-                className="h-12 w-full rounded-xl border-emerald-400/50 bg-emerald-600 px-4 text-sm font-semibold text-white shadow-[0_14px_34px_rgba(5,150,105,0.22)] transition-all hover:-translate-y-0.5 hover:border-emerald-300 hover:bg-emerald-500 hover:text-white sm:hidden"
-              >
-                <Link href="https://wa.me/5522999809455" target="_blank">
-                  <MessageCircleIcon className="h-4 w-4" />
-                  Contate a Organização
-                </Link>
-              </Button>
-            </div>
-
-            <div className="mb-5 inline-flex flex-wrap items-center justify-center gap-2 rounded-full border border-zinc-800 bg-zinc-900/50 px-4 py-2 backdrop-blur lg:justify-start">
-              <Trophy className="h-4 w-4 text-red-500" />
-              <span className="text-sm font-medium text-zinc-200">Campeonato - Black Belt BJJ</span>
-              <span className="ml-2 rounded-full bg-red-500/15 px-2 py-0.5 text-xs text-red-200">
-                2026
-              </span>
-            </div>
-
-            <h1 className="mb-4 text-[2rem] font-bold leading-tight tracking-tight sm:text-4xl md:text-5xl lg:text-6xl">
-              Onde a disciplina encontra o desafio e cada atleta entra para marcar o seu nome.
-            </h1>
-
-            <p className="mx-auto max-w-2xl text-sm leading-7 text-zinc-300 sm:text-lg md:text-xl lg:mx-0 lg:leading-8">
-              Este campeonato foi pensado para reunir competição, respeito e superação em um
-              ambiente que valoriza o atleta do aquecimento ao pódium.
-            </p>
-
-            <div className="mt-6 hidden flex-wrap justify-center gap-3 text-sm text-zinc-300 sm:flex lg:justify-start">
-              <div className="rounded-full border border-zinc-700 bg-black/40 px-4 py-2">
-                Energia de campeonato do início ao fim!
-              </div>
-              <div className="rounded-full border border-zinc-700 bg-black/40 px-4 py-2">
-                Estrutura pensada para atletas e equipes.
-              </div>
-            </div>
-
-            <div className="mt-6 flex items-center justify-center gap-3 rounded-[1.5rem] border border-zinc-800 bg-zinc-950/60 p-3 sm:hidden">
-              <div className="flex items-center justify-center gap-3">
-                <div className="flex flex-col items-center justify-center rounded-2xl border border-white/10 bg-black/60 p-4">
-                  <div className="text-[11px] uppercase tracking-[0.2em] text-zinc-400">Edição</div>
-                  <div className="mt-2 text-lg font-bold text-white">06 - 2026</div>
-                </div>
-                <div className="rounded-2xl border border-white/10 bg-black/60 p-4">
-                  <div className="text-[11px] uppercase tracking-[0.2em] text-zinc-400">Status</div>
-                  <div className="mt-2 text-lg font-bold text-white">Inscrições Abertas</div>
-                </div>
-              </div>
-            </div>
-
-            <div className="mt-6 hidden flex-col gap-3 sm:flex sm:flex-row sm:flex-wrap sm:justify-center lg:justify-start">
-              <Button
-                asChild
-                className="h-12 w-full rounded-xl bg-red-600 px-6 text-sm font-bold text-white shadow-[0_18px_42px_rgba(220,38,38,0.34)] transition-all hover:-translate-y-0.5 hover:bg-red-500 hover:shadow-[0_22px_54px_rgba(220,38,38,0.44)] sm:h-14 sm:w-auto sm:px-8 sm:text-base"
-              >
-                <Link href="/inscricao/cpf">REALIZAR INSCRIÇÃO</Link>
-              </Button>
-
-              <Button
-                asChild
-                variant="outline"
-                className="h-12 w-full rounded-xl border-emerald-400/50 bg-emerald-600 px-6 text-sm font-semibold text-white shadow-[0_18px_42px_rgba(5,150,105,0.24)] transition-all hover:-translate-y-0.5 hover:border-emerald-300 hover:bg-emerald-500 hover:text-white sm:h-14 sm:w-auto sm:px-8 sm:text-base"
-              >
-                <Link href="https://wa.me/5522999809455" target="_blank">
-                  <MessageCircleIcon className="h-5 w-5" />
-                  Contate a Organização
-                </Link>
-              </Button>
-            </div>
+        {/* CTAs principais */}
+        <div className="mb-3 flex w-full flex-col items-center justify-center gap-2.5 sm:mb-5 sm:flex-row sm:gap-3">
+          <div className="relative w-full sm:w-auto">
+            <span className="absolute inset-0 animate-ping rounded-xl bg-red-500 opacity-40 [animation-duration:1.5s]" />
+            <Button
+              asChild
+              className="relative h-11 w-full rounded-xl bg-red-600 px-8 text-sm font-bold text-white shadow-[0_18px_42px_rgba(220,38,38,0.45)] transition-all hover:-translate-y-0.5 hover:bg-red-500 hover:shadow-[0_22px_54px_rgba(220,38,38,0.55)] sm:h-14 sm:w-auto sm:text-base"
+            >
+              <Link href="/inscricao/cpf">INSCRIÇÃO</Link>
+            </Button>
           </div>
 
-          <div className="relative mx-auto hidden w-full max-w-xl lg:block lg:max-w-none">
-            <div className="absolute -inset-6 rounded-[2rem] bg-red-600/10 blur-3xl" />
-            <div className="relative overflow-hidden rounded-[2rem] border border-zinc-800 bg-black/60 p-4 backdrop-blur-sm">
-              <div className="relative overflow-hidden rounded-[1.5rem] border border-zinc-800">
-                <video
-                  ref={videoRef}
-                  src="/vid/hero.mp4"
-                  autoPlay
-                  muted
-                  loop
-                  playsInline
-                  preload="metadata"
-                  className="h-[300px] w-full object-fill sm:h-[420px] lg:h-[520px]"
-                  aria-label="Video de apresenta??o do campeonato"
-                />
-                <div className="pointer-events-none absolute inset-0 bg-linear-to-t from-black via-black/20 to-transparent" />
-                <div className="absolute left-3 right-3 top-3 flex items-center justify-between gap-3 sm:left-5 sm:right-5">
-                  <div className="inline-flex max-w-full items-center gap-2 rounded-full border border-white/10 bg-black/55 px-3 py-2 text-center text-xs text-white backdrop-blur-sm sm:text-sm">
-                    <PlayCircle className="h-4 w-4 text-red-400" />
-                    O tatame chama quem se prepara.
-                  </div>
-                  <button
-                    type="button"
-                    onClick={toggleVideoPlayback}
-                    className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-black/55 px-3 py-2 text-xs text-white backdrop-blur-sm transition hover:bg-black/70 sm:text-sm"
-                    aria-pressed={!isPlaying}
-                    aria-label={isPlaying ? "Pausar v?deo" : "Reproduzir v?deo"}
-                  >
-                    {isPlaying ? (
-                      <PauseCircle className="h-4 w-4 text-white" />
-                    ) : (
-                      <PlayCircle className="h-4 w-4 text-white" />
-                    )}
-                    {isPlaying ? "Pausar" : "Reproduzir"}
-                  </button>
-                </div>
-                <div className="flex items-center justify-center sm:absolute sm:inset-x-0 sm:bottom-0 sm:block sm:p-5">
-                  <div className="flex gap-3 sm:flex-wrap sm:justify-between">
-                    <div className="flex flex-col items-center justify-between rounded-2xl border border-white/10 bg-black/60 p-4">
-                      <div className="text-xs uppercase tracking-[0.2em] text-zinc-400">Edição</div>
-                      <div className="mt-2 text-2xl font-bold text-white">06 - 2026</div>
-                    </div>
-                    <div className="rounded-2xl border border-white/10 bg-black/60 p-4">
-                      <div className="text-xs uppercase tracking-[0.2em] text-zinc-400">Status</div>
-                      <div className="mt-2 text-2xl font-bold text-white">Inscrições Abertas</div>
-                    </div>
-                  </div>
-                </div>
-              </div>
+          <Button
+            asChild
+            variant="outline"
+            className="h-11 w-full rounded-xl border-emerald-400/50 bg-emerald-600/90 px-8 text-sm font-semibold text-white transition-all hover:-translate-y-0.5 hover:bg-emerald-500 hover:text-white sm:h-14 sm:w-auto sm:text-base"
+          >
+            <Link href="https://wa.me/5522999809455" target="_blank">
+              <MessageCircleIcon className="h-4 w-4 sm:h-5 sm:w-5" />
+              Contate a Organização
+            </Link>
+          </Button>
+        </div>
 
-              <div className="mt-4 grid gap-3 sm:hidden">
-                <div className="rounded-2xl border border-white/10 bg-black/60 p-4">
-                  <div className="text-xs uppercase tracking-[0.2em] text-zinc-400">Edição</div>
-                  <div className="mt-2 text-xl font-bold text-white">2026</div>
-                </div>
-                <div className="rounded-2xl border border-white/10 bg-black/60 p-4">
-                  <div className="text-xs uppercase tracking-[0.2em] text-zinc-400">Status</div>
-                  <div className="mt-2 text-xl font-bold text-white">Inscrições Abertas</div>
-                </div>
-              </div>
-            </div>
+        {/* Links secundários — ocultos no mobile */}
+        <div className="mb-5 hidden flex-wrap items-center justify-center gap-2 sm:flex">
+          <Link
+            href="/edital_junho.pdf"
+            target="_blank"
+            className="inline-flex items-center gap-1.5 rounded-full border border-zinc-700 bg-black/40 px-4 py-2 text-sm text-zinc-300 backdrop-blur transition-all hover:border-zinc-500 hover:text-white"
+          >
+            <BookOpenText className="h-3.5 w-3.5" />
+            Edital
+          </Link>
+          <Link
+            href="/chaveamento"
+            className="inline-flex items-center gap-1.5 rounded-full border border-zinc-700 bg-black/40 px-4 py-2 text-sm text-zinc-300 backdrop-blur transition-all hover:border-zinc-500 hover:text-white"
+          >
+            <GitBranch className="h-3.5 w-3.5" />
+            Chaveamento
+          </Link>
+          <Link
+            href="/pontuacoes"
+            className="inline-flex items-center gap-1.5 rounded-full border border-zinc-700 bg-black/40 px-4 py-2 text-sm text-zinc-300 backdrop-blur transition-all hover:border-zinc-500 hover:text-white"
+          >
+            <Medal className="h-3.5 w-3.5" />
+            Pontuações
+          </Link>
+          <Link
+            href="/login"
+            className="inline-flex items-center gap-1.5 rounded-full border border-zinc-700 bg-black/40 px-4 py-2 text-sm text-zinc-300 backdrop-blur transition-all hover:border-zinc-500 hover:text-white"
+          >
+            <LockKeyhole className="h-3.5 w-3.5" />
+            Área Admin
+          </Link>
+        </div>
+
+        {/* Links secundários mobile — compactos, em linha */}
+        <div className="mb-4 flex items-center justify-center gap-3 sm:hidden">
+          <Link href="/edital_junho.pdf" target="_blank" className="text-xs text-zinc-400 underline-offset-2 hover:text-zinc-200">
+            Edital
+          </Link>
+          <span className="text-zinc-700">·</span>
+          <Link href="/chaveamento" className="text-xs text-zinc-400 underline-offset-2 hover:text-zinc-200">
+            Chaveamento
+          </Link>
+          <span className="text-zinc-700">·</span>
+          <Link href="/pontuacoes" className="text-xs text-zinc-400 underline-offset-2 hover:text-zinc-200">
+            Pontuações
+          </Link>
+          <span className="text-zinc-700">·</span>
+          <Link href="/login" className="text-xs text-zinc-400 underline-offset-2 hover:text-zinc-200">
+            Admin
+          </Link>
+        </div>
+
+        {/* Cards de status */}
+        <div className="mb-4 flex items-center justify-center gap-3 sm:mb-6 sm:gap-4">
+          <div className="rounded-xl border border-white/10 bg-black/50 px-4 py-2 backdrop-blur-sm sm:rounded-2xl sm:px-6 sm:py-3">
+            <div className="text-[9px] uppercase tracking-[0.2em] text-zinc-400 sm:text-[10px]">Edição</div>
+            <div className="mt-0.5 text-base font-bold text-white sm:mt-1 sm:text-xl">06 · 2026</div>
+          </div>
+          <div className="rounded-xl border border-white/10 bg-black/50 px-4 py-2 backdrop-blur-sm sm:rounded-2xl sm:px-6 sm:py-3">
+            <div className="text-[9px] uppercase tracking-[0.2em] text-zinc-400 sm:text-[10px]">Status</div>
+            <div className="mt-0.5 text-base font-bold text-white sm:mt-1 sm:text-xl">Inscrições Abertas</div>
           </div>
         </div>
+
+        {/* Indicador de vídeos */}
+        <div className="flex items-center justify-center gap-2">
+          {VIDEOS.map((_, i) => (
+            <button
+              key={i}
+              type="button"
+              onClick={() => setCurrentIndex(i)}
+              className={`h-1.5 rounded-full transition-all duration-300 ${
+                i === currentIndex
+                  ? "w-6 bg-red-500"
+                  : "w-1.5 bg-zinc-600 hover:bg-zinc-400"
+              }`}
+              aria-label={`Vídeo ${i + 1}`}
+            />
+          ))}
+        </div>
+      </div>
+
+      {/* Seta de scroll */}
+      <div className="absolute bottom-4 left-1/2 -translate-x-1/2 animate-bounce text-zinc-500 sm:bottom-6">
+        <ChevronDown className="h-5 w-5 sm:h-6 sm:w-6" />
       </div>
     </section>
   );

@@ -219,9 +219,7 @@ export default function HomeShowcase() {
               </h2>
 
               <p className="mt-4 max-w-2xl text-sm leading-7 text-zinc-300 sm:mt-5 sm:text-base">
-                A proposta desta página é apresentar o evento com presença, clareza e verdade.
-                O atleta sente isso no primeiro clique: informação objetiva, identidade forte e
-                um convite real para viver uma grande edição dentro do tatame.
+                Evento com presença, clareza e verdade do início ao fim. Profissionais e atletas, com informações objetivas em mãos, campeonato com identidade forte, a BlackBelt BJJ é um convite real para viver uma grande aventura dentro do tatame.
               </p>
 
               <div className="mt-6 grid gap-3 sm:mt-8 sm:grid-cols-2 sm:gap-4">
