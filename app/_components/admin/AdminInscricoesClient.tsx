@@ -37,15 +37,18 @@ import {
 } from "@/app/_components/ui/table";
 
 import { deleteParticipantAdmin } from "@/app/_lib/actions/adminInscricoes";
+import { createLink, deleteLink } from "@/app/_lib/actions/adminLinks";
 import { logout } from "@/app/_lib/auth";
 
 import type { BeltColor, ModalityFilter, ParticipantAdmin } from "@/app/_lib/types";
 import { beltDotClasses, beltLabel } from "@/app/_lib/types";
+import type { LinkInscricao } from "@/app/_lib/actions/adminLinks";
 
-import { FileDown, Info, MoreHorizontal, SlidersHorizontal, Trash2, Users, Menu } from "lucide-react";
+import { Check, Copy, ExternalLink, FileDown, Info, Link2, MoreHorizontal, Plus, SlidersHorizontal, Trash2, Users, Menu } from "lucide-react";
 
 type Props = {
   initialParticipants: ParticipantAdmin[];
+  initialLinks: LinkInscricao[];
 };
 
 const beltOptions: Array<{ label: string; value: "ALL" | BeltColor }> = [
@@ -124,12 +127,14 @@ function countByModality(list: ParticipantAdmin[]) {
   return { gi, nogi, abs };
 }
 
-export default function AdminInscricoesClient({ initialParticipants }: Props) {
+export default function AdminInscricoesClient({ initialParticipants, initialLinks }: Props) {
   const router = useRouter();
 
   const [participants, setParticipants] = React.useState<ParticipantAdmin[]>(
     initialParticipants
   );
+
+  const [links, setLinks] = React.useState<LinkInscricao[]>(initialLinks);
 
   const [search, setSearch] = React.useState("");
   const [belt, setBelt] = React.useState<"ALL" | BeltColor>("ALL");
@@ -141,6 +146,15 @@ export default function AdminInscricoesClient({ initialParticipants }: Props) {
 
   const [detailsOpen, setDetailsOpen] = React.useState(false);
   const [detailsItem, setDetailsItem] = React.useState<ParticipantAdmin | null>(null);
+
+  // Link generation modal state
+  const [linkModalOpen, setLinkModalOpen] = React.useState(false);
+  const [linkAcademia, setLinkAcademia] = React.useState("");
+  const [linkQuantidade, setLinkQuantidade] = React.useState("");
+  const [linkGenerating, setLinkGenerating] = React.useState(false);
+  const [linkError, setLinkError] = React.useState<string | null>(null);
+  const [generatedLink, setGeneratedLink] = React.useState<string | null>(null);
+  const [copied, setCopied] = React.useState(false);
 
   const minW = minWeight.trim() === "" ? undefined : Number(minWeight);
   const maxW = maxWeight.trim() === "" ? undefined : Number(maxWeight);
@@ -178,6 +192,62 @@ export default function AdminInscricoesClient({ initialParticipants }: Props) {
     }
   }
 
+  function openLinkModal() {
+    setLinkAcademia("");
+    setLinkQuantidade("");
+    setLinkError(null);
+    setGeneratedLink(null);
+    setCopied(false);
+    setLinkModalOpen(true);
+  }
+
+  async function handleGenerateLink() {
+    const qtd = Number(linkQuantidade);
+    if (!linkAcademia.trim()) {
+      setLinkError("Informe o nome da academia.");
+      return;
+    }
+    if (!qtd || qtd < 1) {
+      setLinkError("Informe uma quantidade válida (mínimo 1).");
+      return;
+    }
+
+    setLinkGenerating(true);
+    setLinkError(null);
+
+    try {
+      const link = await createLink(linkAcademia.trim(), qtd);
+      const url = `${window.location.origin}/link/${link.token}`;
+      setGeneratedLink(url);
+      setLinks((prev) => [link, ...prev]);
+    } catch {
+      setLinkError("Não foi possível gerar o link. Tente novamente.");
+    } finally {
+      setLinkGenerating(false);
+    }
+  }
+
+  async function handleCopyLink(url: string) {
+    try {
+      await navigator.clipboard.writeText(url);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      // fallback
+    }
+  }
+
+  async function handleDeleteLink(id: string) {
+    const ok = window.confirm("Confirma remover este link? As inscrições realizadas por ele não serão afetadas.");
+    if (!ok) return;
+    try {
+      await deleteLink(id);
+      setLinks((prev) => prev.filter((l) => l.id !== id));
+    } catch {
+      alert("Não foi possível remover o link. Tente novamente.");
+    }
+  }
+
   function exportPdf() {
     const params = new URLSearchParams();
 
@@ -204,6 +274,15 @@ export default function AdminInscricoesClient({ initialParticipants }: Props) {
             <div className="flex items-center gap-3">
               {/* Desktop buttons */}
               <div className="hidden md:flex items-center gap-3">
+                <Button
+                  variant="outline"
+                  className="cursor-pointer h-9 rounded-xl px-3 border-zinc-800 bg-transparent text-zinc-100 hover:bg-white hover:text-black"
+                  onClick={openLinkModal}
+                >
+                  <Link2 className="mr-2 h-4 w-4" />
+                  Gerar Link
+                </Button>
+
                 <Link href="/admin/categorias">
                   <Button
                     variant="outline"
@@ -262,6 +341,11 @@ export default function AdminInscricoesClient({ initialParticipants }: Props) {
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end" className="border-zinc-800 bg-zinc-950 text-zinc-100">
+                    <DropdownMenuItem className="cursor-pointer data-highlighted:bg-white" onClick={openLinkModal}>
+                      <Link2 className="mr-2 h-4 w-4" />
+                      Gerar Link
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
                     <Link href="/admin/categorias"><DropdownMenuItem className="cursor-pointer data-highlighted:bg-white">Categorias</DropdownMenuItem></Link>
                     <Link href="/admin/chaveamento"><DropdownMenuItem className="cursor-pointer data-highlighted:bg-white">Chaveamento</DropdownMenuItem></Link>
                     <Link href="/admin/cashback"><DropdownMenuItem className="cursor-pointer data-highlighted:bg-white">Cashback</DropdownMenuItem></Link>
@@ -540,6 +624,191 @@ export default function AdminInscricoesClient({ initialParticipants }: Props) {
           </div>
         </div>
       </main>
+
+      {/* Seção de Links */}
+      <div className="mt-8 rounded-2xl border border-zinc-900 bg-zinc-950/60 p-6 shadow-sm">
+        <div className="mb-4 flex items-center justify-between gap-4">
+          <div className="flex items-center gap-2">
+            <Link2 className="h-4 w-4 text-zinc-400" />
+            <h3 className="text-xl font-semibold">Links de Inscrição ({links.length})</h3>
+          </div>
+          <Button
+            type="button"
+            onClick={openLinkModal}
+            className="cursor-pointer h-9 rounded-xl bg-red-600 px-3 text-sm hover:bg-red-500"
+          >
+            <Plus className="mr-2 h-4 w-4" />
+            Gerar Link
+          </Button>
+        </div>
+
+        {links.length === 0 ? (
+          <p className="py-6 text-center text-zinc-500">
+            Nenhum link gerado ainda. Clique em &quot;Gerar Link&quot; para criar o primeiro.
+          </p>
+        ) : (
+          <div className="flex flex-col gap-3">
+            {links.map((link) => {
+              const url = `${typeof window !== "undefined" ? window.location.origin : ""}/link/${link.token}`;
+              const lotado = link.inscritos >= link.quantidade;
+              return (
+                <div
+                  key={link.id}
+                  className="flex items-center gap-3 rounded-xl border border-zinc-800 bg-black/30 p-4"
+                >
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-2">
+                      <p className="font-medium text-zinc-100">{link.academia}</p>
+                      {lotado && (
+                        <span className="rounded-full border border-yellow-900 bg-yellow-950/50 px-2 py-0.5 text-xs text-yellow-400">
+                          Lotado
+                        </span>
+                      )}
+                    </div>
+                    <p className="mt-0.5 text-sm text-zinc-400">
+                      {link.inscritos}/{link.quantidade} inscrições
+                    </p>
+                    <p className="mt-1 truncate text-xs text-zinc-600">/link/{link.token}</p>
+                  </div>
+
+                  <div className="flex shrink-0 items-center gap-2">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8 rounded-lg text-zinc-400 hover:bg-zinc-800 hover:text-zinc-100"
+                      onClick={() => window.open(url, "_blank")}
+                      title="Abrir link"
+                    >
+                      <ExternalLink className="h-4 w-4" />
+                    </Button>
+
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8 rounded-lg text-zinc-400 hover:bg-zinc-800 hover:text-zinc-100"
+                      onClick={async () => {
+                        try {
+                          await navigator.clipboard.writeText(url);
+                        } catch {
+                          // fallback
+                        }
+                      }}
+                      title="Copiar link"
+                    >
+                      <Copy className="h-4 w-4" />
+                    </Button>
+
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8 rounded-lg text-red-400 hover:bg-zinc-800 hover:text-red-300"
+                      onClick={() => handleDeleteLink(link.id)}
+                      title="Remover link"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
+
+      {/* Modal Gerar Link */}
+      <Dialog open={linkModalOpen} onOpenChange={(open) => { if (!open) { setLinkModalOpen(false); setGeneratedLink(null); } }}>
+        <DialogContent className="border-zinc-800 bg-zinc-950 text-zinc-100 sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Gerar Link de Inscrição</DialogTitle>
+            <DialogDescription className="text-zinc-400">
+              Crie um link exclusivo para uma academia realizar inscrições sem pagamento. O valor será R$ 50,00 por atleta, marcado como pago automaticamente.
+            </DialogDescription>
+          </DialogHeader>
+
+          {!generatedLink ? (
+            <div className="flex flex-col gap-4 pt-2">
+              <div className="flex flex-col gap-2">
+                <label className="text-sm font-medium text-zinc-200">Academia</label>
+                <Input
+                  placeholder="Nome da academia"
+                  value={linkAcademia}
+                  onChange={(e) => setLinkAcademia(e.target.value)}
+                  className="rounded-xl border-zinc-800 bg-black/40 text-zinc-100 placeholder:text-zinc-500 focus-visible:ring-red-500/30"
+                />
+              </div>
+
+              <div className="flex flex-col gap-2">
+                <label className="text-sm font-medium text-zinc-200">Quantidade de inscrições</label>
+                <Input
+                  type="number"
+                  min={1}
+                  placeholder="Ex: 10"
+                  value={linkQuantidade}
+                  onChange={(e) => setLinkQuantidade(e.target.value)}
+                  className="rounded-xl border-zinc-800 bg-black/40 text-zinc-100 placeholder:text-zinc-500 focus-visible:ring-red-500/30"
+                />
+              </div>
+
+              {linkError && (
+                <p className="rounded-xl border border-red-900/50 bg-red-950/40 px-3 py-2 text-sm text-red-200">
+                  {linkError}
+                </p>
+              )}
+
+              <div className="flex justify-end gap-3 pt-2">
+                <Button
+                  variant="ghost"
+                  onClick={() => setLinkModalOpen(false)}
+                  className="rounded-xl text-zinc-400 hover:text-zinc-100"
+                  disabled={linkGenerating}
+                >
+                  Cancelar
+                </Button>
+                <Button
+                  onClick={handleGenerateLink}
+                  disabled={linkGenerating}
+                  className="rounded-xl bg-red-600 hover:bg-red-500"
+                >
+                  {linkGenerating ? "Gerando..." : "Gerar link"}
+                </Button>
+              </div>
+            </div>
+          ) : (
+            <div className="flex flex-col gap-4 pt-2">
+              <p className="text-sm text-green-400">Link gerado com sucesso!</p>
+
+              <div className="flex items-center gap-2 rounded-xl border border-zinc-800 bg-black/40 px-3 py-2">
+                <p className="min-w-0 flex-1 truncate text-sm text-zinc-300">{generatedLink}</p>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-8 w-8 shrink-0 rounded-lg text-zinc-400 hover:bg-zinc-800 hover:text-zinc-100"
+                  onClick={() => handleCopyLink(generatedLink)}
+                >
+                  {copied ? <Check className="h-4 w-4 text-green-400" /> : <Copy className="h-4 w-4" />}
+                </Button>
+              </div>
+
+              <div className="flex justify-end gap-3 pt-2">
+                <Button
+                  variant="ghost"
+                  onClick={() => window.open(generatedLink, "_blank")}
+                  className="rounded-xl text-zinc-400 hover:text-zinc-100"
+                >
+                  <ExternalLink className="mr-2 h-4 w-4" />
+                  Abrir link
+                </Button>
+                <Button
+                  onClick={() => { setLinkModalOpen(false); setGeneratedLink(null); }}
+                  className="rounded-xl bg-zinc-800 hover:bg-zinc-700"
+                >
+                  Fechar
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
 
       {/* Modal */}
       <Dialog open={detailsOpen} onOpenChange={setDetailsOpen}>
