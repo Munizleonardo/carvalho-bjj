@@ -84,7 +84,7 @@ const nextEventHighlights = [
   {
     icon: CalendarDays,
     title: "Data oficial",
-    subtitle: "21/06/2026",
+    subtitle: "À Definir",
     description: "Data oficial do próximo campeonato de Jiu-Jitsu",
   },
   {
@@ -407,9 +407,9 @@ export default function HomeShowcase() {
                     <p className="mt-4 max-w-xl text-sm leading-7 text-zinc-400">
                       Inscrições: 1º lote até 30/05 - R$ 80,00.
                     </p>
-                    <p className="mt-4 max-w-xl text-sm leading-7 text-zinc-400">
-                      Inscrições: 2º lote de 31/05 até 20/06 - R$ 100,00.
-                    </p>
+                    {/* <p className="mt-4 max-w-xl text-sm leading-7 text-zinc-400">
+                      Inscrições: 2º lote - R$ -
+                    </p> */}
                   </div>
 
                   <div className="relative hidden min-h-[280px] md:block">
