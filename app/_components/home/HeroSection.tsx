@@ -107,7 +107,7 @@ export default function HeroSection() {
         {/* Links secundários — desktop */}
         <div className="mb-4 hidden flex-wrap items-center justify-center gap-2 sm:flex">
           <Link
-            href="/edital_junho.pdf"
+            href="/edital_novo.pdf"
             target="_blank"
             className="inline-flex items-center gap-1.5 rounded-full border border-zinc-700 bg-black/40 px-3.5 py-1.5 text-xs text-zinc-300 backdrop-blur transition-all hover:border-zinc-500 hover:text-white"
           >
