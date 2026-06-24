@@ -405,11 +405,8 @@ export default function HomeShowcase() {
                       Cada inscrição representa uma escolha: entrar preparado para competir em alto nível.
                     </h3>
                     <p className="mt-4 max-w-xl text-sm leading-7 text-zinc-400">
-                      Inscrições: 1º lote - R$ 80,00.
+                      Inscrições: R$ 80,00.
                     </p>
-                    {/* <p className="mt-4 max-w-xl text-sm leading-7 text-zinc-400">
-                      Inscrições: 2º lote - R$ -
-                    </p> */}
                   </div>
 
                   <div className="relative hidden min-h-[280px] md:block">
