@@ -6,7 +6,6 @@ import { Button } from "../ui/button";
 import {
   BookOpenText,
   ChevronDown,
-  GitBranch,
   LockKeyhole,
   Medal,
   MessageCircleIcon,
@@ -115,13 +114,6 @@ export default function HeroSection() {
             Edital
           </Link>
           <Link
-            href="/chaveamento"
-            className="inline-flex items-center gap-1.5 rounded-full border border-zinc-700 bg-black/40 px-3.5 py-1.5 text-xs text-zinc-300 backdrop-blur transition-all hover:border-zinc-500 hover:text-white"
-          >
-            <GitBranch className="h-3 w-3" />
-            Chaveamento
-          </Link>
-          <Link
             href="/pontuacoes"
             className="inline-flex items-center gap-1.5 rounded-full border border-zinc-700 bg-black/40 px-3.5 py-1.5 text-xs text-zinc-300 backdrop-blur transition-all hover:border-zinc-500 hover:text-white"
           >
@@ -140,8 +132,6 @@ export default function HeroSection() {
         {/* Links secundários — mobile compacto */}
         <div className="mb-3 flex items-center justify-center gap-3 sm:hidden">
           <Link href="/edital_junho.pdf" target="_blank" className="text-xs text-zinc-400 hover:text-zinc-200">Edital</Link>
-          <span className="text-zinc-700">·</span>
-          <Link href="/chaveamento" className="text-xs text-zinc-400 hover:text-zinc-200">Chaveamento</Link>
           <span className="text-zinc-700">·</span>
           <Link href="/pontuacoes" className="text-xs text-zinc-400 hover:text-zinc-200">Pontuações</Link>
           <span className="text-zinc-700">·</span>
