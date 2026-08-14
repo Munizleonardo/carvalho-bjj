@@ -29,6 +29,7 @@ import {
   buildBracketName,
   createDefaultBracketMetadata,
   createEmptyWinnerSelections,
+  hasMixedGenderConflict,
   hydrateBrackets,
   serializeBrackets,
   type Athlete,
@@ -219,6 +220,31 @@ export default function ChaveamentoClient() {
   }, [brackets, loading]);
 
   const selectedAthleteIdsSet = React.useMemo(() => new Set(selectedAthleteIds), [selectedAthleteIds]);
+
+  const selectedAthletesForCreation = React.useMemo(
+    () =>
+      selectedAthleteIds
+        .map((id) => athletesById.get(id))
+        .filter((athlete): athlete is Athlete => Boolean(athlete)),
+    [selectedAthleteIds, athletesById]
+  );
+  const createGenderConflict = React.useMemo(
+    () => hasMixedGenderConflict(selectedAthletesForCreation),
+    [selectedAthletesForCreation]
+  );
+
+  const editingAthletesResolved = React.useMemo(
+    () =>
+      editingAthleteIds
+        .map((id) => athletesById.get(id))
+        .filter((athlete): athlete is Athlete => Boolean(athlete)),
+    [editingAthleteIds, athletesById]
+  );
+  const editGenderConflict = React.useMemo(
+    () => hasMixedGenderConflict(editingAthletesResolved),
+    [editingAthletesResolved]
+  );
+
   const totalFights = React.useMemo(
     () => brackets.reduce((sum, bracket) => sum + bracket.rounds.reduce((roundSum, round) => roundSum + round.matches.length, 0), 0),
     [brackets]
@@ -284,10 +310,9 @@ export default function ChaveamentoClient() {
 
   function createBracketFromSelection() {
     if (selectedAthleteIds.length === 0) return;
+    if (hasMixedGenderConflict(selectedAthletesForCreation)) return;
 
-    const selectedAthletes = selectedAthleteIds
-      .map((id) => athletesById.get(id))
-      .filter((athlete): athlete is Athlete => Boolean(athlete));
+    const selectedAthletes = selectedAthletesForCreation;
     const slotAthleteIds = selectedAthletes.map((athlete) => athlete.id);
     const winnerSelections = createEmptyWinnerSelections(selectedAthletes.length);
     const description = "Chave criada manualmente pelo painel administrativo.";
@@ -378,6 +403,7 @@ export default function ChaveamentoClient() {
 
   function saveBracketEdit() {
     if (!editingBracketId || editingAthleteIds.length === 0) return;
+    if (hasMixedGenderConflict(editingAthletesResolved)) return;
 
     setBrackets((current) =>
       current.map((bracket) => {
@@ -826,6 +852,12 @@ export default function ChaveamentoClient() {
               Atletas encontrados: {filteredAthletesForCreation.length} • Selecionados: {selectedAthleteIds.length}
             </div>
 
+            {createGenderConflict ? (
+              <div className="rounded-xl border border-red-900/60 bg-red-950/30 p-3 text-sm text-red-400">
+                Não é permitido misturar atletas do sexo masculino e feminino na mesma chave, exceto no festival infantil.
+              </div>
+            ) : null}
+
             <div className="max-h-72 space-y-2 overflow-y-auto rounded-xl border border-zinc-800 bg-black/40 p-3">
               {filteredAthletesForCreation.length === 0 ? (
                 <div className="py-6 text-center text-sm text-zinc-400">
@@ -845,7 +877,7 @@ export default function ChaveamentoClient() {
               <Button type="button" variant="outline" onClick={() => closeCreateModal(false)} className="cursor-pointer border-zinc-700 bg-zinc-900/20 text-zinc-100 hover:bg-zinc-800">
                 Cancelar
               </Button>
-              <Button type="button" onClick={createBracketFromSelection} disabled={selectedAthleteIds.length === 0} className="cursor-pointer bg-white text-black hover:bg-zinc-200 disabled:cursor-not-allowed disabled:opacity-50">
+              <Button type="button" onClick={createBracketFromSelection} disabled={selectedAthleteIds.length === 0 || createGenderConflict} className="cursor-pointer bg-white text-black hover:bg-zinc-200 disabled:cursor-not-allowed disabled:opacity-50">
                 Criar chave com selecionados
               </Button>
             </div>
@@ -876,6 +908,12 @@ export default function ChaveamentoClient() {
             <div className="text-sm text-zinc-300">
               Atletas selecionados: {editingAthleteIds.length}
             </div>
+
+            {editGenderConflict ? (
+              <div className="rounded-xl border border-red-900/60 bg-red-950/30 p-3 text-sm text-red-400">
+                Não é permitido misturar atletas do sexo masculino e feminino na mesma chave, exceto no festival infantil.
+              </div>
+            ) : null}
 
             <div className="max-h-72 space-y-2 overflow-y-auto rounded-xl border border-zinc-800 bg-black/40 p-3">
               {athletes.length === 0 ? (
@@ -912,7 +950,7 @@ export default function ChaveamentoClient() {
               <Button
                 type="button"
                 onClick={saveBracketEdit}
-                disabled={!editingBracket || editingAthleteIds.length === 0}
+                disabled={!editingBracket || editingAthleteIds.length === 0 || editGenderConflict}
                 className="cursor-pointer bg-white text-black hover:bg-zinc-200 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 Salvar alterações

@@ -24,7 +24,7 @@ const DIVISION_RULES: DivisionRule[] = [
     minAge: 4,
     maxAge: 4,
     gender: null,
-    separateByGender: false,
+    separateByGender: true,
     upperBounds: { PLUMA: 14.7, PENA: 18, LEVE: 21, MEDIO: 24, MEIO_PESADO: 27, PESADO: 30, SUPER_PESADO: 33 },
   },
   {
@@ -33,7 +33,7 @@ const DIVISION_RULES: DivisionRule[] = [
     minAge: 5,
     maxAge: 5,
     gender: null,
-    separateByGender: false,
+    separateByGender: true,
     upperBounds: { PLUMA: 17.9, PENA: 20, LEVE: 24, MEDIO: 26, MEIO_PESADO: 28, PESADO: 32, SUPER_PESADO: 35 },
   },
   {
@@ -42,7 +42,7 @@ const DIVISION_RULES: DivisionRule[] = [
     minAge: 6,
     maxAge: 6,
     gender: null,
-    separateByGender: false,
+    separateByGender: true,
     upperBounds: { PLUMA: 18.9, PENA: 22, LEVE: 25, MEDIO: 28, MEIO_PESADO: 31.2, PESADO: 34.2, SUPER_PESADO: 37.2 },
   },
   {
@@ -51,7 +51,7 @@ const DIVISION_RULES: DivisionRule[] = [
     minAge: 7,
     maxAge: 7,
     gender: null,
-    separateByGender: false,
+    separateByGender: true,
     upperBounds: { PLUMA: 21, PENA: 23.5, LEVE: 27, MEDIO: 30.2, MEIO_PESADO: 33.2, PESADO: 36.2, SUPER_PESADO: 39.3 },
   },
   {
@@ -60,7 +60,7 @@ const DIVISION_RULES: DivisionRule[] = [
     minAge: 8,
     maxAge: 8,
     gender: null,
-    separateByGender: false,
+    separateByGender: true,
     upperBounds: { PLUMA: 24, PENA: 26.3, LEVE: 30.2, MEDIO: 33.2, MEIO_PESADO: 35.4, PESADO: 39.3, SUPER_PESADO: 42.3 },
   },
   {
@@ -69,7 +69,7 @@ const DIVISION_RULES: DivisionRule[] = [
     minAge: 9,
     maxAge: 9,
     gender: null,
-    separateByGender: false,
+    separateByGender: true,
     upperBounds: { PLUMA: 27, PENA: 29.4, LEVE: 33.2, MEDIO: 36.2, MEIO_PESADO: 39.3, PESADO: 42.3, SUPER_PESADO: 45.3 },
   },
   {
@@ -78,7 +78,7 @@ const DIVISION_RULES: DivisionRule[] = [
     minAge: 10,
     maxAge: 10,
     gender: null,
-    separateByGender: false,
+    separateByGender: true,
     upperBounds: { GALO: 27, PLUMA: 30.2, PENA: 33.2, LEVE: 36.4, MEDIO: 39.3, MEIO_PESADO: 42.3, PESADO: 45.3, SUPER_PESADO: 48.3 },
   },
   {
@@ -87,7 +87,7 @@ const DIVISION_RULES: DivisionRule[] = [
     minAge: 11,
     maxAge: 11,
     gender: null,
-    separateByGender: false,
+    separateByGender: true,
     upperBounds: { GALO: 30.2, PLUMA: 33.2, PENA: 36.2, LEVE: 39.3, MEDIO: 42.3, MEIO_PESADO: 45.3, PESADO: 48.3, SUPER_PESADO: 51.5 },
   },
   {
@@ -96,7 +96,7 @@ const DIVISION_RULES: DivisionRule[] = [
     minAge: 12,
     maxAge: 12,
     gender: null,
-    separateByGender: false,
+    separateByGender: true,
     upperBounds: { GALO: 32.2, PLUMA: 36.2, PENA: 40.3, LEVE: 44.3, MEDIO: 48.3, MEIO_PESADO: 52.5, PESADO: 56.5, SUPER_PESADO: 60.5 },
   },
   {
@@ -105,7 +105,7 @@ const DIVISION_RULES: DivisionRule[] = [
     minAge: 13,
     maxAge: 13,
     gender: null,
-    separateByGender: false,
+    separateByGender: true,
     upperBounds: { GALO: 36.2, PLUMA: 40.3, PENA: 44.3, LEVE: 48.3, MEDIO: 52.5, MEIO_PESADO: 56.5, PESADO: 60.5, SUPER_PESADO: 64.2 },
   },
   {
@@ -114,7 +114,7 @@ const DIVISION_RULES: DivisionRule[] = [
     minAge: 14,
     maxAge: 14,
     gender: null,
-    separateByGender: false,
+    separateByGender: true,
     upperBounds: { GALO: 40.3, PLUMA: 44.3, PENA: 47.5, LEVE: 52.5, MEDIO: 56.5, MEIO_PESADO: 60.5, PESADO: 65, SUPER_PESADO: 69 },
   },
   {
@@ -123,7 +123,7 @@ const DIVISION_RULES: DivisionRule[] = [
     minAge: 15,
     maxAge: 15,
     gender: null,
-    separateByGender: false,
+    separateByGender: true,
     upperBounds: { GALO: 44.3, PLUMA: 48.3, PENA: 52.5, LEVE: 56.5, MEDIO: 60.5, MEIO_PESADO: 65, PESADO: 69, SUPER_PESADO: 73 },
   },
   {

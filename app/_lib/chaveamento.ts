@@ -197,6 +197,13 @@ function buildRuleMatch(athlete: Athlete): RuleMatch | null {
   return null;
 }
 
+export function hasMixedGenderConflict(athletes: Athlete[]) {
+  const sexos = new Set(
+    athletes.filter((athlete) => !athlete.festival).map((athlete) => athlete.sexo)
+  );
+  return sexos.size > 1;
+}
+
 export function buildAutomaticBracketGroups(athletes: Athlete[]) {
   const paidAthletes = athletes.filter((a) => a.status === "paid");
   const grouped = new Map<string, AutoGroup>();
