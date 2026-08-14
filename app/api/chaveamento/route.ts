@@ -11,11 +11,7 @@ function isAdmin(request: NextRequest) {
   return Boolean(request.cookies.get("admin_auth")?.value);
 }
 
-export async function GET(request: NextRequest) {
-  if (!isAdmin(request)) {
-    return NextResponse.json({ error: "Nao autorizado." }, { status: 401 });
-  }
-
+export async function GET() {
   try {
     const { athletes, brackets } = await syncStoredBracketsWithParticipants();
     return NextResponse.json({ athletes, brackets, rulesFile: "app/_lib/chaveamento-rules.ts" });
