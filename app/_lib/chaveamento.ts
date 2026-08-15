@@ -262,8 +262,6 @@ function resolveWinner(
 ) {
   if (winnerSide === "top" && topAthlete) return { winnerSide: "top" as const, resolvedWinner: topAthlete };
   if (winnerSide === "bottom" && bottomAthlete) return { winnerSide: "bottom" as const, resolvedWinner: bottomAthlete };
-  if (topAthlete && !bottomAthlete) return { winnerSide: "top" as const, resolvedWinner: topAthlete };
-  if (!topAthlete && bottomAthlete) return { winnerSide: "bottom" as const, resolvedWinner: bottomAthlete };
   return { winnerSide: null, resolvedWinner: null };
 }
 
